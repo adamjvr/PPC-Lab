@@ -1,0 +1,8 @@
+{
+  "imports": [
+    {"name": "pow"},
+    {"name": "num2dec"},
+    {"name": "dec2num"},
+    {"name": "cos"}
+  ]
+}

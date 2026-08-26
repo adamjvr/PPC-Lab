@@ -1,0 +1,34 @@
+{
+  "schema": "ppc-lab-rebirth-profile-routines-v1",
+  "note": "Derived target-profile addresses only. No original instruction or sample bytes are stored here.",
+  "image": {
+    "code_base": "0x10000000",
+    "data_base": "0x20000000",
+    "toc_r2": "0x20008000",
+    "import_base": "0x30000000"
+  },
+  "routines": {
+    "delay_ctor": "0x1000007c",
+    "distortion_ctor": "0x10000cf4",
+    "distortion_control_update": "0x10001010",
+    "distortion_render": "0x100011d8",
+    "distortion_setter": "0x100017e4",
+    "mixer_control_update": "0x100027e8",
+    "mixer_render_64": "0x10002cb0",
+    "legacy_output_float_to_s16": "0x10003444",
+    "pcf_ctor": "0x10004268",
+    "tb303_2x_render": "0x1000c310",
+    "tb303_vintage_render": "0x1000c964",
+    "compressor_ctor": "0x10011110",
+    "base_effect_ctor": "0x1000b1d0",
+    "tr808_render": "0x1000f3f4",
+    "tr909_render": "0x10016900",
+    "mixer_gain_pan_table_builder": "0x1001d6a4"
+  },
+  "first_contact": {
+    "routine": "distortion_ctor",
+    "entry": "0x10000cf4",
+    "this_pointer": "0x40010000",
+    "reason": "Small recovered effect object; useful for discovering the first unsupported opcode/import before attempting full render."
+  }
+}

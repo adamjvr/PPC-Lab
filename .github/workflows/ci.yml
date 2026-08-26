@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build/ci -DPPC_LAB_ENABLE_UNICORN=OFF
+      - name: Build
+        run: cmake --build build/ci --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build/ci -C Release --output-on-failure

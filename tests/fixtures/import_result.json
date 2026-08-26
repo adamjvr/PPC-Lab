@@ -1,0 +1,13 @@
+{
+  "schema": "ppc-lab-result-v1",
+  "backend": "builtin",
+  "stop_reason": "import_trap",
+  "instructions": 7,
+  "pc": "0x3000000c",
+  "instruction": "0x00000000",
+  "registers": {},
+  "lr": "0x10000010",
+  "ctr": "0x00000000",
+  "cr": "0x00000000",
+  "dumps": []
+}

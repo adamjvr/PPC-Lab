@@ -1,0 +1,36 @@
+{
+  "schema": "x0x-ppc-original-first-contact-validation-v1",
+  "date": "2026-08-22",
+  "commercial_payload_in_repo": false,
+  "source": {
+    "canonical_sit_sha256": "8b56638dbc18e3709440b2db181a3fb795fae7e1da92ff56dcdcb235c54d1999",
+    "ndif_data_sha256": "dac39e9822739a2ced9bf370f79bbd638d0945a30d20ae19a2a52ea92e37f46a",
+    "ndif_resource_sha256": "1cb0a6f0bc49245645df14e417b48f12e37dd3cf33ec61276a2f2ced1cafcb27",
+    "raw_hfs_sha256": "67e4d79ae3a93a6e5a243c65105055344c529592b514d0a8590adade0d43c3cc",
+    "installer_sha256": "ac81d3bd43de3a80af906726cc7e90990fc66a5ef33e3f94818720fac88aec2a",
+    "relocated_code_sha256": "ca29868a18a95832dd6ea34ed8b499c64d5dc985ef51ce9c705c142395ff8ede",
+    "relocated_data_sha256": "fb13ff7b9e6c41dbf681b1394fb9ed6695423ae850de49e82f135d24593e4f9c"
+  },
+  "routine": {
+    "name": "distortion_ctor",
+    "entry": "0x10000cf4",
+    "toc_r2": "0x20008000",
+    "this_pointer": "0x40010000"
+  },
+  "execution": {
+    "backend": "builtin-ppc32be",
+    "stop_reason": "returned",
+    "instructions": 133027,
+    "object_dump_bytes": 128,
+    "object_dump_fnv1a64": "0x418c9e14a76a422e"
+  },
+  "known_import_policy": {
+    "BlockMoveData": "exact deterministic byte-copy stub",
+    "sin": "host libm execution aid; Classic MathLib rounding is not fidelity-qualified",
+    "cos": "available host libm execution aid",
+    "sqrt": "available host libm execution aid",
+    "exp": "available host libm execution aid",
+    "pow": "available host libm execution aid"
+  },
+  "claim": "Original relocated PPC Distortion constructor executes to normal return under the server harness. This validates execution plumbing, not exact Classic MathLib transcendental rounding."
+}
