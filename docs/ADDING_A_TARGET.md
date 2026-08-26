@@ -38,7 +38,15 @@ Good profile material:
 
 Do not commit commercial/proprietary executable bytes, ROMs, samples, firmware, or other assets unless redistribution is clearly allowed.
 
-PPC Lab's public profile should instead accept external paths:
+PPC Lab's public profile should instead accept external paths. If the external target is a supported PPC ELF executable, prefer passing the original ELF directly instead of creating unnecessary raw-section copies:
+
+```bash
+export PPC_LAB_TARGET_ELF=/absolute/path/firmware.elf
+"$PPC_LAB_BIN" elf-info "$PPC_LAB_TARGET_ELF"
+"$PPC_LAB_BIN" call --elf "$PPC_LAB_TARGET_ELF" --entry 0x00101234
+```
+
+For targets that still require extraction/relocation (for example current Classic CFM work), use external raw paths:
 
 ```bash
 export PPC_LAB_TARGET_CODE=/absolute/path/target.sec0.bin
@@ -100,7 +108,7 @@ First check relocation, data-map size, object pointers, TOC/globals, stack setup
 
 ## Promote repeated infrastructure
 
-If two or more profiles independently need the same loader or helper, that is evidence it may belong in generic PPC Lab tooling. Promotion should remove duplication without moving target-specific addresses into the core.
+If two or more profiles independently need the same loader or helper, that is evidence it may belong in generic PPC Lab tooling. The v0.2 ELF32 loader is the first example: file-format mechanics are generic, while target addresses/runtime assumptions remain outside the core. Promotion should remove duplication without moving target-specific knowledge into generic code.
 
 ## Licensing
 

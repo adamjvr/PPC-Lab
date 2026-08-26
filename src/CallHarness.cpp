@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ppclab/ppc/CallHarness.hpp"
+#include "ppclab/ppc/Elf32Loader.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -21,19 +22,29 @@ bool CallHarness::prepare(const CallConfig& config,
                           Memory& memory,
                           CpuState& cpu,
                           std::string& error) {
-    if (config.image.codePath.empty()) {
-        error = "--code is required";
+    const bool hasRaw = !config.image.codePath.empty();
+    const bool hasElf = !config.image.elfPath.empty();
+    if (hasRaw == hasElf) {
+        error = "exactly one of --code or --elf is required";
         return false;
     }
-    const auto codeSize = fileSize(config.image.codePath);
-    if (codeSize == 0) {
-        error = "cannot read code image: " + config.image.codePath;
-        return false;
-    }
-    if (!memory.loadFile(config.image.codeBase, config.image.codePath, codeSize,
-                         MemoryPerm::Read | MemoryPerm::Execute, "code")) {
-        error = "failed to map code image";
-        return false;
+
+    std::uint32_t imageEntry = 0;
+    if (hasElf) {
+        Elf32ImageInfo elf{};
+        if (!Elf32Loader::loadFile(config.image.elfPath, memory, elf, error)) return false;
+        imageEntry = elf.entry;
+    } else {
+        const auto codeSize = fileSize(config.image.codePath);
+        if (codeSize == 0) {
+            error = "cannot read code image: " + config.image.codePath;
+            return false;
+        }
+        if (!memory.loadFile(config.image.codeBase, config.image.codePath, codeSize,
+                             MemoryPerm::Read | MemoryPerm::Execute, "code")) {
+            error = "failed to map code image";
+            return false;
+        }
     }
 
     if (!config.image.dataPath.empty()) {
@@ -48,25 +59,27 @@ bool CallHarness::prepare(const CallConfig& config,
             error = "failed to map data image";
             return false;
         }
-    } else if (!memory.map(config.image.dataBase, config.image.dataMapSize,
-                           MemoryPerm::Read | MemoryPerm::Write, "data")) {
-        error = "failed to map data region";
-        return false;
+    } else if (hasRaw) {
+        if (!memory.map(config.image.dataBase, config.image.dataMapSize,
+                        MemoryPerm::Read | MemoryPerm::Write, "data")) {
+            error = "failed to map data region";
+            return false;
+        }
     }
 
     if (!memory.map(config.execution.importBase, config.execution.importSize,
                     MemoryPerm::Read | MemoryPerm::Execute, "imports")) {
-        error = "failed to map import trap region";
+        error = "failed to map import trap region (possibly overlaps the input image)";
         return false;
     }
     if (!memory.map(config.image.heapBase, config.image.heapSize,
                     MemoryPerm::Read | MemoryPerm::Write, "heap")) {
-        error = "failed to map heap";
+        error = "failed to map heap (possibly overlaps the input image)";
         return false;
     }
     if (!memory.map(config.image.stackBase, config.image.stackSize,
                     MemoryPerm::Read | MemoryPerm::Write, "stack")) {
-        error = "failed to map stack";
+        error = "failed to map stack (possibly overlaps the input image)";
         return false;
     }
 
@@ -74,7 +87,7 @@ bool CallHarness::prepare(const CallConfig& config,
     cpu.gpr[1] &= ~0x0fU;
     cpu.gpr[2] = config.toc;
     cpu.lr = config.execution.returnAddress;
-    cpu.pc = config.entry;
+    cpu.pc = config.entry != 0 ? config.entry : imageEntry;
 
     if (config.transitionVector != 0) {
         std::uint32_t entry = 0, toc = 0;
@@ -87,7 +100,8 @@ bool CallHarness::prepare(const CallConfig& config,
         cpu.gpr[2] = toc;
         cpu.gpr[12] = config.transitionVector;
     } else if (cpu.pc == 0) {
-        error = "--entry or --transition-vector is required";
+        error = hasElf ? "ELF entry is zero; supply --entry or --transition-vector"
+                       : "--entry or --transition-vector is required";
         return false;
     }
 

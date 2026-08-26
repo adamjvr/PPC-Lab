@@ -8,6 +8,7 @@ important long-term architecture/licensing rules without custom tooling.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -53,6 +54,21 @@ def check_spdx() -> None:
         fail("missing GPL-3.0-only SPDX header: " + ", ".join(sorted(missing)))
 
 
+
+
+def check_version_sync() -> None:
+    cmake = (ROOT / "CMakeLists.txt").read_text(encoding="utf-8", errors="replace")
+    match = re.search(r"project\(PPCLab VERSION ([0-9]+\.[0-9]+\.[0-9]+)", cmake)
+    if not match:
+        fail("cannot determine project version from CMakeLists.txt")
+    version = match.group(1)
+    cli = (ROOT / "tools" / "ppc_lab.cpp").read_text(encoding="utf-8", errors="replace")
+    if f"PPC Lab {version}" not in cli:
+        fail(f"CLI version is not synchronized with CMake project version {version}")
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8", errors="replace")
+    if f"## {version} " not in changelog:
+        fail(f"CHANGELOG.md has no release heading for {version}")
+
 def check_target_neutral_core() -> None:
     roots = ["include", "src", "tools", "scripts", "tests", "cmake"]
     files: list[Path] = []
@@ -81,8 +97,9 @@ def check_target_neutral_core() -> None:
 def main() -> int:
     check_license()
     check_spdx()
+    check_version_sync()
     check_target_neutral_core()
-    print("PASS: GPLv3/SPDX and target-neutral core invariants")
+    print("PASS: GPLv3/SPDX, version sync, and target-neutral core invariants")
     return 0
 
 

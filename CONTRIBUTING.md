@@ -38,6 +38,10 @@ Target profiles should normally contain only redistributable:
 
 Target-specific addresses and assumptions belong under `profiles/<target>/`, never in the generic execution core.
 
+## Loader changes
+
+Executable-loader changes need synthetic, redistributable fixtures and explicit rejection tests for unsupported formats. A loader must not silently accept a file whose relocations, ABI setup, or byte order PPC Lab does not understand.
+
 ## Before submitting
 
 Run:

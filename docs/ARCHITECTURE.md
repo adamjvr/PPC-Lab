@@ -7,8 +7,15 @@ Provide a stable execution substrate for PowerPC reverse engineering that can su
 ```text
 external target bytes
       |
-loader / relocation tooling (profile-specific or future generic loaders)
-      |
++-------------------------------+
+| Generic image intake          |
+|  raw mapped sections          |
+|  ELF32 PPC ET_EXEC loader     |
+|  future justified loaders     |
++---------------+---------------+
+                |
+profile-specific relocation/preparation when required
+                |
 PPC Lab deterministic memory image
       |
 +--------------------------------+
@@ -51,9 +58,13 @@ Holds architectural state needed by the harness: GPRs, FPRs, PC, LR, CTR, CR, an
 
 Owns deterministic mapped regions with read/write/execute permissions and explicit PPC big-endian accessors. The call harness uses separate conventional regions for code, data, imports, heap/scratch, stack, and return handling.
 
+### `Elf32Loader`
+
+Validates and maps fixed-address ELF32 big-endian `EM_PPC` `ET_EXEC` images. It owns reusable ELF file-format mechanics only: header validation, `PT_LOAD` bounds, permissions, BSS zero-fill, and entry-point metadata. It does not implement relocations, dynamic linking, syscalls, or an operating-system personality.
+
 ### `CallHarness`
 
-Turns raw target bytes plus call configuration into one deterministic experiment. Responsibilities include loading images, mapping memory, applying register/memory initializers, resolving a direct entry or CFM transition vector, configuring the return sentinel, then invoking an execution backend.
+Turns a raw image or supported ELF image plus call configuration into one deterministic experiment. Responsibilities include loading/mapping the image, applying register/memory initializers, resolving an explicit entry, ELF entry, or CFM transition vector, configuring the return sentinel, then invoking an execution backend.
 
 ### `ExecutionBackend`
 
@@ -87,6 +98,7 @@ The CLI can capture register state, stop information, memory dumps, and FNV fing
 - PPC big-endian memory semantics;
 - execution backends;
 - deterministic mappings;
+- reusable fixed-address executable-image loaders such as ELF32 PPC;
 - call setup;
 - CFM transition-vector mechanics;
 - generic import-stub behaviors;
@@ -106,7 +118,8 @@ The CLI can capture register state, stop information, memory dumps, and FNV fing
 ### External tooling may own
 
 - PEF/CFM parsing and relocation;
-- Mach-O/ELF loaders;
+- Mach-O loaders;
+- ELF relocation/dynamic-link preparation beyond the fixed-address loader;
 - firmware container extraction;
 - Ghidra/IDA/Binary Ninja integration;
 - real-PPC capture agents.

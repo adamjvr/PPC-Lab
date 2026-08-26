@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — 2026-08-26
+
+- Added a dependency-free ELF32 big-endian PowerPC `ET_EXEC` loader.
+- Added automatic `PT_LOAD` virtual-address mapping, ELF-derived permissions, and BSS zero-fill.
+- Added `ppc-lab elf-info FILE` for safe executable-image inspection.
+- Added `ppc-lab disasm` for raw and ELF-backed lightweight instruction inspection.
+- Added `ppc-lab call --elf FILE`; ELF `e_entry` is used by default and explicit entry/CFM transition-vector overrides remain available.
+- Kept raw relocated-image and Classic CFM workflows backward-compatible.
+- Expanded the built-in disassembly text for common integer, branch, load/store, SPR, and floating-point instructions.
+- Added synthetic ELF loader tests and an end-to-end CLI regression that inspects, disassembles, and executes a generated PPC ELF.
+- Added dedicated ELF32 documentation and a demand-driven long-term roadmap.
+
 ## 0.1.1 — 2026-08-26
 
 - Licensed PPC Lab under GNU GPL version 3.0 only (`GPL-3.0-only`).

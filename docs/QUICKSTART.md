@@ -1,6 +1,7 @@
 # PPC Lab quick start
 
-This is the shortest path from a fresh clone to a useful PowerPC execution result.
+This is the shortest path from a fresh clone to a useful PowerPC research
+result.
 
 ## 1. Requirements
 
@@ -12,11 +13,12 @@ Required:
 
 Useful but optional:
 
-- Python 3 for result-comparison tests/tools;
+- Python 3 for result-comparison and CLI integration tests;
 - Clang for ASan/UBSan verification;
 - Unicorn 2.x development files for the optional Unicorn backend.
 
-PPC Lab always includes its own dependency-free PPC32 big-endian interpreter.
+PPC Lab always includes its own dependency-free PPC32 big-endian interpreter
+and dependency-free ELF32 PowerPC loader.
 
 ## 2. Clone and verify
 
@@ -26,7 +28,9 @@ cd PPC-Lab
 ./Tools/verify.command
 ```
 
-Expected end state: CMake configures, `ppc-lab` builds, CTest passes, built-in PPC microtests pass, and sanitizer verification runs when a suitable Clang is installed.
+Expected end state: CMake configures, `ppc-lab` builds, CTest passes, built-in
+PPC microtests pass, and sanitizer verification runs when suitable Clang is
+installed.
 
 ## 3. Confirm the execution backend
 
@@ -34,11 +38,54 @@ Expected end state: CMake configures, `ppc-lab` builds, CTest passes, built-in P
 ./build/release/ppc-lab selftest --backend builtin
 ```
 
-Use `--backend auto` to prefer Unicorn when PPC support is available, otherwise fall back to the built-in interpreter.
+Use `--backend auto` to prefer Unicorn when PPC support is available, otherwise
+fall back to the built-in interpreter.
 
-## 4. Execute a raw code image
+## 4. Start with an ELF executable when you have one
 
-PPC Lab maps raw binary bytes at deterministic addresses. The default code base is `0x10000000`.
+Inspect it before running anything:
+
+```bash
+./build/release/ppc-lab elf-info ./firmware.elf
+```
+
+PPC Lab v0.2.0 accepts fixed-address ELF32, big-endian, `EM_PPC`, `ET_EXEC`
+images. It maps `PT_LOAD` segments and zero-fills BSS.
+
+Look at the entry-point instructions:
+
+```bash
+./build/release/ppc-lab disasm \
+  --elf ./firmware.elf \
+  --count 32
+```
+
+Execute from the ELF entry point:
+
+```bash
+./build/release/ppc-lab call \
+  --elf ./firmware.elf \
+  --backend builtin \
+  --max-instructions 100000
+```
+
+For reverse engineering, it is often more useful to call one known function
+than to pretend PPC Lab is the original operating system:
+
+```bash
+./build/release/ppc-lab call \
+  --elf ./firmware.elf \
+  --entry 0x00104560 \
+  --set r3=0x40010000 \
+  --set r4=64
+```
+
+See `docs/ELF32.md` for the exact loader contract and unsupported cases.
+
+## 5. Raw/relocated code still works
+
+PPC Lab maps raw binary bytes at deterministic addresses. The default raw code
+base is `0x10000000`.
 
 ```bash
 ./build/release/ppc-lab call \
@@ -47,9 +94,20 @@ PPC Lab maps raw binary bytes at deterministic addresses. The default code base 
   --max-instructions 100000
 ```
 
-A normal emulated function return exits with status `0`. Unsupported instructions, memory faults, import traps, and instruction-limit stops return distinct nonzero status codes.
+You can inspect raw code too:
 
-## 5. Supply ABI state
+```bash
+./build/release/ppc-lab disasm \
+  --code ./code.bin \
+  --base 0x10000000 \
+  --count 32
+```
+
+A normal emulated function return exits with status `0`. Unsupported
+instructions, memory faults, import traps, and instruction_limit stops return
+distinct nonzero status codes.
+
+## 6. Supply ABI state
 
 Pass integer arguments or pointers in GPRs:
 
@@ -80,7 +138,7 @@ For Classic CFM code, a transition vector can provide the entry point and TOC:
   --transition-vector 0x20005224
 ```
 
-## 6. Initialize target memory
+## 7. Initialize target memory
 
 Write deterministic inputs before execution:
 
@@ -92,9 +150,12 @@ Write deterministic inputs before execution:
   --write-f32 0x40010004=0.25
 ```
 
-## 7. Bind only required imports
+Writes must land in writable mapped target/heap/data memory.
 
-If execution reaches an imported function, PPC Lab normally stops with an import trap. Bind a known generic behavior only when the target needs it:
+## 8. Bind only required imports
+
+If execution reaches an imported function, PPC Lab normally stops with an
+import trap. Bind a known generic behavior only when the target needs it:
 
 ```bash
 ./build/release/ppc-lab call \
@@ -104,9 +165,10 @@ If execution reaches an imported function, PPC Lab normally stops with an import
   --stub blockmove@0x300001c8
 ```
 
-Do not globally guess imports. Unknown imports remaining traps is useful research information.
+Do not globally guess imports. Unknown imports remaining traps is useful
+research information.
 
-## 8. Capture deterministic output
+## 9. Capture deterministic output
 
 ```bash
 ./build/release/ppc-lab call \
@@ -130,20 +192,32 @@ python3 scripts/compare_ppc_dump.py \
   --reference /tmp/reference.bin
 ```
 
-## 9. Turn the experiment into a profile
+## 10. Turn the experiment into a profile
 
-Once an invocation answers a recurring research question, do not leave it in shell history. Put its addresses, bindings, expected fingerprints, and command under `profiles/<target>/`.
+Once an invocation answers a recurring research question, do not leave it in
+shell history. Put its addresses, bindings, expected fingerprints, and command
+under `profiles/<target>/`.
+
+If the target is redistributable ELF, the profile can simply point to it. For
+commercial/proprietary input, keep the bytes external and accept a path through
+an environment variable or script argument.
 
 See `docs/ADDING_A_TARGET.md`.
 
-## 10. What to do when execution stops
+## 11. What to do when execution stops
 
-- `returned`: good; capture outputs and compare behavior.
-- `unsupported-instruction`: implement that opcode only if the target needs it, then add a synthetic test.
-- `memory-fault`: verify relocation, mappings, pointers, stack, and data-map size.
-- `import-trap`: identify the imported function and add the smallest reusable stub if required.
-- `instruction-limit`: inspect trace/control flow before simply raising the limit.
-- `invalid-configuration`: fix the call setup.
-- `backend-error`: try the built-in backend and inspect backend-specific setup.
+- `returned`: capture outputs and compare behavior.
+- `unsupported_instruction`: implement that opcode only if the target needs it,
+  then add a synthetic test.
+- `memory_fault`: verify mappings, pointers, relocation assumptions, stack, and
+  writable regions.
+- `import_trap`: identify the imported function and add the smallest reusable
+  stub if required.
+- `instruction_limit`: inspect trace/control flow before simply raising the
+  limit.
+- `invalid_configuration`: fix the call setup or move a harness-owned range that
+  overlaps target memory.
+- `backend_error`: try the built-in backend and inspect backend-specific setup.
 
-The intended workflow is incremental: **target question -> deterministic call -> smallest missing capability -> regression test -> continue target research**.
+The intended workflow is incremental: **target question -> deterministic call
+-> smallest missing capability -> regression test -> continue target research**.

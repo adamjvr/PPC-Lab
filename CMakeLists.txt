@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 0.1.1 LANGUAGES CXX)
+project(PPCLab VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,6 +20,7 @@ add_library(ppc_lab STATIC
     src/ImportStubs.cpp
     src/Execution.cpp
     src/CallHarness.cpp
+    src/Elf32Loader.cpp
     src/BuiltinInterpreter.cpp
     src/UnicornBackend.cpp
     src/Microtests.cpp)
@@ -51,18 +52,23 @@ add_executable(ppc_lab_tests tests/test_ppc_harness.cpp)
 target_link_libraries(ppc_lab_tests PRIVATE ppc_lab)
 add_executable(ppc_lab_call_tests tests/test_call_harness.cpp)
 target_link_libraries(ppc_lab_call_tests PRIVATE ppc_lab)
+add_executable(ppc_lab_elf32_tests tests/test_elf32_loader.cpp)
+target_link_libraries(ppc_lab_elf32_tests PRIVATE ppc_lab)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ppc_lab_tests PRIVATE -UNDEBUG)
     target_compile_options(ppc_lab_call_tests PRIVATE -UNDEBUG)
+    target_compile_options(ppc_lab_elf32_tests PRIVATE -UNDEBUG)
 endif()
 
 enable_testing()
 add_test(NAME ppc_lab_tests COMMAND ppc_lab_tests)
 add_test(NAME ppc_lab_call_tests COMMAND ppc_lab_call_tests)
+add_test(NAME ppc_lab_elf32_tests COMMAND ppc_lab_elf32_tests)
 add_test(NAME ppc_lab_cli_selftest COMMAND ppc-lab selftest --backend builtin)
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_result_tools COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_result_tools.py)
+    add_test(NAME ppc_lab_cli_elf COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_cli_elf.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_repository_invariants COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/check_repository_invariants.py)
 endif()

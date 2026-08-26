@@ -59,6 +59,18 @@ Commit scripts, hashes, addresses, symbols, derived metadata, and validation res
 
 Profile scripts should accept external paths through environment variables or arguments.
 
+### Prefer direct ELF intake when supported
+
+For fixed-address ELF32 big-endian `EM_PPC` `ET_EXEC` targets, preserve the original executable container and let PPC Lab map it directly:
+
+```bash
+ppc-lab elf-info firmware.elf
+ppc-lab disasm --elf firmware.elf --count 32
+ppc-lab call --elf firmware.elf --entry 0x00101234
+```
+
+This keeps segment permissions, BSS size, and executable entry metadata intact. Extract or relocate raw sections only when the original container is unsupported or the active target genuinely requires preprocessing.
+
 ## 4. Make memory deterministic
 
 A useful function experiment should explicitly control:

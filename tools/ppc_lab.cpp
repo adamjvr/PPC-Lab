@@ -2,11 +2,11 @@
 
 #include "ppclab/ppc/BuiltinInterpreter.hpp"
 #include "ppclab/ppc/CallHarness.hpp"
-#include "ppclab/ppc/Microtests.hpp"
+#include "ppclab/ppc/Elf32Loader.hpp"
 #include "ppclab/ppc/ImportStubs.hpp"
+#include "ppclab/ppc/Microtests.hpp"
 #include "ppclab/ppc/UnicornBackend.hpp"
 
-#include <bit>
 #include <charconv>
 #include <cstdint>
 #include <fstream>
@@ -33,6 +33,7 @@ std::optional<std::uint64_t> parseUnsigned(std::string_view text) {
         text.remove_prefix(2);
         base = 16;
     }
+    if (text.empty()) return std::nullopt;
     std::uint64_t value = 0;
     const auto* begin = text.data();
     const auto* end = text.data() + text.size();
@@ -66,6 +67,19 @@ std::string hex32(std::uint32_t value) {
     return out.str();
 }
 
+std::string hex64(std::uint64_t value) {
+    std::ostringstream out;
+    out << "0x" << std::hex << std::setw(16) << std::setfill('0') << value;
+    return out.str();
+}
+
+std::size_t fileSize(const std::string& path) {
+    std::ifstream in(path, std::ios::binary | std::ios::ate);
+    if (!in) return 0;
+    const auto end = in.tellg();
+    return end > 0 ? static_cast<std::size_t>(end) : 0;
+}
+
 std::unique_ptr<ExecutionBackend> makeBackend(const std::string& requested, std::string& error) {
     if (requested == "builtin") return std::make_unique<BuiltinInterpreter>();
     if (requested == "unicorn") {
@@ -84,12 +98,15 @@ std::unique_ptr<ExecutionBackend> makeBackend(const std::string& requested, std:
 }
 
 void usage() {
-    std::cout << R"(PPC Lab — deterministic PowerPC execution and reverse-engineering harness
+    std::cout << R"(PPC Lab 0.2.0 — deterministic PowerPC execution and reverse-engineering harness
 
 Usage:
   ppc-lab selftest [--backend auto|builtin|unicorn]
-  ppc-lab call --code FILE [--data FILE]
-      (--entry HEX | --transition-vector HEX)
+  ppc-lab elf-info FILE
+  ppc-lab disasm (--code FILE [--base HEX] | --elf FILE)
+      [--start HEX] [--count N]
+  ppc-lab call (--code FILE | --elf FILE) [--data FILE]
+      [--entry HEX | --transition-vector HEX]
       [--backend auto|builtin|unicorn]
       [--code-base HEX] [--data-base HEX] [--data-map-size N]
       [--heap-base HEX] [--heap-size N]
@@ -103,26 +120,34 @@ Usage:
       [--trace] [--trace-range START:END]
       [--json FILE]
 
+Input formats:
+  --code FILE   raw PPC32-BE bytes mapped at --code-base (default 0x10000000)
+  --elf FILE    ELF32, big-endian, EM_PPC, fixed-address ET_EXEC image;
+                PT_LOAD segments are mapped automatically and e_entry is used
+                unless --entry or --transition-vector overrides it
+
 Built-in stub kinds:
   pow cos sqrt sin exp blockmove
 
-Default deterministic map (all configurable):
-  CODE    0x10000000
-  DATA    0x20000000
-  imports 0x30000000
-  heap    0x40000000
-  stack   0x70000000
-  return  0x7fff0000
+Default deterministic auxiliary map (all configurable):
+  raw data 0x20000000
+  imports  0x30000000
+  heap     0x40000000
+  stack    0x70000000
+  return   0x7fff0000
 
 Examples:
   ppc-lab selftest --backend builtin
+  ppc-lab elf-info firmware.elf
+  ppc-lab disasm --elf firmware.elf --count 24
+  ppc-lab call --elf firmware.elf --max-instructions 100000
   ppc-lab call --code code.bin --entry 0x10000000 --set r3=5 --dump 0x40000000:64
-  ppc-lab call --code code.bin --entry 0x10000000 --stub sin@0x30000014
 
 PPC Lab contains no target-program code. Target binaries, relocated sections and
 firmware images are always supplied externally at runtime.
 )";
 }
+
 void printCpu(const CpuState& cpu) {
     std::cout << "pc=" << hex32(cpu.pc)
               << " lr=" << hex32(cpu.lr)
@@ -158,12 +183,6 @@ std::optional<std::uint64_t> dumpFnv1a64(const Memory& memory, std::uint32_t add
         hash *= 1099511628211ULL;
     }
     return hash;
-}
-
-std::string hex64(std::uint64_t value) {
-    std::ostringstream out;
-    out << "0x" << std::hex << std::setw(16) << std::setfill('0') << value;
-    return out.str();
 }
 
 void writeJson(const std::string& path,
@@ -213,6 +232,110 @@ int stopExitCode(StopReason reason) {
     return 7;
 }
 
+int commandElfInfo(int argc, char** argv) {
+    if (argc != 3) {
+        std::cerr << "usage: ppc-lab elf-info FILE\n";
+        return 1;
+    }
+    Elf32ImageInfo info{};
+    std::string error;
+    if (!Elf32Loader::inspectFile(argv[2], info, error)) {
+        std::cerr << "elf-info: " << error << '\n';
+        return 1;
+    }
+    std::cout << "PPC Lab ELF32 PowerPC image\n"
+              << "file=" << argv[2] << '\n'
+              << "type=" << info.type << " (ET_EXEC)\n"
+              << "machine=" << info.machine << " (EM_PPC)\n"
+              << "entry=" << hex32(info.entry) << '\n'
+              << "flags=" << hex32(info.flags) << '\n'
+              << "load_segments=" << info.loadSegments.size() << '\n';
+    for (const auto& segment : info.loadSegments) {
+        std::cout << "  [" << segment.index << "] " << elf32SegmentFlags(segment.flags)
+                  << " vaddr=" << hex32(segment.virtualAddress)
+                  << " paddr=" << hex32(segment.physicalAddress)
+                  << " file_off=" << hex32(segment.fileOffset)
+                  << " filesz=" << hex32(segment.fileSize)
+                  << " memsz=" << hex32(segment.memorySize)
+                  << " align=" << hex32(segment.alignment) << '\n';
+    }
+    return 0;
+}
+
+int commandDisasm(int argc, char** argv) {
+    std::string codePath;
+    std::string elfPath;
+    std::uint32_t base = 0x10000000U;
+    std::optional<std::uint32_t> start;
+    std::size_t count = 32;
+
+    for (int i = 2; i < argc; ++i) {
+        const std::string arg = argv[i];
+        auto needValue = [&](const char* option) -> std::string {
+            if (i + 1 >= argc) throw std::runtime_error(std::string(option) + " requires a value");
+            return argv[++i];
+        };
+        try {
+            if (arg == "--code") codePath = needValue("--code");
+            else if (arg == "--elf") elfPath = needValue("--elf");
+            else if (arg == "--base" || arg == "--start" || arg == "--count") {
+                const auto text = needValue(arg.c_str());
+                const auto value = parseUnsigned(text);
+                if (!value) throw std::runtime_error("invalid numeric value: " + text);
+                if (arg == "--base") base = static_cast<std::uint32_t>(*value);
+                else if (arg == "--start") start = static_cast<std::uint32_t>(*value);
+                else count = static_cast<std::size_t>(*value);
+            } else {
+                throw std::runtime_error("unknown disasm option: " + arg);
+            }
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << '\n';
+            return 1;
+        }
+    }
+
+    if (codePath.empty() == elfPath.empty()) {
+        std::cerr << "disasm requires exactly one of --code or --elf\n";
+        return 1;
+    }
+    if (count == 0) {
+        std::cerr << "--count must be greater than zero\n";
+        return 1;
+    }
+
+    Memory memory;
+    std::uint32_t pc = base;
+    if (!elfPath.empty()) {
+        Elf32ImageInfo info{};
+        std::string error;
+        if (!Elf32Loader::loadFile(elfPath, memory, info, error)) {
+            std::cerr << "disasm: " << error << '\n';
+            return 1;
+        }
+        pc = start.value_or(info.entry);
+    } else {
+        const auto size = fileSize(codePath);
+        if (size == 0 || !memory.loadFile(base, codePath, size,
+                                         MemoryPerm::Read | MemoryPerm::Execute, "disasm:raw")) {
+            std::cerr << "disasm: cannot map raw code file\n";
+            return 1;
+        }
+        pc = start.value_or(base);
+    }
+
+    for (std::size_t i = 0; i < count; ++i, pc += 4U) {
+        std::uint32_t instruction = 0;
+        if (!memory.executable(pc, 4) || !memory.read32(pc, instruction)) {
+            std::cerr << "disasm: stopped at " << hex32(pc)
+                      << " (not executable/mapped)\n";
+            return i == 0 ? 1 : 0;
+        }
+        std::cout << hex32(pc) << "  " << hex32(instruction) << "  "
+                  << BuiltinInterpreter::disassemble(pc, instruction) << '\n';
+    }
+    return 0;
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -221,6 +344,11 @@ int main(int argc, char** argv) {
         return 1;
     }
     const std::string command = argv[1];
+
+    if (command == "--version" || command == "version") {
+        std::cout << "PPC Lab 0.2.0\n";
+        return 0;
+    }
 
     if (command == "selftest") {
         std::string backendName = "auto";
@@ -243,6 +371,9 @@ int main(int argc, char** argv) {
         return result.passed ? 0 : 1;
     }
 
+    if (command == "elf-info") return commandElfInfo(argc, argv);
+    if (command == "disasm") return commandDisasm(argc, argv);
+
     if (command != "call") {
         usage();
         return 1;
@@ -262,9 +393,10 @@ int main(int argc, char** argv) {
         try {
             if (arg == "--backend") backendName = needValue("--backend");
             else if (arg == "--code") config.image.codePath = needValue("--code");
+            else if (arg == "--elf") config.image.elfPath = needValue("--elf");
             else if (arg == "--data") config.image.dataPath = needValue("--data");
             else if (arg == "--trace") config.execution.trace = true;
-                        else if (arg == "--json") jsonPath = needValue("--json");
+            else if (arg == "--json") jsonPath = needValue("--json");
             else if (arg == "--entry" || arg == "--transition-vector" || arg == "--toc" ||
                      arg == "--code-base" || arg == "--data-base" || arg == "--data-map-size" ||
                      arg == "--heap-base" || arg == "--heap-size" ||

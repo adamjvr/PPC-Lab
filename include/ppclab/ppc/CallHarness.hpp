@@ -14,6 +14,7 @@ namespace ppclab::ppc {
 
 struct ImageConfig {
     std::string codePath{};
+    std::string elfPath{};
     std::string dataPath{};
     std::uint32_t codeBase = 0x10000000U;
     std::uint32_t dataBase = 0x20000000U;

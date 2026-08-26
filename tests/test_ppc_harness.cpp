@@ -29,6 +29,10 @@ int main() {
     std::cout << result.report;
     assert(result.passed);
 
+    assert(ppclab::ppc::BuiltinInterpreter::disassemble(0x1000U, 0x48000008U) ==
+           "b 0x00001008");
+    assert(ppclab::ppc::BuiltinInterpreter::disassemble(0x1000U, 0x4e800020U) == "blr");
+
     std::cout << "unicorn_available=" << (ppclab::ppc::UnicornBackend::available() ? "yes" : "no") << '\n';
     return 0;
 }

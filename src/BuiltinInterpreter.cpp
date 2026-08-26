@@ -727,30 +727,181 @@ ExecutionResult BuiltinInterpreter::run(Memory& memory,
             "instruction limit reached"};
 }
 
-std::string BuiltinInterpreter::disassemble(std::uint32_t, std::uint32_t insn) {
+std::string BuiltinInterpreter::disassemble(std::uint32_t pc, std::uint32_t insn) {
     std::ostringstream out;
     const unsigned opcode = insn >> 26U;
     const unsigned rt = (insn >> 21U) & 31U;
     const unsigned ra = (insn >> 16U) & 31U;
     const unsigned rb = (insn >> 11U) & 31U;
     const auto simm = signExtend16(insn);
+    const auto uimm = insn & 0xffffU;
+    const bool rc = (insn & 1U) != 0;
+    const auto record = [rc]() { return rc ? "." : ""; };
+    const auto target26 = [&]() {
+        const auto disp = signExtend26(insn);
+        return (insn & 2U) != 0 ? static_cast<std::uint32_t>(disp)
+                                : pc + static_cast<std::uint32_t>(disp);
+    };
+    const auto target14 = [&]() {
+        const auto disp = signExtend14Shift2(insn);
+        return (insn & 2U) != 0 ? static_cast<std::uint32_t>(disp)
+                                : pc + static_cast<std::uint32_t>(disp);
+    };
+    const auto hexTarget = [](std::uint32_t value) {
+        std::ostringstream text;
+        text << "0x" << std::hex << std::setw(8) << std::setfill('0') << value;
+        return text.str();
+    };
+
     switch (opcode) {
-    case 14: out << "addi r" << rt << ",r" << ra << ',' << simm; break;
-    case 15: out << "addis r" << rt << ",r" << ra << ',' << simm; break;
-    case 18: out << (((insn & 1U) != 0) ? "bl" : "b"); break;
-    case 24: out << "ori r" << ra << ",r" << rt << ",0x" << std::hex << (insn & 0xffffU); break;
+    case 7: out << "mulli r" << rt << ",r" << ra << ',' << simm; break;
+    case 8: out << "subfic r" << rt << ",r" << ra << ',' << simm; break;
+    case 10: out << "cmplwi cr" << ((insn >> 23U) & 7U) << ",r" << ra << ',' << uimm; break;
+    case 11: out << "cmpwi cr" << ((insn >> 23U) & 7U) << ",r" << ra << ',' << simm; break;
+    case 12: out << "addic r" << rt << ",r" << ra << ',' << simm; break;
+    case 13: out << "addic. r" << rt << ",r" << ra << ',' << simm; break;
+    case 14:
+        if (ra == 0) out << "li r" << rt << ',' << simm;
+        else out << "addi r" << rt << ",r" << ra << ',' << simm;
+        break;
+    case 15:
+        if (ra == 0) out << "lis r" << rt << ',' << simm;
+        else out << "addis r" << rt << ",r" << ra << ',' << simm;
+        break;
+    case 16:
+        out << (((insn & 1U) != 0) ? "bcl " : "bc ")
+            << ((insn >> 21U) & 31U) << ',' << ((insn >> 16U) & 31U)
+            << ',' << hexTarget(target14());
+        break;
+    case 18:
+        out << (((insn & 1U) != 0) ? "bl " : "b ") << hexTarget(target26());
+        break;
+    case 19: {
+        const unsigned xo = (insn >> 1U) & 0x3ffU;
+        const unsigned bo = (insn >> 21U) & 31U;
+        const unsigned bi = (insn >> 16U) & 31U;
+        const bool lk = (insn & 1U) != 0;
+        if (xo == 16U && bo == 20U && bi == 0U && !lk) out << "blr";
+        else if (xo == 528U && bo == 20U && bi == 0U && !lk) out << "bctr";
+        else if (xo == 16U) out << (lk ? "bclrl " : "bclr ") << bo << ',' << bi;
+        else if (xo == 528U) out << (lk ? "bcctrl " : "bcctr ") << bo << ',' << bi;
+        else if (xo == 150U) out << "isync";
+        else out << ".long " << hexTarget(insn) << "  # opcode19 xo=" << xo;
+        break;
+    }
+    case 20:
+        out << "rlwimi" << record() << " r" << ra << ",r" << rt << ','
+            << ((insn >> 11U) & 31U) << ',' << ((insn >> 6U) & 31U) << ','
+            << ((insn >> 1U) & 31U);
+        break;
+    case 21:
+        out << "rlwinm" << record() << " r" << ra << ",r" << rt << ','
+            << ((insn >> 11U) & 31U) << ',' << ((insn >> 6U) & 31U) << ','
+            << ((insn >> 1U) & 31U);
+        break;
+    case 24:
+        if (rt == 0 && ra == 0 && uimm == 0) out << "nop";
+        else out << "ori r" << ra << ",r" << rt << ",0x" << std::hex << uimm;
+        break;
+    case 25: out << "oris r" << ra << ",r" << rt << ",0x" << std::hex << uimm; break;
+    case 26: out << "xori r" << ra << ",r" << rt << ",0x" << std::hex << uimm; break;
+    case 27: out << "xoris r" << ra << ",r" << rt << ",0x" << std::hex << uimm; break;
+    case 28: out << "andi. r" << ra << ",r" << rt << ",0x" << std::hex << uimm; break;
+    case 29: out << "andis. r" << ra << ",r" << rt << ",0x" << std::hex << uimm; break;
+    case 31: {
+        const unsigned xo = (insn >> 1U) & 0x3ffU;
+        switch (xo) {
+        case 0: out << "cmpw cr" << ((insn >> 23U) & 7U) << ",r" << ra << ",r" << rb; break;
+        case 8: out << "subfc" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 10: out << "addc" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 19: out << "mfcr r" << rt; break;
+        case 23: out << "lwzx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 24: out << "slw" << record() << " r" << ra << ",r" << rt << ",r" << rb; break;
+        case 26: out << "cntlzw" << record() << " r" << ra << ",r" << rt; break;
+        case 28: out << "and" << record() << " r" << ra << ",r" << rt << ",r" << rb; break;
+        case 32: out << "cmplw cr" << ((insn >> 23U) & 7U) << ",r" << ra << ",r" << rb; break;
+        case 40: out << "subf" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 87: out << "lbzx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 104: out << "neg" << record() << " r" << rt << ",r" << ra; break;
+        case 136: out << "subfe" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 138: out << "adde" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 144: out << "mtcrf 0x" << std::hex << ((insn >> 12U) & 0xffU) << ",r" << rt; break;
+        case 151: out << "stwx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 200: out << "subfze" << record() << " r" << rt << ",r" << ra; break;
+        case 202: out << "addze" << record() << " r" << rt << ",r" << ra; break;
+        case 215: out << "stbx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 235: out << "mullw" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 266: out << "add" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 279: out << "lhzx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 316: out << "xor" << record() << " r" << ra << ",r" << rt << ",r" << rb; break;
+        case 339: out << "mfspr r" << rt << ',' << sprNumber(insn); break;
+        case 407: out << "sthx r" << rt << ",r" << ra << ",r" << rb; break;
+        case 444:
+            if (rt == rb) out << "mr r" << ra << ",r" << rt;
+            else out << "or" << record() << " r" << ra << ",r" << rt << ",r" << rb;
+            break;
+        case 459: out << "divwu" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 467: out << "mtspr " << sprNumber(insn) << ",r" << rt; break;
+        case 491: out << "divw" << record() << " r" << rt << ",r" << ra << ",r" << rb; break;
+        case 535: out << "lfsx f" << rt << ",r" << ra << ",r" << rb; break;
+        case 536: out << "srw" << record() << " r" << ra << ",r" << rt << ",r" << rb; break;
+        case 567: out << "lfsux f" << rt << ",r" << ra << ",r" << rb; break;
+        case 598: out << "sync"; break;
+        case 599: out << "lfdx f" << rt << ",r" << ra << ",r" << rb; break;
+        case 631: out << "lfdux f" << rt << ",r" << ra << ",r" << rb; break;
+        case 663: out << "stfsx f" << rt << ",r" << ra << ",r" << rb; break;
+        case 695: out << "stfsux f" << rt << ",r" << ra << ",r" << rb; break;
+        case 727: out << "stfdx f" << rt << ",r" << ra << ",r" << rb; break;
+        case 759: out << "stfdux f" << rt << ",r" << ra << ",r" << rb; break;
+        case 824: out << "srawi" << record() << " r" << ra << ",r" << rt << ',' << rb; break;
+        case 922: out << "extsh" << record() << " r" << ra << ",r" << rt; break;
+        case 954: out << "extsb" << record() << " r" << ra << ",r" << rt; break;
+        default: out << ".long " << hexTarget(insn) << "  # opcode31 xo=" << xo; break;
+        }
+        break;
+    }
     case 32: out << "lwz r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 33: out << "lwzu r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 34: out << "lbz r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 35: out << "lbzu r" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 36: out << "stw r" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 37: out << "stwu r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 38: out << "stb r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 39: out << "stbu r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 40: out << "lhz r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 41: out << "lhzu r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 42: out << "lha r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 43: out << "lhau r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 44: out << "sth r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 45: out << "sthu r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 46: out << "lmw r" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 47: out << "stmw r" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 48: out << "lfs f" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 49: out << "lfsu f" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 50: out << "lfd f" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 51: out << "lfdu f" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 52: out << "stfs f" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 53: out << "stfsu f" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 54: out << "stfd f" << rt << ',' << simm << "(r" << ra << ')'; break;
+    case 55: out << "stfdu f" << rt << ',' << simm << "(r" << ra << ')'; break;
     case 59: out << "fp59 xo=" << ((insn >> 1U) & 31U) << " f" << rt << ",f" << ra << ",f" << rb; break;
-    case 63: out << "fp63 xo=" << ((insn >> 1U) & 0x3ffU) << " f" << rt << ",f" << ra << ",f" << rb; break;
-    case 31: out << "op31 xo=" << ((insn >> 1U) & 0x3ffU); break;
-    case 19: out << "op19 xo=" << ((insn >> 1U) & 0x3ffU); break;
-    default: out << "op" << opcode;
+    case 63: {
+        const unsigned xo = (insn >> 1U) & 0x3ffU;
+        switch (xo) {
+        case 0: out << "fcmpu cr" << ((insn >> 23U) & 7U) << ",f" << ra << ",f" << rb; break;
+        case 12: out << "frsp f" << rt << ",f" << rb; break;
+        case 18: out << "fdiv f" << rt << ",f" << ra << ",f" << rb; break;
+        case 20: out << "fsub f" << rt << ",f" << ra << ",f" << rb; break;
+        case 21: out << "fadd f" << rt << ",f" << ra << ",f" << rb; break;
+        case 32: out << "fcmpo cr" << ((insn >> 23U) & 7U) << ",f" << ra << ",f" << rb; break;
+        case 40: out << "fneg f" << rt << ",f" << rb; break;
+        case 72: out << "fmr f" << rt << ",f" << rb; break;
+        case 264: out << "fabs f" << rt << ",f" << rb; break;
+        default: out << "fp63 xo=" << xo << " f" << rt << ",f" << ra << ",f" << rb; break;
+        }
+        break;
+    }
+    default: out << ".long " << hexTarget(insn) << "  # opcode=" << opcode; break;
     }
     return out.str();
 }
