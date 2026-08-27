@@ -147,3 +147,24 @@ PPC Lab does not need ceremonial releases for every research patch. Tag releases
 ## Repository invariant test
 
 `python3 scripts/check_repository_invariants.py` is deliberately dependency-free and is also registered with CTest. It verifies that the canonical GPLv3 license is present, source/build/script entry points carry the `GPL-3.0-only` SPDX identifier, and known ReBirth/X0X regression identifiers have not leaked back into generic core/tooling directories.
+
+## Adding or extending a runtime personality
+
+Prefer a JSON personality under `runtimes/` when an existing generic stub is
+sufficient. Add C++ only when the reusable behavior itself is missing. Every new
+stub must define PPC ABI inputs/outputs, validate mapped memory, and gain a
+synthetic test. Do not use a runtime personality to hide an unknown OS service.
+
+## Research-tool schemas
+
+The v0.4 automation formats are deliberately versioned:
+
+- `ppc-lab-metadata-v1` — loader-normalized image metadata;
+- `ppc-lab-snapshot-v1` — deterministic architectural/memory state;
+- `ppc-lab-trace-v1` — captured instruction trace events;
+- `ppc-lab-evidence-v1` — decompiler-neutral symbols/comments;
+- `ppc-lab-experiment-v1` / `ppc-lab-differential-v1` — input manifests.
+
+Breaking semantics require a new schema name. Additive fields are preferred.
+Decompiler adapters should remain thin consumers of evidence rather than gaining
+execution or target-specific logic.

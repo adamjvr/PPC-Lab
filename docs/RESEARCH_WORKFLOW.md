@@ -22,7 +22,7 @@ PPC Lab deterministic call fixture
  normal return     concrete stop
        |             |
        v             v
-capture state     add smallest reusable
+snapshot/trace    add smallest reusable
 and compare       opcode/stub/mapping support
        |             |
        +------+------+
@@ -66,6 +66,7 @@ Preserve the original ELF, Mach-O, or PEF container when PPC Lab supports it:
 ```bash
 ppc-lab image-info target.bin
 ppc-lab symbols target.bin
+ppc-lab metadata target.bin > target.metadata.json
 ppc-lab disasm --pef target.bin --count 32
 ppc-lab call --pef target.bin --image-base 0x11000000
 ```
@@ -143,3 +144,23 @@ A good profile makes the question reproducible months or years later without nee
 If multiple targets need the same loader, ABI helper, instruction family, import behavior, or result tool, promote it into the generic core/tooling. Otherwise keep target-specific knowledge in the profile.
 
 This is how PPC Lab stays useful for years without becoming its own full-time product.
+
+
+## v0.4 fast evidence loop
+
+For a routine already identified in a decompiler:
+
+```bash
+ppc-lab metadata target.elf > /tmp/meta.json
+ppc-lab call --elf target.elf --entry-symbol foo --backend builtin \
+  --snapshot /tmp/foo.json --trace
+python3 scripts/ppc_trace_capture.py --json /tmp/foo.trace.json -- \
+  --elf target.elf --entry-symbol foo --backend builtin
+python3 scripts/ppc_evidence_pack.py --metadata /tmp/meta.json \
+  --snapshot /tmp/foo.json --trace /tmp/foo.trace.json \
+  --json /tmp/foo.evidence.json
+```
+
+Import the evidence package with the thin adapter for Ghidra, IDA, or Binary
+Ninja. For parameter questions, replace one-off calls with an experiment
+manifest; for implementation/backend parity, use differential execution.

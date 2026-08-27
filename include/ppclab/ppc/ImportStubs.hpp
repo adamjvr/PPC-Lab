@@ -18,7 +18,14 @@ enum class ImportStubKind : std::uint8_t {
     Sqrt,
     Sin,
     Exp,
+    Fabs,
+    Floor,
+    Ceil,
     BlockMoveData,
+    Memcpy,
+    Memmove,
+    Memset,
+    Bzero,
 };
 
 struct ImportStubBinding {

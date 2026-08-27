@@ -1,0 +1,32 @@
+{
+  "schema": "ppc-lab-runtime-v1",
+  "name": "libc-posix-minimal",
+  "description": "Dependency-free behavioral stubs for common libc/libm leaf imports.",
+  "symbols": {
+    "memcpy": "memcpy",
+    "_memcpy": "memcpy",
+    "memmove": "memmove",
+    "_memmove": "memmove",
+    "memset": "memset",
+    "_memset": "memset",
+    "bzero": "bzero",
+    "_bzero": "bzero",
+    "pow": "pow",
+    "_pow": "pow",
+    "cos": "cos",
+    "_cos": "cos",
+    "sqrt": "sqrt",
+    "_sqrt": "sqrt",
+    "sin": "sin",
+    "_sin": "sin",
+    "exp": "exp",
+    "_exp": "exp",
+    "fabs": "fabs",
+    "_fabs": "fabs",
+    "floor": "floor",
+    "_floor": "floor",
+    "ceil": "ceil",
+    "_ceil": "ceil"
+  },
+  "license": "GPL-3.0-only"
+}

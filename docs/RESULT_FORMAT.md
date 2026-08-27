@@ -86,3 +86,15 @@ The float32 report includes counts, first bitwise difference, RMS error, and max
 ## Compatibility policy
 
 Within a `*-v1` schema, fields should be additive when practical. A breaking format change should use a new schema identifier instead of silently changing the meaning of existing fields.
+
+
+## Rich state snapshots (v0.4)
+
+`--json` remains the compact backward-compatible execution result. Use
+`--snapshot FILE` when a regression needs complete CPU state, region
+fingerprints, loaded symbols, and requested dumps. The snapshot schema is
+`ppc-lab-snapshot-v1`; see [`SNAPSHOTS.md`](SNAPSHOTS.md).
+
+Normalized loader metadata and decompiler evidence intentionally use separate
+schemas (`ppc-lab-metadata-v1` and `ppc-lab-evidence-v1`) so execution-result
+compatibility is not coupled to external-tool integration.

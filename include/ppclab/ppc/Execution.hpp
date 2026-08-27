@@ -5,6 +5,7 @@
 #include "ppclab/ppc/Cpu.hpp"
 #include "ppclab/ppc/Memory.hpp"
 #include "ppclab/ppc/ImportStubs.hpp"
+#include "ppclab/ppc/ImageSymbol.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -41,6 +42,7 @@ struct ExecutionConfig {
     bool trace = false;
     std::vector<ImportStubBinding> importStubs{};
     std::optional<TraceRange> traceRange{};
+    const std::vector<ImageSymbol>* traceSymbols = nullptr;
 };
 
 struct ExecutionResult {

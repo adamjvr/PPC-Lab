@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 — 2026-08-27 — Research Machine
+
+- Carry native image symbols into execution so `--trace` is symbol-aware without a separate post-processing step.
+- Add `metadata` JSON intake output for decompiler/tooling integration.
+- Add deterministic `--snapshot` capture with full CPU state, memory-region fingerprints, image symbols, and requested dumps.
+- Add reusable runtime personalities and automatic import binding/stubbing for minimal Classic Mac and libc/POSIX research.
+- Expand built-in behavioral stubs with memcpy/memmove/memset/bzero and fabs/floor/ceil.
+- Add dependency-free batch parameter sweeps, snapshot comparison, differential execution, trace capture, and evidence packaging.
+- Add Ghidra, IDAPython, and Binary Ninja evidence import helpers.
+- Add regression coverage for runtime stubs and the complete research-tool workflow.
+
 ## 0.3.0 — 2026-08-26 — Binary Intake Blitz
 
 - Added native PEF/CFM PowerPC parsing, section instantiation, pattern-initialized data, import/export metadata, main/init/term discovery, and standard relocation-bytecode execution.

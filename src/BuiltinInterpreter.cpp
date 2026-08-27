@@ -95,6 +95,22 @@ std::string hex32(std::uint32_t value) {
     return out.str();
 }
 
+std::string symbolize(std::uint32_t pc, const std::vector<ImageSymbol>* symbols) {
+    if (!symbols) return {};
+    const ImageSymbol* best = nullptr;
+    for (const auto& symbol : *symbols) {
+        if (!symbol.defined || symbol.name.empty() || symbol.value > pc) continue;
+        if (!best || symbol.value > best->value) best = &symbol;
+    }
+    if (!best) return {};
+    const auto delta = pc - best->value;
+    if (best->size != 0 && delta >= best->size) return {};
+    std::ostringstream out;
+    out << best->name;
+    if (delta) out << "+0x" << std::hex << delta;
+    return out.str();
+}
+
 } // namespace
 
 bool BuiltinInterpreter::evaluateBranchCondition(CpuState& cpu, unsigned bo, unsigned bi) noexcept {
@@ -135,8 +151,11 @@ ExecutionResult BuiltinInterpreter::run(Memory& memory,
         const bool traceThis = config.trace &&
             (!config.traceRange || config.traceRange->contains(currentPc));
         if (traceThis) {
+            const auto symbol = symbolize(currentPc, config.traceSymbols);
             std::cerr << hex32(currentPc) << "  " << hex32(insn) << "  "
-                      << disassemble(currentPc, insn) << '\n';
+                      << disassemble(currentPc, insn);
+            if (!symbol.empty()) std::cerr << "  [" << symbol << "]";
+            std::cerr << '\n';
         }
 
         cpu.pc += 4U;

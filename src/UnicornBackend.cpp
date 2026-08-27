@@ -41,6 +41,21 @@ std::string hex32(std::uint32_t value) {
     return out.str();
 }
 
+std::string symbolize(std::uint32_t pc, const std::vector<ImageSymbol>* symbols) {
+    if (!symbols) return {};
+    const ImageSymbol* best = nullptr;
+    for (const auto& symbol : *symbols) {
+        if (!symbol.defined || symbol.name.empty() || symbol.value > pc) continue;
+        if (!best || symbol.value > best->value) best = &symbol;
+    }
+    if (!best) return {};
+    const auto delta = pc - best->value;
+    if (best->size != 0 && delta >= best->size) return {};
+    std::ostringstream out; out << best->name;
+    if (delta) out << "+0x" << std::hex << delta;
+    return out.str();
+}
+
 void codeHook(uc_engine* uc, std::uint64_t address, std::uint32_t size, void* userData) {
     auto& ctx = *static_cast<HookContext*>(userData);
     ++ctx.instructions;
@@ -83,33 +98,76 @@ void codeHook(uc_engine* uc, std::uint64_t address, std::uint32_t size, void* us
                 bool success = true;
                 if (const auto* binding = findImportStub(ctx.config->importStubs, r12)) {
                     handled = true;
-                    if (binding->kind == ImportStubKind::BlockMoveData) {
-                        std::uint32_t source = 0, destination = 0, count = 0;
-                        (void)uc_reg_read(uc, UC_PPC_REG_3, &source);
-                        (void)uc_reg_read(uc, UC_PPC_REG_4, &destination);
-                        (void)uc_reg_read(uc, UC_PPC_REG_5, &count);
-                        if (count > 0x01000000U) success = false;
-                        else if (count != 0) {
-                            std::vector<std::uint8_t> bytes(count);
-                            success = uc_mem_read(uc, source, bytes.data(), bytes.size()) == UC_ERR_OK &&
-                                      uc_mem_write(uc, destination, bytes.data(), bytes.size()) == UC_ERR_OK;
+                    auto readGpr = [&](int reg, std::uint32_t& value) {
+                        return uc_reg_read(uc, reg, &value) == UC_ERR_OK;
+                    };
+                    auto copyBytes = [&](std::uint32_t source, std::uint32_t destination, std::uint32_t count) {
+                        if (count > 0x01000000U) return false;
+                        if (count == 0) return true;
+                        std::vector<std::uint8_t> bytes(count);
+                        return uc_mem_read(uc, source, bytes.data(), bytes.size()) == UC_ERR_OK &&
+                               uc_mem_write(uc, destination, bytes.data(), bytes.size()) == UC_ERR_OK;
+                    };
+                    switch (binding->kind) {
+                    case ImportStubKind::BlockMoveData: {
+                        std::uint32_t source=0,destination=0,count=0;
+                        success = readGpr(UC_PPC_REG_3, source) && readGpr(UC_PPC_REG_4, destination) &&
+                                  readGpr(UC_PPC_REG_5, count) && copyBytes(source,destination,count);
+                        break;
+                    }
+                    case ImportStubKind::Memcpy:
+                    case ImportStubKind::Memmove: {
+                        std::uint32_t destination=0,source=0,count=0;
+                        success = readGpr(UC_PPC_REG_3, destination) && readGpr(UC_PPC_REG_4, source) &&
+                                  readGpr(UC_PPC_REG_5, count) && copyBytes(source,destination,count);
+                        if (success) (void)uc_reg_write(uc, UC_PPC_REG_3, &destination);
+                        break;
+                    }
+                    case ImportStubKind::Memset: {
+                        std::uint32_t destination=0,value=0,count=0;
+                        success = readGpr(UC_PPC_REG_3,destination) && readGpr(UC_PPC_REG_4,value) &&
+                                  readGpr(UC_PPC_REG_5,count) && count <= 0x01000000U;
+                        if (success && count) {
+                            std::vector<std::uint8_t> bytes(count, static_cast<std::uint8_t>(value));
+                            success = uc_mem_write(uc,destination,bytes.data(),bytes.size()) == UC_ERR_OK;
                         }
-                    } else {
-                        std::uint64_t raw1 = 0, raw2 = 0;
-                        (void)uc_reg_read(uc, UC_PPC_REG_FPR1, &raw1);
-                        (void)uc_reg_read(uc, UC_PPC_REG_FPR2, &raw2);
-                        double a = std::bit_cast<double>(raw1);
-                        const double b = std::bit_cast<double>(raw2);
-                        switch (binding->kind) {
-                        case ImportStubKind::Pow: a = std::pow(a, b); break;
-                        case ImportStubKind::Cos: a = std::cos(a); break;
-                        case ImportStubKind::Sqrt: a = std::sqrt(a); break;
-                        case ImportStubKind::Sin: a = std::sin(a); break;
-                        case ImportStubKind::Exp: a = std::exp(a); break;
-                        case ImportStubKind::BlockMoveData: break;
+                        if (success) (void)uc_reg_write(uc, UC_PPC_REG_3, &destination);
+                        break;
+                    }
+                    case ImportStubKind::Bzero: {
+                        std::uint32_t destination=0,count=0;
+                        success = readGpr(UC_PPC_REG_3,destination) && readGpr(UC_PPC_REG_4,count) &&
+                                  count <= 0x01000000U;
+                        if (success && count) {
+                            std::vector<std::uint8_t> bytes(count,0);
+                            success = uc_mem_write(uc,destination,bytes.data(),bytes.size()) == UC_ERR_OK;
                         }
-                        raw1 = std::bit_cast<std::uint64_t>(a);
-                        (void)uc_reg_write(uc, UC_PPC_REG_FPR1, &raw1);
+                        break;
+                    }
+                    default: {
+                        std::uint64_t raw1=0,raw2=0;
+                        (void)uc_reg_read(uc,UC_PPC_REG_FPR1,&raw1);
+                        (void)uc_reg_read(uc,UC_PPC_REG_FPR2,&raw2);
+                        double a=std::bit_cast<double>(raw1); const double b=std::bit_cast<double>(raw2);
+                        switch(binding->kind) {
+                        case ImportStubKind::Pow: a=std::pow(a,b); break;
+                        case ImportStubKind::Cos: a=std::cos(a); break;
+                        case ImportStubKind::Sqrt: a=std::sqrt(a); break;
+                        case ImportStubKind::Sin: a=std::sin(a); break;
+                        case ImportStubKind::Exp: a=std::exp(a); break;
+                        case ImportStubKind::Fabs: a=std::fabs(a); break;
+                        case ImportStubKind::Floor: a=std::floor(a); break;
+                        case ImportStubKind::Ceil: a=std::ceil(a); break;
+                        case ImportStubKind::BlockMoveData:
+                        case ImportStubKind::Memcpy:
+                        case ImportStubKind::Memmove:
+                        case ImportStubKind::Memset:
+                        case ImportStubKind::Bzero: break;
+                        }
+                        raw1=std::bit_cast<std::uint64_t>(a);
+                        (void)uc_reg_write(uc,UC_PPC_REG_FPR1,&raw1);
+                        break;
+                    }
                     }
                 }
                 if (handled && success) {
@@ -138,7 +196,10 @@ void codeHook(uc_engine* uc, std::uint64_t address, std::uint32_t size, void* us
                    (static_cast<std::uint32_t>(b[2]) << 8U) |
                    b[3];
         }
-        std::cerr << hex32(pc) << "  " << hex32(word) << '\n';
+        const auto symbol = symbolize(pc, ctx.config->traceSymbols);
+        std::cerr << hex32(pc) << "  " << hex32(word);
+        if (!symbol.empty()) std::cerr << "  [" << symbol << "]";
+        std::cerr << '\n';
     }
 }
 

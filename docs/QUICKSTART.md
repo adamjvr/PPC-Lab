@@ -26,7 +26,7 @@ Sanity check:
 ./build/release/ppc-lab image-info /path/to/target
 ```
 
-Supported v0.3 native intake:
+Supported native intake:
 
 - ELF32 big-endian PowerPC (`ET_EXEC`, `ET_DYN`, `ET_REL`);
 - 32-bit big-endian PowerPC Mach-O, thin or fat;
@@ -104,11 +104,18 @@ If relocation/loading reports a missing symbol:
   --bind memcpy=0x30000100
 ```
 
-If that address should also behave like one of PPC Lab's reusable runtime
-stubs:
+If that address should also behave like one of PPC Lab's reusable runtime stubs:
 
 ```bash
---bind memcpy=0x30000100 --stub blockmove@0x30000100
+--bind memcpy=0x30000100 --stub memcpy@0x30000100
+```
+
+Or let a reusable personality bind the imports it understands:
+
+```bash
+python3 scripts/ppc_runtime_call.py \
+  --runtime runtimes/libc-posix-minimal.json \
+  --image module.o -- --entry-symbol process --backend builtin
 ```
 
 Do not pre-stub everything. Let execution tell you what is actually required.
@@ -122,7 +129,8 @@ Do not pre-stub everything. Let execution tell you what is actually required.
   --set r3=5 \
   --dump 0x40010000:128 \
   --trace-range 0x00104560:0x00104680 \
-  --json /tmp/ppc-result.json
+  --json /tmp/ppc-result.json \
+  --snapshot /tmp/ppc-state.json
 ```
 
 Inspect the result:
@@ -131,7 +139,7 @@ Inspect the result:
 python3 scripts/ppc_result_inspect.py /tmp/ppc-result.json
 ```
 
-Compare two deterministic dumps/results with the scripts under `scripts/`.
+Compare full state with `python3 scripts/ppc_snapshot_diff.py A.json B.json`. For repeated parameter studies, use `ppc_lab_batch.py`; for A/B execution, use `ppc_differential.py`.
 
 ## 8. Turn a successful experiment into a profile
 

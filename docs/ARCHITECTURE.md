@@ -133,3 +133,33 @@ Generic areas (`include/`, `src/`, `tools/`, generic `scripts/`, synthetic
 `tests/`) must not acquire target-specific addresses or proprietary code. The
 repository invariant test enforces known extraction sentinels so accidental
 regression is caught in CI.
+
+## v0.4 research/evidence layer
+
+v0.4 adds a layer **above** binary intake and `CallHarness`; it does not move
+research policy into the CPU core:
+
+```text
+native loader -> CallHarness -> backend
+     |              |            |
+     |              +-> snapshot + symbol-aware trace
+     |                           |
+     +-> metadata JSON           v
+                        experiment / differential tools
+                                  |
+                                  v
+                        decompiler-neutral evidence
+                                  |
+                    +-------------+-------------+
+                    v             v             v
+                  Ghidra          IDA       Binary Ninja
+```
+
+Runtime personality JSON maps **names to reusable behaviors**. The runner
+allocates deterministic import identities and translates the profile into normal
+`--bind`/`--stub` arguments. This preserves the core rule that addresses and
+runtime assumptions are policy rather than loader behavior.
+
+Snapshots and evidence formats are intentionally separate from backend internals.
+A future backend can participate if it honors `ExecutionBackend` and produces the
+same architectural state.

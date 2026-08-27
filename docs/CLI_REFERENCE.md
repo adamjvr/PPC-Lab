@@ -80,7 +80,7 @@ ppc-lab call (--code FILE | --elf FILE | --macho FILE | --pef FILE) [--data FILE
   [--stub KIND@ADDRESS] \
   [--dump ADDRESS:SIZE] \
   [--trace] [--trace-range START:END] \
-  [--json FILE]
+  [--json FILE] [--snapshot FILE]
 ```
 
 ### Inputs
@@ -158,7 +158,14 @@ cos
 sqrt
 sin
 exp
+fabs
+floor
+ceil
 blockmove
+memcpy
+memmove
+memset
+bzero
 ```
 
 A stub binding is an execution aid, not proof of bit-exact parity with the
@@ -171,19 +178,17 @@ original runtime.
 --trace-range 0x10001200:0x10001400
 ```
 
-`--trace` enables instruction trace output. `--trace-range` restricts trace
-reporting to an inclusive address interval while execution can continue outside
-it.
+`--trace` enables instruction trace output. For native images, loaded symbols are carried into the execution backend and trace lines are annotated with the nearest matching symbol and offset. `--trace-range` restricts trace reporting to an inclusive address interval while execution can continue outside it.
 
 ### Dumps and JSON
 
 ```bash
 --dump 0x40010000:128
 --json /tmp/result.json
+--snapshot /tmp/state.json
 ```
 
-Each dump reports bytes plus FNV-1a64. JSON uses the documented result schema in
-[`RESULT_FORMAT.md`](RESULT_FORMAT.md).
+Each dump reports bytes plus FNV-1a64. `--json` preserves the compact result schema. `--snapshot` emits the richer `ppc-lab-snapshot-v1` state checkpoint documented in [`SNAPSHOTS.md`](SNAPSHOTS.md).
 
 ## Backend selection
 
@@ -206,3 +211,28 @@ instruction, unmapped/protection memory fault, trapped unresolved import,
 instruction-limit stop, backend failure, and setup/load failure. Treat the
 printed stop reason as the stable research signal; scripts should not depend on
 undocumented prose.
+
+## `metadata`
+
+```bash
+ppc-lab metadata FILE [--image-base ADDRESS] [--bind NAME=ADDRESS]
+```
+
+Loads a supported native image through the same loader used by `call` and emits
+`ppc-lab-metadata-v1` JSON containing normalized format, mapped entry, regions,
+permissions, and symbols. This is the preferred machine-readable intake
+interface for decompiler and automation tooling.
+
+## v0.4 research scripts
+
+```bash
+python3 scripts/ppc_runtime_call.py --runtime RUNTIME.json --image IMAGE -- [call options]
+python3 scripts/ppc_trace_capture.py --json TRACE.json -- [call options]
+python3 scripts/ppc_snapshot_diff.py LEFT.json RIGHT.json [--ignore-backend]
+python3 scripts/ppc_lab_batch.py MANIFEST.json --out DIRECTORY
+python3 scripts/ppc_differential.py MANIFEST.json
+python3 scripts/ppc_evidence_pack.py --metadata META.json [--snapshot SNAP.json] [--trace TRACE.json] --json OUT.json
+```
+
+See `RUNTIMES.md`, `SNAPSHOTS.md`, `EXPERIMENTS.md`, and
+`DECOMPILER_INTEGRATION.md` for the corresponding schemas and workflows.

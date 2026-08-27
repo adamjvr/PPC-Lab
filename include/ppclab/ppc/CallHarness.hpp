@@ -67,6 +67,7 @@ struct CallResult {
     ExecutionResult execution{};
     CpuState cpu{};
     Memory memory{};
+    std::vector<ImageSymbol> symbols{};
 };
 
 class CallHarness {
@@ -74,7 +75,8 @@ public:
     static bool prepare(const CallConfig& config,
                         Memory& memory,
                         CpuState& cpu,
-                        std::string& error);
+                        std::string& error,
+                        std::vector<ImageSymbol>* symbols = nullptr);
 
     static CallResult run(const CallConfig& config, ExecutionBackend& backend);
 };

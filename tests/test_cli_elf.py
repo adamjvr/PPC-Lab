@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import struct
 import subprocess
 import sys
@@ -72,6 +73,14 @@ def main() -> int:
         assert "entry=0x00100000" in info.stdout
         assert "segments=2" in info.stdout
 
+        metadata = run(exe, "metadata", str(elf))
+        assert metadata.returncode == 0, metadata.stderr
+        meta = json.loads(metadata.stdout)
+        assert meta["schema"] == "ppc-lab-metadata-v1"
+        assert meta["format"] == "ELF32-PPC-BE"
+        assert meta["entry"] == "0x00100000"
+        assert len(meta["regions"]) == 2
+
         dis = run(exe, "disasm", "--elf", str(elf), "--count", "2")
         assert dis.returncode == 0, dis.stderr
         assert "addi r3,r3,7" in dis.stdout
@@ -84,7 +93,7 @@ def main() -> int:
 
         version = run(exe, "--version")
         assert version.returncode == 0
-        assert version.stdout.strip() == "PPC Lab 0.3.0"
+        assert version.stdout.strip() == "PPC Lab 0.4.0"
 
     print("PASS: ELF32 CLI inspect/disasm/call")
     return 0

@@ -37,7 +37,8 @@ bool chooseSymbolEntry(const std::string& requested,
 bool CallHarness::prepare(const CallConfig& config,
                           Memory& memory,
                           CpuState& cpu,
-                          std::string& error) {
+                          std::string& error,
+                          std::vector<ImageSymbol>* symbols) {
     const bool hasRaw = !config.image.codePath.empty();
     const bool hasElf = !config.image.elfPath.empty();
     const bool hasMacho = !config.image.machoPath.empty();
@@ -55,18 +56,21 @@ bool CallHarness::prepare(const CallConfig& config,
         if (!Elf32Loader::loadFile(config.image.elfPath, memory, elf, error,
                                    config.image.imageBase, config.image.symbolBindings)) return false;
         imageEntry = elf.entry;
+        if (symbols) *symbols = elf.symbols;
         if (!chooseSymbolEntry(config.entrySymbol, elf.symbols, imageEntry, error)) return false;
     } else if (hasMacho) {
         MachOImageInfo macho{};
         if (!MachOLoader::loadFile(config.image.machoPath, memory, macho, error,
                                    config.image.imageBase, config.image.symbolBindings)) return false;
         imageEntry = macho.entry;
+        if (symbols) *symbols = macho.symbols;
         if (!chooseSymbolEntry(config.entrySymbol, macho.symbols, imageEntry, error)) return false;
     } else if (hasPef) {
         PefImageInfo pef{};
         if (!PefLoader::loadFile(config.image.pefPath, memory, pef, error,
                                  config.image.imageBase, config.image.symbolBindings)) return false;
         imageEntry = pef.entry;
+        if (symbols) *symbols = pef.symbols;
         if (!chooseSymbolEntry(config.entrySymbol, pef.symbols, imageEntry, error)) return false;
     } else {
         if (!config.entrySymbol.empty()) {
@@ -176,12 +180,14 @@ bool CallHarness::prepare(const CallConfig& config,
 CallResult CallHarness::run(const CallConfig& config, ExecutionBackend& backend) {
     CallResult result{};
     std::string error;
-    if (!prepare(config, result.memory, result.cpu, error)) {
+    if (!prepare(config, result.memory, result.cpu, error, &result.symbols)) {
         result.execution.reason = StopReason::InvalidConfiguration;
         result.execution.message = std::move(error);
         return result;
     }
-    result.execution = backend.run(result.memory, result.cpu, config.execution);
+    auto execution = config.execution;
+    execution.traceSymbols = &result.symbols;
+    result.execution = backend.run(result.memory, result.cpu, execution);
     return result;
 }
 

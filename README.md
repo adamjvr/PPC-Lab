@@ -12,22 +12,22 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
-## v0.3.0 — Binary Intake Blitz
+## v0.4.0 — Research Machine
 
-PPC Lab can now natively intake the three PowerPC formats most useful to our
-current and likely future work:
+v0.3 made PPC Lab ingest real PPC containers. v0.4 makes those binaries useful
+as repeatable behavioral experiments:
 
-- **ELF32 big-endian PowerPC** — `ET_EXEC`, `ET_DYN`, and `ET_REL`, including
-  sections, symbols, rebasing, BSS, and common System V PPC relocations;
-- **32-bit big-endian PowerPC Mach-O** — thin or fat containers containing
-  `MH_OBJECT`, `MH_EXECUTE`, `MH_DYLIB`, or `MH_BUNDLE`, with symbols, entry
-  discovery, rebasing where required, and common PPC relocations;
-- **PEF/CFM PowerPC** — section instantiation, pattern-initialized data,
-  imports/exports, main/init/term discovery, and standard PEF relocation
-  bytecode.
+- native ELF32/Mach-O/PEF intake plus normalized `metadata` JSON;
+- symbol-aware execution tracing;
+- deterministic full-state snapshots and state comparison;
+- reusable minimal Classic Mac and libc/POSIX runtime personalities;
+- automatic import binding/stubbing for supported runtime services;
+- batch parameter sweeps and differential execution;
+- machine-readable trace/evidence packaging;
+- Ghidra, IDAPython, and Binary Ninja evidence import helpers.
 
-Raw relocated code/data remains supported for research cases where a custom
-extractor is still the right tool.
+PPC Lab remains deliberately headless and low-maintenance. The research engine
+produces portable evidence; decompilers consume it through thin adapters.
 
 ## Fast start
 
@@ -41,6 +41,7 @@ Inspect any supported native image without executing it:
 ```bash
 ./build/release/ppc-lab image-info target.bin
 ./build/release/ppc-lab symbols target.bin
+./build/release/ppc-lab metadata target.bin > target.metadata.json
 ```
 
 Disassemble or execute it:
@@ -67,7 +68,8 @@ imports explicitly:
   --bind malloc=0x30001000 \
   --stub blockmove@0x30002000 \
   --set r3=5 \
-  --json /tmp/result.json
+  --json /tmp/result.json \
+  --snapshot /tmp/state.json
 ```
 
 The important rule is that **addresses are target policy**. Generic PPC Lab
@@ -83,11 +85,11 @@ addresses, bindings, inputs, and expected results.
 - Classic CFM transition-vector calls (`entry`, TOC/`r2`, `r12`);
 - GPR/FPR setup and deterministic memory writes;
 - import traps and explicit symbol bindings;
-- reusable runtime stubs (`pow`, `cos`, `sqrt`, `sin`, `exp`, `blockmove`);
-- instruction limits, trace output, and trace ranges;
+- reusable runtime stubs for libm, memory operations, and Classic Mac block moves;
+- instruction limits, symbol-aware trace output, and trace ranges;
 - memory dumps with FNV-1a64 fingerprints;
-- machine-readable JSON results;
-- byte/float differential comparison tools;
+- machine-readable results, normalized metadata, and deterministic full-state snapshots;
+- byte/float comparison, snapshot diffing, batch sweeps, and differential execution;
 - synthetic loader/relocation/execution regressions;
 - GPL/SPDX/version/target-neutrality repository invariants;
 - low-maintenance macOS/Linux/Windows CI.
@@ -106,6 +108,7 @@ ppc-lab elf-info FILE
 ppc-lab macho-info FILE
 ppc-lab pef-info FILE
 ppc-lab symbols FILE
+ppc-lab metadata FILE [--image-base HEX] [--bind NAME=ADDRESS]
 ppc-lab disasm (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
 ppc-lab call   (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
 ```
@@ -153,7 +156,9 @@ PPC-Lab/
 ├── include/ppclab/ppc/   reusable public C++ API
 ├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              build, verification, diff/result tooling
+├── scripts/              experiments, runtime, trace, diff/result tooling
+├── runtimes/             reusable runtime personality maps
+├── integrations/         Ghidra / IDA / Binary Ninja evidence adapters
 ├── tests/                synthetic deterministic regressions
 ├── profiles/             target-specific metadata/scripts/expectations
 ├── docs/                 usage, format, architecture, development docs
@@ -177,6 +182,11 @@ PPC-Lab/
 | [`docs/ADDING_A_TARGET.md`](docs/ADDING_A_TARGET.md) | How do I add a new project without contaminating the core? |
 | [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md) | How should PPC Lab be used alongside a decompiler? |
 | [`docs/RESULT_FORMAT.md`](docs/RESULT_FORMAT.md) | What does deterministic JSON/dump output contain? |
+| [`docs/METADATA.md`](docs/METADATA.md) | How do external tools consume normalized loader metadata? |
+| [`docs/RUNTIMES.md`](docs/RUNTIMES.md) | How do reusable import/runtime personalities work? |
+| [`docs/SNAPSHOTS.md`](docs/SNAPSHOTS.md) | What is captured in deterministic behavioral state? |
+| [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) | How do batch sweeps and differential runs work? |
+| [`docs/DECOMPILER_INTEGRATION.md`](docs/DECOMPILER_INTEGRATION.md) | How do Ghidra, IDA, and Binary Ninja consume evidence? |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | How do I add an opcode, relocation, loader feature, or backend? |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | What is left before v1.0? |
 | [`docs/HISTORY.md`](docs/HISTORY.md) | Where did PPC Lab come from? |
@@ -197,7 +207,7 @@ PPC-Lab/
 
 ## Scope
 
-PPC Lab v0.3 is a **PPC32 big-endian research execution platform**, not a full
+PPC Lab v0.4 is a **PPC32 big-endian research execution platform**, not a full
 Mac OS, Linux, console, or firmware emulator. Loader support does not imply that
 the target operating system/runtime has been emulated. Dynamic-linker-heavy,
 scattered/complex relocations, missing CPU instructions, syscalls, traps, or

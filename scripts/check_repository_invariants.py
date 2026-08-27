@@ -39,6 +39,7 @@ def check_spdx() -> None:
     required.extend(ROOT.glob("scripts/*.py"))
     required.extend(ROOT.glob("scripts/*.sh"))
     required.extend(ROOT.glob("tests/*.py"))
+    required.extend(ROOT.glob("integrations/**/*.py"))
     required.extend(ROOT.glob("Tools/*.command"))
     required.extend(ROOT.glob("profiles/*/scripts/*.sh"))
     required.extend([ROOT / "CMakeLists.txt", ROOT / "cmake/FindUnicorn.cmake", ROOT / ".github/workflows/ci.yml"])
@@ -70,7 +71,7 @@ def check_version_sync() -> None:
         fail(f"CHANGELOG.md has no release heading for {version}")
 
 def check_target_neutral_core() -> None:
-    roots = ["include", "src", "tools", "scripts", "tests", "cmake"]
+    roots = ["include", "src", "tools", "scripts", "tests", "cmake", "integrations"]
     files: list[Path] = []
     for name in roots:
         base = ROOT / name
