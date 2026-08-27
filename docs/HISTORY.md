@@ -28,3 +28,9 @@ disassemble, map, and execute fixed-address big-endian `EM_PPC` `ET_EXEC`
 images directly. Synthetic ELF tests prove segment permissions, BSS zero-fill,
 entry-point selection, CLI inspection/disassembly, and actual execution through
 the normal call harness. Raw and Classic CFM workflows remain intact.
+
+## v0.3.0 — Binary Intake Blitz — 2026-08-26
+
+PPC Lab generalized binary intake in one concentrated milestone. ELF support expanded to `ET_DYN` and `ET_REL` with symbols and common System V PowerPC relocations; a native 32-bit PowerPC Mach-O loader added thin/fat intake, symbols, entry discovery, rebasing and common PPC relocations; and a native PEF/CFM loader added section instantiation, pattern-initialized data, imports/exports, main/init/term discovery, and standard relocation bytecode.
+
+The CLI gained `image-info`, `symbols`, `--image-base`, `--entry-symbol`, and explicit `--bind` symbol resolution. Every native loader gained synthetic inspect/load/execute tests, and cross-format CLI tests prove that inspection, disassembly, and execution use the same generic `CallHarness` path.

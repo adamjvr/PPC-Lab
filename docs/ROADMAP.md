@@ -1,98 +1,73 @@
-# PPC Lab demand-driven roadmap
+# PPC Lab roadmap
 
-PPC Lab is infrastructure, not a product treadmill. This roadmap records the
-next reusable capability classes so future work does not require reconstructing
-intent from old chats. It is **not** a promise to implement features in order or
-on a schedule.
+This is a **capability roadmap, not a schedule**. PPC Lab is infrastructure. We
+ship large useful chunks, then stop working on it until an actual PPC target
+needs the next chunk.
 
-## Completed foundation
+## Current: v0.3 — Binary Intake Blitz — COMPLETE
 
-### v0.1.x — deterministic call harness
+The binary-intake layer is now broad enough that most near-term PPC research can
+start from the original container instead of a hand-relocated blob:
 
-- dependency-free PPC32-BE interpreter;
-- optional Unicorn backend;
-- deterministic raw code/data/heap/stack/import maps;
-- direct calls and CFM transition vectors;
-- target-bound import stubs;
-- tracing, dumps, JSON results, differential tools;
-- external target profiles;
-- GPL-3.0-only repository and invariant CI.
+- PEF/CFM parsing, instantiation, imports/exports, entry discovery, pidata, and
+  standard relocation bytecode;
+- thin/fat PPC32 big-endian Mach-O for objects/executables/dylibs/bundles;
+- ELF32 big-endian `ET_EXEC`, `ET_DYN`, and `ET_REL`;
+- native symbols and common PPC relocation handling;
+- `image-info`, `symbols`, cross-format `disasm`, and cross-format `call`;
+- `--image-base`, `--entry-symbol`, and explicit `--bind` import resolution;
+- synthetic execution regressions for all native loader families.
 
-### v0.2.0 — executable-image intake
+## v0.4 — Research Machine
 
-- dependency-free ELF32 big-endian `EM_PPC` `ET_EXEC` loader;
-- `PT_LOAD` mapping with permissions and BSS zero-fill;
-- ELF entry-point execution through the normal `CallHarness`;
-- `elf-info` inspection command;
-- lightweight `disasm` command for raw or ELF code;
-- synthetic loader + CLI execution regressions.
+Condense the analysis/integration work into one serious milestone:
 
-## Next capability buckets
+- reusable runtime personalities, beginning with whichever target needs one
+  first (Classic Mac services and/or libc/POSIX);
+- symbolized execution traces and call/import reporting;
+- batch experiment runner for parameter sweeps and reproducible fixtures;
+- snapshot/state capture and deterministic state comparison;
+- first-class differential execution workflows;
+- Ghidra integration helpers, with IDA/Binary Ninja adapters where cheap;
+- machine-readable intake metadata suitable for external decompiler tooling;
+- profile-level symbol maps and reusable runtime bindings.
 
-Implement the first bucket demanded by an active reverse-engineering target.
-Do not work through this list merely for completeness.
+**Exit condition:** a researcher can select a function in a decompiler, prepare
+a repeatable experiment, execute it through PPC Lab, and consume symbolized
+behavioral evidence without hand-gluing every step.
 
-### Classic Mac intake
+## v0.5 — PPC Coverage Monster
 
-Promote reusable PEF/CFM parsing and relocation into PPC Lab when another
-Classic Mac target needs it. Preserve transition-vector/TOC behavior already in
-the call harness. Keep Toolbox/OS services as explicit runtime personality or
-profile behavior rather than hard-coded assumptions.
+One concentrated execution-hardening milestone:
 
-### Symbol-aware research
+- aggressively fill PPC32 instruction gaps encountered by real workloads;
+- improve CR/XER/FPSCR/SPR edge-case fidelity where validation demands it;
+- structured exception/trap/syscall interception;
+- stronger builtin-vs-Unicorn backend parity tests;
+- fuzz/property-style decoder/interpreter/memory/loader regressions;
+- stress malformed binary intake and relocation streams;
+- expand reusable ABI/runtime helpers;
+- PPC64 and little-endian scaffolding only if doing so is cheap or a live target
+  demands it.
 
-Add generic symbol import/export when it removes repeated manual address work:
-ELF symbol tables first if an active ELF target needs them, followed by PEF or
-Mach-O symbols as justified. Symbols should annotate results/traces without
-becoming required for execution.
+**Exit condition:** ordinary PPC32 user-space routines should fail because of a
+missing external environment far more often than because PPC Lab cannot execute
+the instructions themselves.
 
-### Mach-O PowerPC loader
+## v1.0 — Useful general PPC research platform
 
-Add fixed-address 32-bit PPC Mach-O intake for early Mac OS X research when a
-real target arrives. Relocation/dyld behavior should remain explicit rather
-than partially emulated.
+The practical v1.0 definition is intentionally simple:
 
-### ELF relocations / ET_REL / ET_DYN
+> Throw a supported PPC binary at PPC Lab, inspect it, find an interesting
+> routine, execute it in a controlled environment, trace/stub/bind what it
+> touches, compare behavior, and feed the evidence back into decompilation.
 
-Add only the relocation families observed in real PPC objects/firmware. Reject
-unknown relocation types. Do not quietly pretend a shared object is already
-relocated.
+v1.0 does **not** require emulating every PowerPC machine or operating system.
+It requires a stable, documented, extensible research platform that has proven
+itself across unrelated projects.
 
-### Better runtime personalities
+## Later, only when justified
 
-Reusable personalities may model narrow ABI/runtime services such as libc-like
-memory/string helpers, selected POSIX calls, or Classic Mac services. Keep
-address bindings and target-specific semantics outside the CPU core.
-
-### Analysis integration
-
-Potential low-friction bridges:
-
-- Ghidra export/import scripts;
-- IDA/Binary Ninja address/symbol adapters;
-- batch function-call experiment manifests;
-- trace-to-symbol annotation;
-- coverage summaries;
-- compare PPC Lab state against native clean-room implementations.
-
-### ISA expansion
-
-Continue the existing rule: unsupported opcode from a real target -> implement
-smallest correct reusable semantics -> synthetic regression -> resume target.
-Full ISA coverage is not a goal by itself.
-
-### PPC64 or little-endian PPC
-
-These are separate architecture milestones. Do not complicate the PPC32-BE
-baseline until an actual project needs them.
-
-## Maintenance rule
-
-A PPC Lab change should normally satisfy at least one of these tests:
-
-1. it unblocks an active PPC reverse-engineering target;
-2. it removes duplicated infrastructure from multiple profiles;
-3. it improves reproducibility or catches a silent correctness failure;
-4. it makes an already-supported capability materially easier to use.
-
-If none apply, the feature can wait.
+Potential post-1.0 work includes PPC64, little-endian PowerPC, more OS/runtime
+personalities, JIT backends, remote execution workers, richer debugger
+protocols, and deeper decompiler plugins. None of these are obligations.

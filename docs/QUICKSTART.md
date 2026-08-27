@@ -1,223 +1,142 @@
-# PPC Lab quick start
+# Quick start
 
-This is the shortest path from a fresh clone to a useful PowerPC research
-result.
+## 1. Build and verify
 
-## 1. Requirements
-
-Required:
-
-- CMake 3.20 or newer;
-- a C++20 compiler;
-- Git if building from a clone.
-
-Useful but optional:
-
-- Python 3 for result-comparison and CLI integration tests;
-- Clang for ASan/UBSan verification;
-- Unicorn 2.x development files for the optional Unicorn backend.
-
-PPC Lab always includes its own dependency-free PPC32 big-endian interpreter
-and dependency-free ELF32 PowerPC loader.
-
-## 2. Clone and verify
+macOS/Linux:
 
 ```bash
-git clone https://github.com/YOUR-ACCOUNT/PPC-Lab.git
-cd PPC-Lab
 ./Tools/verify.command
 ```
 
-Expected end state: CMake configures, `ppc-lab` builds, CTest passes, built-in
-PPC microtests pass, and sanitizer verification runs when suitable Clang is
-installed.
+The release binary is normally:
 
-## 3. Confirm the execution backend
+```bash
+./build/release/ppc-lab
+```
+
+Sanity check:
 
 ```bash
 ./build/release/ppc-lab selftest --backend builtin
 ```
 
-Use `--backend auto` to prefer Unicorn when PPC support is available, otherwise
-fall back to the built-in interpreter.
-
-## 4. Start with an ELF executable when you have one
-
-Inspect it before running anything:
+## 2. Identify a native PPC image
 
 ```bash
-./build/release/ppc-lab elf-info ./firmware.elf
+./build/release/ppc-lab image-info /path/to/target
 ```
 
-PPC Lab v0.2.0 accepts fixed-address ELF32, big-endian, `EM_PPC`, `ET_EXEC`
-images. It maps `PT_LOAD` segments and zero-fills BSS.
+Supported v0.3 native intake:
 
-Look at the entry-point instructions:
+- ELF32 big-endian PowerPC (`ET_EXEC`, `ET_DYN`, `ET_REL`);
+- 32-bit big-endian PowerPC Mach-O, thin or fat;
+- PowerPC PEF/CFM.
+
+If the target is not a native supported container but you already have raw
+relocated code, use `--code` as before.
+
+## 3. See symbols when available
 
 ```bash
-./build/release/ppc-lab disasm \
-  --elf ./firmware.elf \
-  --count 32
+./build/release/ppc-lab symbols /path/to/target
 ```
 
-Execute from the ELF entry point:
+For relocatable objects this is often the fastest way to choose a function for
+an isolated experiment.
+
+## 4. Disassemble a small region
+
+```bash
+./build/release/ppc-lab disasm --elf target.elf --count 32
+./build/release/ppc-lab disasm --macho target.macho --count 32
+./build/release/ppc-lab disasm --pef target.pef --count 32
+```
+
+Override the start address when useful:
+
+```bash
+./build/release/ppc-lab disasm --elf target.elf --start 0x00104560 --count 64
+```
+
+## 5. Execute an entry or function
+
+Native default entry:
+
+```bash
+./build/release/ppc-lab call --elf target.elf --backend builtin
+```
+
+Named function in a relocatable/shared image:
 
 ```bash
 ./build/release/ppc-lab call \
-  --elf ./firmware.elf \
-  --backend builtin \
-  --max-instructions 100000
+  --elf module.o \
+  --image-base 0x12000000 \
+  --entry-symbol process \
+  --set r3=5
 ```
 
-For reverse engineering, it is often more useful to call one known function
-than to pretend PPC Lab is the original operating system:
+Numeric function entry:
 
 ```bash
 ./build/release/ppc-lab call \
-  --elf ./firmware.elf \
+  --macho target.macho \
   --entry 0x00104560 \
-  --set r3=0x40010000 \
-  --set r4=64
+  --set r3=0x40010000
 ```
 
-See `docs/ELF32.md` for the exact loader contract and unsupported cases.
-
-## 5. Raw/relocated code still works
-
-PPC Lab maps raw binary bytes at deterministic addresses. The default raw code
-base is `0x10000000`.
+PEF default main:
 
 ```bash
 ./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10000000 \
-  --max-instructions 100000
+  --pef application.pef \
+  --image-base 0x11000000
 ```
 
-You can inspect raw code too:
+## 6. Bind an unresolved external only when execution needs it
 
-```bash
-./build/release/ppc-lab disasm \
-  --code ./code.bin \
-  --base 0x10000000 \
-  --count 32
-```
-
-A normal emulated function return exits with status `0`. Unsupported
-instructions, memory faults, import traps, and instruction_limit stops return
-distinct nonzero status codes.
-
-## 6. Supply ABI state
-
-Pass integer arguments or pointers in GPRs:
+If relocation/loading reports a missing symbol:
 
 ```bash
 ./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10001234 \
-  --set r3=0x40010000 \
-  --set r4=64
+  --elf module.o \
+  --entry-symbol process \
+  --bind memcpy=0x30000100
 ```
 
-Pass floating-point values in FPRs:
+If that address should also behave like one of PPC Lab's reusable runtime
+stubs:
+
+```bash
+--bind memcpy=0x30000100 --stub blockmove@0x30000100
+```
+
+Do not pre-stub everything. Let execution tell you what is actually required.
+
+## 7. Capture deterministic evidence
 
 ```bash
 ./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10001234 \
-  --set-f f1=0.5 \
-  --set-f f2=2.0
-```
-
-For Classic CFM code, a transition vector can provide the entry point and TOC:
-
-```bash
-./build/release/ppc-lab call \
-  --code ./code.bin \
-  --data ./data.bin \
-  --transition-vector 0x20005224
-```
-
-## 7. Initialize target memory
-
-Write deterministic inputs before execution:
-
-```bash
-./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10001234 \
-  --write-u32 0x40010000=0x12345678 \
-  --write-f32 0x40010004=0.25
-```
-
-Writes must land in writable mapped target/heap/data memory.
-
-## 8. Bind only required imports
-
-If execution reaches an imported function, PPC Lab normally stops with an
-import trap. Bind a known generic behavior only when the target needs it:
-
-```bash
-./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10001234 \
-  --stub sin@0x30000014 \
-  --stub blockmove@0x300001c8
-```
-
-Do not globally guess imports. Unknown imports remaining traps is useful
-research information.
-
-## 9. Capture deterministic output
-
-```bash
-./build/release/ppc-lab call \
-  --code ./code.bin \
-  --entry 0x10001234 \
+  --elf target.elf \
+  --entry 0x00104560 \
+  --set r3=5 \
   --dump 0x40010000:128 \
-  --json /tmp/result.json
+  --trace-range 0x00104560:0x00104680 \
+  --json /tmp/ppc-result.json
 ```
 
-Inspect it:
+Inspect the result:
 
 ```bash
-python3 scripts/ppc_result_inspect.py /tmp/result.json
+python3 scripts/ppc_result_inspect.py /tmp/ppc-result.json
 ```
 
-Compare the dump against a reference byte file:
+Compare two deterministic dumps/results with the scripts under `scripts/`.
 
-```bash
-python3 scripts/compare_ppc_dump.py \
-  --ppc /tmp/result.json \
-  --reference /tmp/reference.bin
-```
+## 8. Turn a successful experiment into a profile
 
-## 10. Turn the experiment into a profile
+Once the experiment answers a useful research question, put only the reusable
+metadata/script/expected hashes under `profiles/<target>/`. Keep proprietary
+binary bytes external.
 
-Once an invocation answers a recurring research question, do not leave it in
-shell history. Put its addresses, bindings, expected fingerprints, and command
-under `profiles/<target>/`.
-
-If the target is redistributable ELF, the profile can simply point to it. For
-commercial/proprietary input, keep the bytes external and accept a path through
-an environment variable or script argument.
-
-See `docs/ADDING_A_TARGET.md`.
-
-## 11. What to do when execution stops
-
-- `returned`: capture outputs and compare behavior.
-- `unsupported_instruction`: implement that opcode only if the target needs it,
-  then add a synthetic test.
-- `memory_fault`: verify mappings, pointers, relocation assumptions, stack, and
-  writable regions.
-- `import_trap`: identify the imported function and add the smallest reusable
-  stub if required.
-- `instruction_limit`: inspect trace/control flow before simply raising the
-  limit.
-- `invalid_configuration`: fix the call setup or move a harness-owned range that
-  overlaps target memory.
-- `backend_error`: try the built-in backend and inspect backend-specific setup.
-
-The intended workflow is incremental: **target question -> deterministic call
--> smallest missing capability -> regression test -> continue target research**.
+See [`ADDING_A_TARGET.md`](ADDING_A_TARGET.md).

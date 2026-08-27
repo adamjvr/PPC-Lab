@@ -4,7 +4,9 @@
 #include "ppclab/ppc/CallHarness.hpp"
 #include "ppclab/ppc/Elf32Loader.hpp"
 #include "ppclab/ppc/ImportStubs.hpp"
+#include "ppclab/ppc/MachOLoader.hpp"
 #include "ppclab/ppc/Microtests.hpp"
+#include "ppclab/ppc/PefLoader.hpp"
 #include "ppclab/ppc/UnicornBackend.hpp"
 
 #include <charconv>
@@ -15,6 +17,7 @@
 #include <memory>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -22,497 +25,299 @@
 namespace {
 using namespace ppclab::ppc;
 
-struct DumpRequest {
-    std::uint32_t address = 0;
-    std::size_t size = 0;
-};
+struct DumpRequest { std::uint32_t address = 0; std::size_t size = 0; };
+enum class ImageKind { Unknown, Elf, MachO, Pef };
 
 std::optional<std::uint64_t> parseUnsigned(std::string_view text) {
     int base = 10;
     if (text.size() > 2 && text[0] == '0' && (text[1] == 'x' || text[1] == 'X')) {
-        text.remove_prefix(2);
-        base = 16;
+        text.remove_prefix(2); base = 16;
     }
     if (text.empty()) return std::nullopt;
     std::uint64_t value = 0;
-    const auto* begin = text.data();
-    const auto* end = text.data() + text.size();
-    auto [ptr, ec] = std::from_chars(begin, end, value, base);
-    if (ec != std::errc{} || ptr != end) return std::nullopt;
+    auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), value, base);
+    if (ec != std::errc{} || ptr != text.data() + text.size()) return std::nullopt;
     return value;
 }
 
 std::optional<double> parseDouble(std::string_view text) {
     try {
-        std::size_t consumed = 0;
-        double value = std::stod(std::string(text), &consumed);
-        if (consumed != text.size()) return std::nullopt;
-        return value;
-    } catch (...) {
-        return std::nullopt;
-    }
+        std::size_t n = 0; const double v = std::stod(std::string(text), &n);
+        if (n != text.size()) return std::nullopt; return v;
+    } catch (...) { return std::nullopt; }
 }
 
 bool splitAssignment(std::string_view text, std::string_view& left, std::string_view& right) {
     const auto pos = text.find('=');
     if (pos == std::string_view::npos || pos == 0 || pos + 1 >= text.size()) return false;
-    left = text.substr(0, pos);
-    right = text.substr(pos + 1);
-    return true;
+    left = text.substr(0, pos); right = text.substr(pos + 1); return true;
 }
 
 std::string hex32(std::uint32_t value) {
-    std::ostringstream out;
-    out << "0x" << std::hex << std::setw(8) << std::setfill('0') << value;
-    return out.str();
+    std::ostringstream out; out << "0x" << std::hex << std::setw(8) << std::setfill('0') << value; return out.str();
 }
-
 std::string hex64(std::uint64_t value) {
-    std::ostringstream out;
-    out << "0x" << std::hex << std::setw(16) << std::setfill('0') << value;
-    return out.str();
+    std::ostringstream out; out << "0x" << std::hex << std::setw(16) << std::setfill('0') << value; return out.str();
+}
+std::size_t fileSize(const std::string& path) {
+    std::ifstream in(path, std::ios::binary | std::ios::ate); if (!in) return 0;
+    const auto end = in.tellg(); return end > 0 ? static_cast<std::size_t>(end) : 0;
 }
 
-std::size_t fileSize(const std::string& path) {
-    std::ifstream in(path, std::ios::binary | std::ios::ate);
-    if (!in) return 0;
-    const auto end = in.tellg();
-    return end > 0 ? static_cast<std::size_t>(end) : 0;
+ImageKind detectImage(const std::string& path) {
+    std::ifstream in(path, std::ios::binary); unsigned char b[8]{}; in.read(reinterpret_cast<char*>(b), 8);
+    if (in.gcount() < 4) return ImageKind::Unknown;
+    if (b[0] == 0x7f && b[1] == 'E' && b[2] == 'L' && b[3] == 'F') return ImageKind::Elf;
+    if (b[0] == 'J' && b[1] == 'o' && b[2] == 'y' && b[3] == '!') return ImageKind::Pef;
+    const std::uint32_t magic = (std::uint32_t(b[0]) << 24U) | (std::uint32_t(b[1]) << 16U) |
+                                (std::uint32_t(b[2]) << 8U) | b[3];
+    if (magic == 0xfeedfaceU || magic == 0xcafebabeU) return ImageKind::MachO;
+    return ImageKind::Unknown;
 }
 
 std::unique_ptr<ExecutionBackend> makeBackend(const std::string& requested, std::string& error) {
     if (requested == "builtin") return std::make_unique<BuiltinInterpreter>();
     if (requested == "unicorn") {
-        if (!UnicornBackend::available()) {
-            error = "Unicorn backend not available in this build";
-            return {};
-        }
+        if (!UnicornBackend::available()) { error = "Unicorn backend not available in this build"; return {}; }
         return std::make_unique<UnicornBackend>();
     }
-    if (requested == "auto") {
-        if (UnicornBackend::available()) return std::make_unique<UnicornBackend>();
-        return std::make_unique<BuiltinInterpreter>();
-    }
-    error = "unknown backend: " + requested;
-    return {};
+    if (requested == "auto") return UnicornBackend::available()
+        ? std::unique_ptr<ExecutionBackend>(std::make_unique<UnicornBackend>())
+        : std::unique_ptr<ExecutionBackend>(std::make_unique<BuiltinInterpreter>());
+    error = "unknown backend: " + requested; return {};
 }
 
 void usage() {
-    std::cout << R"(PPC Lab 0.2.0 — deterministic PowerPC execution and reverse-engineering harness
+    std::cout << R"(PPC Lab 0.3.0 — PowerPC binary intake, execution and reverse-engineering harness
 
 Usage:
   ppc-lab selftest [--backend auto|builtin|unicorn]
-  ppc-lab elf-info FILE
-  ppc-lab disasm (--code FILE [--base HEX] | --elf FILE)
-      [--start HEX] [--count N]
-  ppc-lab call (--code FILE | --elf FILE) [--data FILE]
-      [--entry HEX | --transition-vector HEX]
+  ppc-lab image-info FILE
+  ppc-lab elf-info FILE | macho-info FILE | pef-info FILE
+  ppc-lab symbols FILE
+  ppc-lab disasm (--code FILE | --elf FILE | --macho FILE | --pef FILE)
+      [--base HEX] [--image-base HEX] [--start HEX] [--count N] [--bind NAME=ADDRESS]
+  ppc-lab call (--code FILE | --elf FILE | --macho FILE | --pef FILE) [--data FILE]
+      [--entry HEX | --entry-symbol NAME | --transition-vector HEX]
+      [--image-base HEX] [--bind NAME=ADDRESS]
       [--backend auto|builtin|unicorn]
       [--code-base HEX] [--data-base HEX] [--data-map-size N]
-      [--heap-base HEX] [--heap-size N]
-      [--stack-base HEX] [--stack-size N]
-      [--import-base HEX] [--import-size N] [--return HEX]
-      [--toc HEX] [--max-instructions N]
-      [--set rN=VALUE] [--set-f fN=VALUE]
+      [--heap-base HEX] [--heap-size N] [--stack-base HEX] [--stack-size N]
+      [--import-base HEX] [--import-size N] [--return HEX] [--toc HEX]
+      [--max-instructions N] [--set rN=VALUE] [--set-f fN=VALUE]
       [--write-u32 ADDRESS=VALUE] [--write-f32 ADDRESS=VALUE]
-      [--stub KIND@ADDRESS]
-      [--dump ADDRESS:SIZE]
-      [--trace] [--trace-range START:END]
-      [--json FILE]
+      [--stub KIND@ADDRESS] [--dump ADDRESS:SIZE]
+      [--trace] [--trace-range START:END] [--json FILE]
 
-Input formats:
-  --code FILE   raw PPC32-BE bytes mapped at --code-base (default 0x10000000)
-  --elf FILE    ELF32, big-endian, EM_PPC, fixed-address ET_EXEC image;
-                PT_LOAD segments are mapped automatically and e_entry is used
-                unless --entry or --transition-vector overrides it
+Native intake:
+  ELF32 PPC BE: ET_EXEC, ET_DYN and ET_REL + symbols/common PPC relocations
+  Mach-O PPC32 BE: thin/fat MH_OBJECT/MH_EXECUTE/MH_DYLIB/MH_BUNDLE
+  PEF/CFM PPC: instantiated sections, pidata, imports/exports, relocation bytecode
 
-Built-in stub kinds:
-  pow cos sqrt sin exp blockmove
-
-Default deterministic auxiliary map (all configurable):
-  raw data 0x20000000
-  imports  0x30000000
-  heap     0x40000000
-  stack    0x70000000
-  return   0x7fff0000
-
-Examples:
-  ppc-lab selftest --backend builtin
-  ppc-lab elf-info firmware.elf
-  ppc-lab disasm --elf firmware.elf --count 24
-  ppc-lab call --elf firmware.elf --max-instructions 100000
-  ppc-lab call --code code.bin --entry 0x10000000 --set r3=5 --dump 0x40000000:64
-
-PPC Lab contains no target-program code. Target binaries, relocated sections and
-firmware images are always supplied externally at runtime.
+Undefined imports are target policy, not core policy: bind them explicitly with
+--bind NAME=ADDRESS and optionally attach behavioral --stub KIND@ADDRESS traps.
 )";
 }
 
 void printCpu(const CpuState& cpu) {
-    std::cout << "pc=" << hex32(cpu.pc)
-              << " lr=" << hex32(cpu.lr)
-              << " ctr=" << hex32(cpu.ctr)
-              << " cr=" << hex32(cpu.cr) << '\n';
+    std::cout << "pc=" << hex32(cpu.pc) << " lr=" << hex32(cpu.lr)
+              << " ctr=" << hex32(cpu.ctr) << " cr=" << hex32(cpu.cr) << '\n';
     for (unsigned row = 0; row < 4; ++row) {
         for (unsigned col = 0; col < 8; ++col) {
             const unsigned r = row * 8 + col;
-            std::cout << 'r' << std::setw(2) << std::setfill('0') << r << '='
-                      << hex32(cpu.gpr[r]) << (col == 7 ? '\n' : ' ');
+            std::cout << 'r' << std::setw(2) << std::setfill('0') << r << '=' << hex32(cpu.gpr[r])
+                      << (col == 7 ? '\n' : ' ');
         }
     }
     std::cout << std::setfill(' ');
 }
 
 std::string dumpHex(const Memory& memory, std::uint32_t address, std::size_t size) {
-    std::vector<std::uint8_t> bytes(size);
-    if (!memory.readBytes(address, bytes)) return "<unreadable>";
+    std::vector<std::uint8_t> bytes(size); if (!memory.readBytes(address, bytes)) return "<unreadable>";
     std::ostringstream out;
     for (std::size_t i = 0; i < bytes.size(); ++i) {
-        if (i) out << ' ';
-        out << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(bytes[i]);
+        if (i) out << ' '; out << std::hex << std::setw(2) << std::setfill('0') << unsigned(bytes[i]);
     }
     return out.str();
 }
-
 std::optional<std::uint64_t> dumpFnv1a64(const Memory& memory, std::uint32_t address, std::size_t size) {
-    std::vector<std::uint8_t> bytes(size);
-    if (!memory.readBytes(address, bytes)) return std::nullopt;
+    std::vector<std::uint8_t> bytes(size); if (!memory.readBytes(address, bytes)) return std::nullopt;
     std::uint64_t hash = 14695981039346656037ULL;
-    for (const auto byte : bytes) {
-        hash ^= static_cast<std::uint64_t>(byte);
-        hash *= 1099511628211ULL;
-    }
-    return hash;
+    for (auto byte : bytes) { hash ^= byte; hash *= 1099511628211ULL; } return hash;
 }
 
-void writeJson(const std::string& path,
-               const std::string& backend,
-               const CallResult& result,
-               const std::vector<DumpRequest>& dumps) {
-    std::ofstream out(path);
-    if (!out) throw std::runtime_error("cannot open JSON output: " + path);
-    out << "{\n"
-        << "  \"schema\": \"ppc-lab-result-v1\",\n"
-        << "  \"backend\": \"" << backend << "\",\n"
-        << "  \"stop_reason\": \"" << stopReasonName(result.execution.reason) << "\",\n"
-        << "  \"instructions\": " << result.execution.instructions << ",\n"
-        << "  \"pc\": \"" << hex32(result.execution.pc) << "\",\n"
-        << "  \"instruction\": \"" << hex32(result.execution.instruction) << "\",\n"
-        << "  \"registers\": {\n";
-    for (unsigned i = 0; i < 32; ++i) {
-        out << "    \"r" << i << "\": \"" << hex32(result.cpu.gpr[i]) << "\""
-            << (i == 31 ? '\n' : ',') << (i == 31 ? "" : "\n");
-    }
-    out << "  },\n"
-        << "  \"lr\": \"" << hex32(result.cpu.lr) << "\",\n"
-        << "  \"ctr\": \"" << hex32(result.cpu.ctr) << "\",\n"
-        << "  \"cr\": \"" << hex32(result.cpu.cr) << "\",\n"
-        << "  \"dumps\": [\n";
+void writeJson(const std::string& path, const std::string& backend,
+               const CallResult& result, const std::vector<DumpRequest>& dumps) {
+    std::ofstream out(path); if (!out) throw std::runtime_error("cannot open JSON output: " + path);
+    out << "{\n  \"schema\": \"ppc-lab-result-v1\",\n  \"backend\": \"" << backend
+        << "\",\n  \"stop_reason\": \"" << stopReasonName(result.execution.reason)
+        << "\",\n  \"instructions\": " << result.execution.instructions
+        << ",\n  \"pc\": \"" << hex32(result.execution.pc) << "\",\n  \"instruction\": \""
+        << hex32(result.execution.instruction) << "\",\n  \"registers\": {\n";
+    for (unsigned i = 0; i < 32; ++i)
+        out << "    \"r" << i << "\": \"" << hex32(result.cpu.gpr[i]) << "\"" << (i == 31 ? '\n' : ',') << (i == 31 ? "" : "\n");
+    out << "  },\n  \"lr\": \"" << hex32(result.cpu.lr) << "\",\n  \"ctr\": \"" << hex32(result.cpu.ctr)
+        << "\",\n  \"cr\": \"" << hex32(result.cpu.cr) << "\",\n  \"dumps\": [\n";
     for (std::size_t i = 0; i < dumps.size(); ++i) {
         const auto fnv = dumpFnv1a64(result.memory, dumps[i].address, dumps[i].size);
-        out << "    {\"address\": \"" << hex32(dumps[i].address)
-            << "\", \"size\": " << dumps[i].size
-            << ", \"fnv1a64\": \"" << (fnv ? hex64(*fnv) : std::string("unreadable"))
-            << "\", \"hex\": \"" << dumpHex(result.memory, dumps[i].address, dumps[i].size) << "\"}"
-            << (i + 1 == dumps.size() ? '\n' : ',') << (i + 1 == dumps.size() ? "" : "\n");
+        out << "    {\"address\": \"" << hex32(dumps[i].address) << "\", \"size\": " << dumps[i].size
+            << ", \"fnv1a64\": \"" << (fnv ? hex64(*fnv) : "unreadable") << "\", \"hex\": \""
+            << dumpHex(result.memory, dumps[i].address, dumps[i].size) << "\"}" << (i + 1 == dumps.size() ? '\n' : ',') << (i + 1 == dumps.size() ? "" : "\n");
     }
     out << "  ]\n}\n";
 }
 
 int stopExitCode(StopReason reason) {
     switch (reason) {
-    case StopReason::Returned: return 0;
-    case StopReason::UnsupportedInstruction: return 2;
-    case StopReason::MemoryFault: return 3;
-    case StopReason::ImportTrap: return 4;
-    case StopReason::InstructionLimit: return 5;
-    case StopReason::InvalidConfiguration: return 6;
-    case StopReason::BackendError: return 7;
-    }
-    return 7;
+    case StopReason::Returned: return 0; case StopReason::UnsupportedInstruction: return 2;
+    case StopReason::MemoryFault: return 3; case StopReason::ImportTrap: return 4;
+    case StopReason::InstructionLimit: return 5; case StopReason::InvalidConfiguration: return 6;
+    case StopReason::BackendError: return 7; } return 7;
 }
 
-int commandElfInfo(int argc, char** argv) {
-    if (argc != 3) {
-        std::cerr << "usage: ppc-lab elf-info FILE\n";
-        return 1;
+void printSymbols(const std::vector<ImageSymbol>& symbols) {
+    for (const auto& s : symbols) {
+        std::cout << hex32(s.value) << ' ' << (s.imported ? 'U' : (s.defined ? 'D' : '?'))
+                  << " sec=" << s.sectionIndex << " type=" << unsigned(s.type) << ' ' << s.name << '\n';
     }
-    Elf32ImageInfo info{};
-    std::string error;
-    if (!Elf32Loader::inspectFile(argv[2], info, error)) {
-        std::cerr << "elf-info: " << error << '\n';
-        return 1;
-    }
-    std::cout << "PPC Lab ELF32 PowerPC image\n"
-              << "file=" << argv[2] << '\n'
-              << "type=" << info.type << " (ET_EXEC)\n"
-              << "machine=" << info.machine << " (EM_PPC)\n"
-              << "entry=" << hex32(info.entry) << '\n'
-              << "flags=" << hex32(info.flags) << '\n'
-              << "load_segments=" << info.loadSegments.size() << '\n';
-    for (const auto& segment : info.loadSegments) {
-        std::cout << "  [" << segment.index << "] " << elf32SegmentFlags(segment.flags)
-                  << " vaddr=" << hex32(segment.virtualAddress)
-                  << " paddr=" << hex32(segment.physicalAddress)
-                  << " file_off=" << hex32(segment.fileOffset)
-                  << " filesz=" << hex32(segment.fileSize)
-                  << " memsz=" << hex32(segment.memorySize)
-                  << " align=" << hex32(segment.alignment) << '\n';
-    }
+}
+
+int printElfInfo(const std::string& file) {
+    Elf32ImageInfo info{}; std::string error;
+    if (!Elf32Loader::inspectFile(file, info, error)) { std::cerr << "elf-info: " << error << '\n'; return 1; }
+    std::cout << "format=ELF32-PPC-BE\ntype=" << info.type << " (" << elf32TypeName(info.type) << ")\n"
+              << "machine=" << info.machine << " (EM_PPC)\nentry=" << hex32(info.originalEntry)
+              << "\nsegments=" << info.loadSegments.size() << "\nsections=" << info.sections.size()
+              << "\nsymbols=" << info.symbols.size() << "\nrelocations=" << info.relocationCount << '\n';
+    for (const auto& s : info.loadSegments)
+        std::cout << "  PT_LOAD[" << s.index << "] " << elf32SegmentFlags(s.flags) << " vaddr=" << hex32(s.virtualAddress)
+                  << " filesz=" << hex32(s.fileSize) << " memsz=" << hex32(s.memorySize) << '\n';
     return 0;
 }
 
-int commandDisasm(int argc, char** argv) {
-    std::string codePath;
-    std::string elfPath;
-    std::uint32_t base = 0x10000000U;
-    std::optional<std::uint32_t> start;
-    std::size_t count = 32;
+int printMachOInfo(const std::string& file) {
+    MachOImageInfo info{}; std::string error;
+    if (!MachOLoader::inspectFile(file, info, error)) { std::cerr << "macho-info: " << error << '\n'; return 1; }
+    std::cout << "format=Mach-O-PPC32-BE\ncontainer=" << (info.fatContainer ? "fat" : "thin")
+              << "\ntype=" << info.fileType << " (" << machoFileTypeName(info.fileType) << ")\n"
+              << "entry=" << hex32(info.entry) << "\nsegments=" << info.segments.size()
+              << "\nsections=" << info.sections.size() << "\nsymbols=" << info.symbols.size() << '\n';
+    for (const auto& s : info.segments)
+        std::cout << "  " << s.name << ' ' << machoVmProtection(s.initProt) << " vmaddr=" << hex32(s.vmAddress)
+                  << " vmsize=" << hex32(s.vmSize) << " filesz=" << hex32(s.fileSize) << '\n';
+    return 0;
+}
 
+int printPefInfo(const std::string& file) {
+    PefImageInfo info{}; std::string error;
+    if (!PefLoader::inspectFile(file, info, error)) { std::cerr << "pef-info: " << error << '\n'; return 1; }
+    std::cout << "format=PEF-CFM-PPC\narchitecture=pwpc\nversion=" << info.formatVersion
+              << "\nsections=" << info.sectionCount << "\ninstantiated=" << info.instantiatedSectionCount
+              << "\nmain=" << info.mainSection << ':' << hex32(info.mainOffset)
+              << "\nimports=" << info.importCount << "\nrelocation_sections=" << info.relocationSectionCount
+              << "\nrelocation_chunks=" << info.relocationChunkCount << "\nsymbols=" << info.symbols.size() << '\n';
+    for (const auto& s : info.sections)
+        std::cout << "  [" << s.index << "] " << pefSectionKindName(s.kind) << " total=" << hex32(s.totalLength)
+                  << " packed=" << hex32(s.containerLength) << " align=2^" << unsigned(s.alignmentPower) << '\n';
+    return 0;
+}
+
+int commandInfo(int argc, char** argv, std::optional<ImageKind> forced) {
+    if (argc != 3) { std::cerr << "info command requires FILE\n"; return 1; }
+    const std::string file = argv[2]; const ImageKind kind = forced.value_or(detectImage(file));
+    if (kind == ImageKind::Elf) return printElfInfo(file);
+    if (kind == ImageKind::MachO) return printMachOInfo(file);
+    if (kind == ImageKind::Pef) return printPefInfo(file);
+    std::cerr << "image-info: unknown input format\n"; return 1;
+}
+
+int commandSymbols(int argc, char** argv) {
+    if (argc != 3) { std::cerr << "usage: ppc-lab symbols FILE\n"; return 1; }
+    const std::string file = argv[2]; std::string error;
+    switch (detectImage(file)) {
+    case ImageKind::Elf: { Elf32ImageInfo i{}; if (!Elf32Loader::inspectFile(file, i, error)) break; printSymbols(i.symbols); return 0; }
+    case ImageKind::MachO: { MachOImageInfo i{}; if (!MachOLoader::inspectFile(file, i, error)) break; printSymbols(i.symbols); return 0; }
+    case ImageKind::Pef: { PefImageInfo i{}; if (!PefLoader::inspectFile(file, i, error)) break; printSymbols(i.symbols); return 0; }
+    default: error = "unknown input format"; break;
+    }
+    std::cerr << "symbols: " << error << '\n'; return 1;
+}
+
+bool parseBinding(const std::string& text, SymbolBinding& binding) {
+    std::string_view left, right; if (!splitAssignment(text, left, right)) return false;
+    const auto address = parseUnsigned(right); if (!address || *address > 0xffffffffULL) return false;
+    binding.name = std::string(left); binding.address = static_cast<std::uint32_t>(*address); return true;
+}
+
+int commandDisasm(int argc, char** argv) {
+    ImageConfig image{}; std::optional<std::uint32_t> start; std::size_t count = 32;
     for (int i = 2; i < argc; ++i) {
         const std::string arg = argv[i];
-        auto needValue = [&](const char* option) -> std::string {
-            if (i + 1 >= argc) throw std::runtime_error(std::string(option) + " requires a value");
-            return argv[++i];
-        };
+        auto need = [&](const char* opt) { if (i + 1 >= argc) throw std::runtime_error(std::string(opt)+" requires a value"); return std::string(argv[++i]); };
         try {
-            if (arg == "--code") codePath = needValue("--code");
-            else if (arg == "--elf") elfPath = needValue("--elf");
-            else if (arg == "--base" || arg == "--start" || arg == "--count") {
-                const auto text = needValue(arg.c_str());
-                const auto value = parseUnsigned(text);
-                if (!value) throw std::runtime_error("invalid numeric value: " + text);
-                if (arg == "--base") base = static_cast<std::uint32_t>(*value);
-                else if (arg == "--start") start = static_cast<std::uint32_t>(*value);
-                else count = static_cast<std::size_t>(*value);
-            } else {
-                throw std::runtime_error("unknown disasm option: " + arg);
-            }
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
-            return 1;
-        }
+            if (arg == "--code") image.codePath = need("--code");
+            else if (arg == "--elf") image.elfPath = need("--elf");
+            else if (arg == "--macho") image.machoPath = need("--macho");
+            else if (arg == "--pef") image.pefPath = need("--pef");
+            else if (arg == "--bind") { SymbolBinding b{}; auto t=need("--bind"); if(!parseBinding(t,b)) throw std::runtime_error("expected --bind NAME=ADDRESS"); image.symbolBindings.push_back(std::move(b)); }
+            else if (arg == "--base" || arg == "--image-base" || arg == "--start" || arg == "--count") {
+                const auto t=need(arg.c_str()); const auto v=parseUnsigned(t); if(!v) throw std::runtime_error("invalid numeric value: "+t);
+                if(arg=="--base") image.codeBase=static_cast<std::uint32_t>(*v); else if(arg=="--image-base") image.imageBase=static_cast<std::uint32_t>(*v);
+                else if(arg=="--start") start=static_cast<std::uint32_t>(*v); else count=static_cast<std::size_t>(*v);
+            } else throw std::runtime_error("unknown disasm option: "+arg);
+        } catch(const std::exception& e){ std::cerr<<e.what()<<'\n'; return 1; }
     }
-
-    if (codePath.empty() == elfPath.empty()) {
-        std::cerr << "disasm requires exactly one of --code or --elf\n";
-        return 1;
-    }
-    if (count == 0) {
-        std::cerr << "--count must be greater than zero\n";
-        return 1;
-    }
-
-    Memory memory;
-    std::uint32_t pc = base;
-    if (!elfPath.empty()) {
-        Elf32ImageInfo info{};
-        std::string error;
-        if (!Elf32Loader::loadFile(elfPath, memory, info, error)) {
-            std::cerr << "disasm: " << error << '\n';
-            return 1;
-        }
-        pc = start.value_or(info.entry);
-    } else {
-        const auto size = fileSize(codePath);
-        if (size == 0 || !memory.loadFile(base, codePath, size,
-                                         MemoryPerm::Read | MemoryPerm::Execute, "disasm:raw")) {
-            std::cerr << "disasm: cannot map raw code file\n";
-            return 1;
-        }
-        pc = start.value_or(base);
-    }
-
-    for (std::size_t i = 0; i < count; ++i, pc += 4U) {
-        std::uint32_t instruction = 0;
-        if (!memory.executable(pc, 4) || !memory.read32(pc, instruction)) {
-            std::cerr << "disasm: stopped at " << hex32(pc)
-                      << " (not executable/mapped)\n";
-            return i == 0 ? 1 : 0;
-        }
-        std::cout << hex32(pc) << "  " << hex32(instruction) << "  "
-                  << BuiltinInterpreter::disassemble(pc, instruction) << '\n';
-    }
+    const unsigned inputs=!image.codePath.empty()+!image.elfPath.empty()+!image.machoPath.empty()+!image.pefPath.empty();
+    if(inputs!=1 || count==0){ std::cerr<<"disasm requires exactly one input and --count > 0\n"; return 1; }
+    Memory memory; std::uint32_t pc=image.codeBase; std::string error;
+    if(!image.codePath.empty()) { const auto sz=fileSize(image.codePath); if(sz==0||!memory.loadFile(image.codeBase,image.codePath,sz,MemoryPerm::Read|MemoryPerm::Execute,"disasm:raw")){std::cerr<<"disasm: cannot map raw code\n";return 1;} pc=start.value_or(image.codeBase); }
+    else if(!image.elfPath.empty()) { Elf32ImageInfo i{}; if(!Elf32Loader::loadFile(image.elfPath,memory,i,error,image.imageBase,image.symbolBindings)){std::cerr<<"disasm: "<<error<<'\n';return 1;} pc=start.value_or(i.entry); }
+    else if(!image.machoPath.empty()) { MachOImageInfo i{}; if(!MachOLoader::loadFile(image.machoPath,memory,i,error,image.imageBase,image.symbolBindings)){std::cerr<<"disasm: "<<error<<'\n';return 1;} pc=start.value_or(i.entry); }
+    else { PefImageInfo i{}; if(!PefLoader::loadFile(image.pefPath,memory,i,error,image.imageBase,image.symbolBindings)){std::cerr<<"disasm: "<<error<<'\n';return 1;} pc=start.value_or(i.entry); }
+    if(pc==0){ for(const auto& r:memory.regions()) if(hasPerm(r.perms,MemoryPerm::Execute)){pc=r.base;break;} }
+    if(pc==0){std::cerr<<"disasm: no executable entry/region\n";return 1;}
+    for(std::size_t i=0;i<count;++i,pc+=4U){std::uint32_t ins=0;if(!memory.executable(pc,4)||!memory.read32(pc,ins)){std::cerr<<"disasm: stopped at "<<hex32(pc)<<" (not executable/mapped)\n";return i==0?1:0;} std::cout<<hex32(pc)<<"  "<<hex32(ins)<<"  "<<BuiltinInterpreter::disassemble(pc,ins)<<'\n';}
     return 0;
 }
 
 } // namespace
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        usage();
-        return 1;
-    }
+    if (argc < 2) { usage(); return 1; }
     const std::string command = argv[1];
-
-    if (command == "--version" || command == "version") {
-        std::cout << "PPC Lab 0.2.0\n";
-        return 0;
-    }
-
+    if (command == "--version" || command == "version") { std::cout << "PPC Lab 0.3.0\n"; return 0; }
     if (command == "selftest") {
-        std::string backendName = "auto";
-        for (int i = 2; i < argc; ++i) {
-            const std::string arg = argv[i];
-            if (arg == "--backend" && i + 1 < argc) backendName = argv[++i];
-            else {
-                std::cerr << "unknown selftest option: " << arg << '\n';
-                return 1;
-            }
-        }
-        std::string error;
-        auto backend = makeBackend(backendName, error);
-        if (!backend) {
-            std::cerr << error << '\n';
-            return 7;
-        }
-        const auto result = runMicrotests(*backend);
-        std::cout << result.report;
-        return result.passed ? 0 : 1;
+        std::string backendName="auto"; for(int i=2;i<argc;++i){std::string a=argv[i];if(a=="--backend"&&i+1<argc)backendName=argv[++i];else{std::cerr<<"unknown selftest option: "<<a<<'\n';return 1;}}
+        std::string error; auto backend=makeBackend(backendName,error); if(!backend){std::cerr<<error<<'\n';return 7;} const auto r=runMicrotests(*backend); std::cout<<r.report; return r.passed?0:1;
     }
+    if(command=="image-info") return commandInfo(argc,argv,std::nullopt);
+    if(command=="elf-info") return commandInfo(argc,argv,ImageKind::Elf);
+    if(command=="macho-info") return commandInfo(argc,argv,ImageKind::MachO);
+    if(command=="pef-info") return commandInfo(argc,argv,ImageKind::Pef);
+    if(command=="symbols") return commandSymbols(argc,argv);
+    if(command=="disasm") return commandDisasm(argc,argv);
+    if(command!="call"){usage();return 1;}
 
-    if (command == "elf-info") return commandElfInfo(argc, argv);
-    if (command == "disasm") return commandDisasm(argc, argv);
-
-    if (command != "call") {
-        usage();
-        return 1;
+    CallConfig config{}; std::string backendName="auto",jsonPath; std::vector<DumpRequest>dumps;
+    for(int i=2;i<argc;++i){const std::string arg=argv[i];auto need=[&](const char*o){if(i+1>=argc)throw std::runtime_error(std::string(o)+" requires a value");return std::string(argv[++i]);};
+        try{
+            if(arg=="--backend")backendName=need("--backend"); else if(arg=="--code")config.image.codePath=need("--code"); else if(arg=="--elf")config.image.elfPath=need("--elf"); else if(arg=="--macho")config.image.machoPath=need("--macho"); else if(arg=="--pef")config.image.pefPath=need("--pef"); else if(arg=="--data")config.image.dataPath=need("--data"); else if(arg=="--entry-symbol")config.entrySymbol=need("--entry-symbol"); else if(arg=="--bind"){SymbolBinding b{};auto t=need("--bind");if(!parseBinding(t,b))throw std::runtime_error("expected --bind NAME=ADDRESS");config.image.symbolBindings.push_back(std::move(b));}
+            else if(arg=="--trace")config.execution.trace=true; else if(arg=="--json")jsonPath=need("--json");
+            else if(arg=="--entry"||arg=="--transition-vector"||arg=="--toc"||arg=="--image-base"||arg=="--code-base"||arg=="--data-base"||arg=="--data-map-size"||arg=="--heap-base"||arg=="--heap-size"||arg=="--stack-base"||arg=="--stack-size"||arg=="--import-base"||arg=="--import-size"||arg=="--return"||arg=="--max-instructions"){
+                auto t=need(arg.c_str());auto v=parseUnsigned(t);if(!v)throw std::runtime_error("invalid numeric value: "+t);
+                if(arg=="--entry")config.entry=std::uint32_t(*v);else if(arg=="--transition-vector")config.transitionVector=std::uint32_t(*v);else if(arg=="--toc")config.toc=std::uint32_t(*v);else if(arg=="--image-base")config.image.imageBase=std::uint32_t(*v);else if(arg=="--code-base")config.image.codeBase=std::uint32_t(*v);else if(arg=="--data-base")config.image.dataBase=std::uint32_t(*v);else if(arg=="--data-map-size")config.image.dataMapSize=std::size_t(*v);else if(arg=="--heap-base")config.image.heapBase=std::uint32_t(*v);else if(arg=="--heap-size")config.image.heapSize=std::size_t(*v);else if(arg=="--stack-base")config.image.stackBase=std::uint32_t(*v);else if(arg=="--stack-size")config.image.stackSize=std::size_t(*v);else if(arg=="--import-base")config.execution.importBase=std::uint32_t(*v);else if(arg=="--import-size")config.execution.importSize=std::uint32_t(*v);else if(arg=="--return")config.execution.returnAddress=std::uint32_t(*v);else config.execution.instructionLimit=*v;
+            } else if(arg=="--stub"){auto t=need("--stub");auto p=t.find('@');if(p==std::string::npos||p==0||p+1>=t.size())throw std::runtime_error("expected --stub KIND@ADDRESS");ImportStubKind k{};if(!parseImportStubKind(std::string_view(t).substr(0,p),k))throw std::runtime_error("unknown stub kind: "+t.substr(0,p));auto a=parseUnsigned(std::string_view(t).substr(p+1));if(!a||*a>0xffffffffULL)throw std::runtime_error("invalid stub address");config.execution.importStubs.push_back({std::uint32_t(*a),k,t.substr(0,p)});
+            } else if(arg=="--set"){auto t=need("--set");std::string_view l,r;if(!splitAssignment(t,l,r)||l.size()<2||l[0]!='r')throw std::runtime_error("expected --set rN=VALUE");auto reg=parseUnsigned(l.substr(1)),v=parseUnsigned(r);if(!reg||!v||*reg>=32)throw std::runtime_error("invalid GPR assignment");config.registers.push_back({unsigned(*reg),std::uint32_t(*v)});
+            } else if(arg=="--set-f"){auto t=need("--set-f");std::string_view l,r;if(!splitAssignment(t,l,r)||l.size()<2||l[0]!='f')throw std::runtime_error("expected --set-f fN=VALUE");auto reg=parseUnsigned(l.substr(1));auto v=parseDouble(r);if(!reg||!v||*reg>=32)throw std::runtime_error("invalid FPR assignment");config.floatRegisters.push_back({unsigned(*reg),*v});
+            } else if(arg=="--write-u32"){auto t=need("--write-u32");std::string_view l,r;if(!splitAssignment(t,l,r))throw std::runtime_error("expected ADDRESS=VALUE");auto a=parseUnsigned(l),v=parseUnsigned(r);if(!a||!v)throw std::runtime_error("invalid --write-u32");config.writes32.push_back({std::uint32_t(*a),std::uint32_t(*v)});
+            } else if(arg=="--write-f32"){auto t=need("--write-f32");std::string_view l,r;if(!splitAssignment(t,l,r))throw std::runtime_error("expected ADDRESS=VALUE");auto a=parseUnsigned(l);auto v=parseDouble(r);if(!a||!v)throw std::runtime_error("invalid --write-f32");config.writesFloat.push_back({std::uint32_t(*a),float(*v)});
+            } else if(arg=="--dump"||arg=="--trace-range"){auto t=need(arg.c_str());auto p=t.find(':');if(p==std::string::npos)throw std::runtime_error("expected START:END/SIZE");auto a=parseUnsigned(std::string_view(t).substr(0,p)),b=parseUnsigned(std::string_view(t).substr(p+1));if(!a||!b)throw std::runtime_error("invalid range");if(arg=="--dump")dumps.push_back({std::uint32_t(*a),std::size_t(*b)});else config.execution.traceRange=TraceRange{std::uint32_t(*a),std::uint32_t(*b)};
+            } else throw std::runtime_error("unknown option: "+arg);
+        }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
     }
-
-    CallConfig config{};
-    std::string backendName = "auto";
-    std::string jsonPath;
-    std::vector<DumpRequest> dumps;
-
-    for (int i = 2; i < argc; ++i) {
-        const std::string arg = argv[i];
-        auto needValue = [&](const char* option) -> std::string {
-            if (i + 1 >= argc) throw std::runtime_error(std::string(option) + " requires a value");
-            return argv[++i];
-        };
-        try {
-            if (arg == "--backend") backendName = needValue("--backend");
-            else if (arg == "--code") config.image.codePath = needValue("--code");
-            else if (arg == "--elf") config.image.elfPath = needValue("--elf");
-            else if (arg == "--data") config.image.dataPath = needValue("--data");
-            else if (arg == "--trace") config.execution.trace = true;
-            else if (arg == "--json") jsonPath = needValue("--json");
-            else if (arg == "--entry" || arg == "--transition-vector" || arg == "--toc" ||
-                     arg == "--code-base" || arg == "--data-base" || arg == "--data-map-size" ||
-                     arg == "--heap-base" || arg == "--heap-size" ||
-                     arg == "--stack-base" || arg == "--stack-size" ||
-                     arg == "--import-base" || arg == "--import-size" || arg == "--return" ||
-                     arg == "--max-instructions") {
-                const auto text = needValue(arg.c_str());
-                const auto parsed = parseUnsigned(text);
-                if (!parsed) throw std::runtime_error("invalid numeric value: " + text);
-                if (arg == "--entry") config.entry = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--transition-vector") config.transitionVector = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--toc") config.toc = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--code-base") config.image.codeBase = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--data-base") config.image.dataBase = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--data-map-size") config.image.dataMapSize = static_cast<std::size_t>(*parsed);
-                else if (arg == "--heap-base") config.image.heapBase = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--heap-size") config.image.heapSize = static_cast<std::size_t>(*parsed);
-                else if (arg == "--stack-base") config.image.stackBase = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--stack-size") config.image.stackSize = static_cast<std::size_t>(*parsed);
-                else if (arg == "--import-base") config.execution.importBase = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--import-size") config.execution.importSize = static_cast<std::uint32_t>(*parsed);
-                else if (arg == "--return") config.execution.returnAddress = static_cast<std::uint32_t>(*parsed);
-                else config.execution.instructionLimit = *parsed;
-            } else if (arg == "--stub") {
-                const auto text = needValue("--stub");
-                const auto pos = text.find('@');
-                if (pos == std::string::npos || pos == 0 || pos + 1 >= text.size())
-                    throw std::runtime_error("expected --stub KIND@ADDRESS");
-                ImportStubKind kind{};
-                if (!parseImportStubKind(std::string_view(text).substr(0, pos), kind))
-                    throw std::runtime_error("unknown stub kind: " + text.substr(0, pos));
-                const auto address = parseUnsigned(std::string_view(text).substr(pos + 1));
-                if (!address || *address > 0xffffffffULL)
-                    throw std::runtime_error("invalid stub address");
-                config.execution.importStubs.push_back({static_cast<std::uint32_t>(*address), kind,
-                                                        text.substr(0, pos)});
-            } else if (arg == "--set") {
-                const auto text = needValue("--set");
-                std::string_view left, right;
-                if (!splitAssignment(text, left, right) || left.size() < 2 || left[0] != 'r')
-                    throw std::runtime_error("expected --set rN=VALUE");
-                const auto reg = parseUnsigned(left.substr(1));
-                const auto value = parseUnsigned(right);
-                if (!reg || !value || *reg >= 32) throw std::runtime_error("invalid GPR assignment");
-                config.registers.push_back({static_cast<unsigned>(*reg), static_cast<std::uint32_t>(*value)});
-            } else if (arg == "--set-f") {
-                const auto text = needValue("--set-f");
-                std::string_view left, right;
-                if (!splitAssignment(text, left, right) || left.size() < 2 || left[0] != 'f')
-                    throw std::runtime_error("expected --set-f fN=VALUE");
-                const auto reg = parseUnsigned(left.substr(1));
-                const auto value = parseDouble(right);
-                if (!reg || !value || *reg >= 32) throw std::runtime_error("invalid FPR assignment");
-                config.floatRegisters.push_back({static_cast<unsigned>(*reg), *value});
-            } else if (arg == "--write-u32") {
-                const auto text = needValue("--write-u32");
-                std::string_view left, right;
-                if (!splitAssignment(text, left, right)) throw std::runtime_error("expected ADDRESS=VALUE");
-                const auto address = parseUnsigned(left), value = parseUnsigned(right);
-                if (!address || !value) throw std::runtime_error("invalid --write-u32");
-                config.writes32.push_back({static_cast<std::uint32_t>(*address), static_cast<std::uint32_t>(*value)});
-            } else if (arg == "--write-f32") {
-                const auto text = needValue("--write-f32");
-                std::string_view left, right;
-                if (!splitAssignment(text, left, right)) throw std::runtime_error("expected ADDRESS=VALUE");
-                const auto address = parseUnsigned(left);
-                const auto value = parseDouble(right);
-                if (!address || !value) throw std::runtime_error("invalid --write-f32");
-                config.writesFloat.push_back({static_cast<std::uint32_t>(*address), static_cast<float>(*value)});
-            } else if (arg == "--dump" || arg == "--trace-range") {
-                const auto text = needValue(arg.c_str());
-                const auto pos = text.find(':');
-                if (pos == std::string::npos) throw std::runtime_error("expected START:END/SIZE");
-                const auto first = parseUnsigned(std::string_view(text).substr(0, pos));
-                const auto second = parseUnsigned(std::string_view(text).substr(pos + 1));
-                if (!first || !second) throw std::runtime_error("invalid range");
-                if (arg == "--dump") dumps.push_back({static_cast<std::uint32_t>(*first), static_cast<std::size_t>(*second)});
-                else config.execution.traceRange = TraceRange{static_cast<std::uint32_t>(*first), static_cast<std::uint32_t>(*second)};
-            } else {
-                throw std::runtime_error("unknown option: " + arg);
-            }
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
-            return 1;
-        }
-    }
-
-    std::string backendError;
-    auto backend = makeBackend(backendName, backendError);
-    if (!backend) {
-        std::cerr << backendError << '\n';
-        return 7;
-    }
-
-    const auto result = CallHarness::run(config, *backend);
-    std::cout << "PPC Lab\n"
-              << "backend=" << backend->name() << '\n'
-              << "stop=" << stopReasonName(result.execution.reason) << '\n'
-              << "instructions=" << result.execution.instructions << '\n'
-              << "pc=" << hex32(result.execution.pc) << '\n';
-    if (!result.execution.message.empty()) std::cout << "message=" << result.execution.message << '\n';
-    printCpu(result.cpu);
-    for (const auto& dump : dumps) {
-        const auto fnv = dumpFnv1a64(result.memory, dump.address, dump.size);
-        std::cout << "dump " << hex32(dump.address) << ':' << dump.size
-                  << " fnv1a64=" << (fnv ? hex64(*fnv) : std::string("unreadable")) << "  "
-                  << dumpHex(result.memory, dump.address, dump.size) << '\n';
-    }
-    if (!jsonPath.empty()) {
-        try {
-            writeJson(jsonPath, backend->name(), result, dumps);
-            std::cout << "json=" << jsonPath << '\n';
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
-            return 1;
-        }
-    }
+    std::string be;auto backend=makeBackend(backendName,be);if(!backend){std::cerr<<be<<'\n';return 7;}const auto result=CallHarness::run(config,*backend);
+    std::cout<<"PPC Lab\nbackend="<<backend->name()<<"\nstop="<<stopReasonName(result.execution.reason)<<"\ninstructions="<<result.execution.instructions<<"\npc="<<hex32(result.execution.pc)<<'\n';if(!result.execution.message.empty())std::cout<<"message="<<result.execution.message<<'\n';printCpu(result.cpu);
+    for(const auto&d:dumps){auto f=dumpFnv1a64(result.memory,d.address,d.size);std::cout<<"dump "<<hex32(d.address)<<':'<<d.size<<" fnv1a64="<<(f?hex64(*f):"unreadable")<<"  "<<dumpHex(result.memory,d.address,d.size)<<'\n';}
+    if(!jsonPath.empty())try{writeJson(jsonPath,backend->name(),result,dumps);std::cout<<"json="<<jsonPath<<'\n';}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
     return stopExitCode(result.execution.reason);
 }

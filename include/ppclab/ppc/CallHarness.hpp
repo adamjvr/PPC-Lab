@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ppclab/ppc/Execution.hpp"
+#include "ppclab/ppc/ImageSymbol.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -15,7 +16,11 @@ namespace ppclab::ppc {
 struct ImageConfig {
     std::string codePath{};
     std::string elfPath{};
+    std::string machoPath{};
+    std::string pefPath{};
     std::string dataPath{};
+    std::uint32_t imageBase = 0x10000000U;
+    std::vector<SymbolBinding> symbolBindings{};
     std::uint32_t codeBase = 0x10000000U;
     std::uint32_t dataBase = 0x20000000U;
     std::size_t dataMapSize = 0x00200000U;
@@ -48,6 +53,7 @@ struct MemoryWriteFloat {
 struct CallConfig {
     ImageConfig image{};
     std::uint32_t entry = 0;
+    std::string entrySymbol{};
     std::uint32_t toc = 0;
     std::uint32_t transitionVector = 0;
     std::vector<RegisterAssignment> registers{};

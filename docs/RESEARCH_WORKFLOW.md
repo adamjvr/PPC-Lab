@@ -11,7 +11,7 @@ static analysis / decompiler hypothesis
 identify one callable routine or state transition
               |
               v
-prepare relocated/raw target bytes externally
+load native ELF/Mach-O/PEF or raw research bytes
               |
               v
 PPC Lab deterministic call fixture
@@ -59,17 +59,18 @@ Commit scripts, hashes, addresses, symbols, derived metadata, and validation res
 
 Profile scripts should accept external paths through environment variables or arguments.
 
-### Prefer direct ELF intake when supported
+### Prefer direct native intake when supported
 
-For fixed-address ELF32 big-endian `EM_PPC` `ET_EXEC` targets, preserve the original executable container and let PPC Lab map it directly:
+Preserve the original ELF, Mach-O, or PEF container when PPC Lab supports it:
 
 ```bash
-ppc-lab elf-info firmware.elf
-ppc-lab disasm --elf firmware.elf --count 32
-ppc-lab call --elf firmware.elf --entry 0x00101234
+ppc-lab image-info target.bin
+ppc-lab symbols target.bin
+ppc-lab disasm --pef target.bin --count 32
+ppc-lab call --pef target.bin --image-base 0x11000000
 ```
 
-This keeps segment permissions, BSS size, and executable entry metadata intact. Extract or relocate raw sections only when the original container is unsupported or the active target genuinely requires preprocessing.
+Native intake preserves container metadata and lets PPC Lab own the reusable relocation/layout work. Extract raw sections only when the original container is unsupported or the active research question genuinely benefits from a preprocessed image.
 
 ## 4. Make memory deterministic
 

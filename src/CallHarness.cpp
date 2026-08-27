@@ -2,6 +2,8 @@
 
 #include "ppclab/ppc/CallHarness.hpp"
 #include "ppclab/ppc/Elf32Loader.hpp"
+#include "ppclab/ppc/MachOLoader.hpp"
+#include "ppclab/ppc/PefLoader.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -16,6 +18,20 @@ std::size_t fileSize(const std::string& path) {
     return static_cast<std::size_t>(in.tellg());
 }
 
+bool chooseSymbolEntry(const std::string& requested,
+                       const std::vector<ImageSymbol>& symbols,
+                       std::uint32_t& entry,
+                       std::string& error) {
+    if (requested.empty()) return true;
+    const auto* symbol = findImageSymbol(symbols, requested);
+    if (!symbol || !symbol->defined) {
+        error = "entry symbol not found/resolved: " + requested;
+        return false;
+    }
+    entry = symbol->value;
+    return true;
+}
+
 } // namespace
 
 bool CallHarness::prepare(const CallConfig& config,
@@ -24,17 +40,39 @@ bool CallHarness::prepare(const CallConfig& config,
                           std::string& error) {
     const bool hasRaw = !config.image.codePath.empty();
     const bool hasElf = !config.image.elfPath.empty();
-    if (hasRaw == hasElf) {
-        error = "exactly one of --code or --elf is required";
+    const bool hasMacho = !config.image.machoPath.empty();
+    const bool hasPef = !config.image.pefPath.empty();
+    const unsigned inputCount = static_cast<unsigned>(hasRaw) + static_cast<unsigned>(hasElf) +
+                                static_cast<unsigned>(hasMacho) + static_cast<unsigned>(hasPef);
+    if (inputCount != 1) {
+        error = "exactly one of --code, --elf, --macho or --pef is required";
         return false;
     }
 
     std::uint32_t imageEntry = 0;
     if (hasElf) {
         Elf32ImageInfo elf{};
-        if (!Elf32Loader::loadFile(config.image.elfPath, memory, elf, error)) return false;
+        if (!Elf32Loader::loadFile(config.image.elfPath, memory, elf, error,
+                                   config.image.imageBase, config.image.symbolBindings)) return false;
         imageEntry = elf.entry;
+        if (!chooseSymbolEntry(config.entrySymbol, elf.symbols, imageEntry, error)) return false;
+    } else if (hasMacho) {
+        MachOImageInfo macho{};
+        if (!MachOLoader::loadFile(config.image.machoPath, memory, macho, error,
+                                   config.image.imageBase, config.image.symbolBindings)) return false;
+        imageEntry = macho.entry;
+        if (!chooseSymbolEntry(config.entrySymbol, macho.symbols, imageEntry, error)) return false;
+    } else if (hasPef) {
+        PefImageInfo pef{};
+        if (!PefLoader::loadFile(config.image.pefPath, memory, pef, error,
+                                 config.image.imageBase, config.image.symbolBindings)) return false;
+        imageEntry = pef.entry;
+        if (!chooseSymbolEntry(config.entrySymbol, pef.symbols, imageEntry, error)) return false;
     } else {
+        if (!config.entrySymbol.empty()) {
+            error = "--entry-symbol requires ELF, Mach-O or PEF symbol metadata";
+            return false;
+        }
         const auto codeSize = fileSize(config.image.codePath);
         if (codeSize == 0) {
             error = "cannot read code image: " + config.image.codePath;
@@ -100,8 +138,8 @@ bool CallHarness::prepare(const CallConfig& config,
         cpu.gpr[2] = toc;
         cpu.gpr[12] = config.transitionVector;
     } else if (cpu.pc == 0) {
-        error = hasElf ? "ELF entry is zero; supply --entry or --transition-vector"
-                       : "--entry or --transition-vector is required";
+        error = hasRaw ? "--entry or --transition-vector is required"
+                       : "image has no discoverable entry; supply --entry, --entry-symbol or --transition-vector";
         return false;
     }
 

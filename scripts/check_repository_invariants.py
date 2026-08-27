@@ -75,7 +75,10 @@ def check_target_neutral_core() -> None:
     for name in roots:
         base = ROOT / name
         if base.exists():
-            files.extend(path for path in base.rglob("*") if path.is_file())
+            files.extend(
+                path for path in base.rglob("*")
+                if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+            )
     files.extend([ROOT / "CMakeLists.txt", ROOT / ".github/workflows/ci.yml"])
 
     # These are deliberate regression sentinels for the first extracted target.

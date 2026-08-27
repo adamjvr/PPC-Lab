@@ -38,15 +38,15 @@ Good profile material:
 
 Do not commit commercial/proprietary executable bytes, ROMs, samples, firmware, or other assets unless redistribution is clearly allowed.
 
-PPC Lab's public profile should instead accept external paths. If the external target is a supported PPC ELF executable, prefer passing the original ELF directly instead of creating unnecessary raw-section copies:
+PPC Lab's public profile should instead accept external paths. Prefer the original supported native container (ELF, Mach-O, or PEF) instead of creating unnecessary raw-section copies:
 
 ```bash
-export PPC_LAB_TARGET_ELF=/absolute/path/firmware.elf
-"$PPC_LAB_BIN" elf-info "$PPC_LAB_TARGET_ELF"
-"$PPC_LAB_BIN" call --elf "$PPC_LAB_TARGET_ELF" --entry 0x00101234
+export PPC_LAB_TARGET=/absolute/path/target.bin
+"$PPC_LAB_BIN" image-info "$PPC_LAB_TARGET"
+"$PPC_LAB_BIN" call --pef "$PPC_LAB_TARGET" --image-base 0x11000000
 ```
 
-For targets that still require extraction/relocation (for example current Classic CFM work), use external raw paths:
+If a target uses a custom/unsupported container or research already produced relocated sections, external raw paths remain valid:
 
 ```bash
 export PPC_LAB_TARGET_CODE=/absolute/path/target.sec0.bin
@@ -108,7 +108,7 @@ First check relocation, data-map size, object pointers, TOC/globals, stack setup
 
 ## Promote repeated infrastructure
 
-If two or more profiles independently need the same loader or helper, that is evidence it may belong in generic PPC Lab tooling. The v0.2 ELF32 loader is the first example: file-format mechanics are generic, while target addresses/runtime assumptions remain outside the core. Promotion should remove duplication without moving target-specific knowledge into generic code.
+If multiple targets need the same runtime helper, or a file-format feature is inherently reusable, that is evidence it belongs in generic PPC Lab tooling. v0.3's ELF/Mach-O/PEF loaders are examples: file-format mechanics are generic, while target addresses, import policy, runtime services, and validation remain outside the core. Promotion should remove duplication without moving project-specific knowledge into generic code.
 
 ## Licensing
 

@@ -70,7 +70,7 @@ def main() -> int:
         assert info.returncode == 0, info.stderr
         assert "machine=20 (EM_PPC)" in info.stdout
         assert "entry=0x00100000" in info.stdout
-        assert "load_segments=2" in info.stdout
+        assert "segments=2" in info.stdout
 
         dis = run(exe, "disasm", "--elf", str(elf), "--count", "2")
         assert dis.returncode == 0, dis.stderr
@@ -84,7 +84,7 @@ def main() -> int:
 
         version = run(exe, "--version")
         assert version.returncode == 0
-        assert version.stdout.strip() == "PPC Lab 0.2.0"
+        assert version.stdout.strip() == "PPC Lab 0.3.0"
 
     print("PASS: ELF32 CLI inspect/disasm/call")
     return 0

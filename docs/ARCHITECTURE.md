@@ -1,170 +1,135 @@
-# PPC Lab architecture
+# Architecture
 
-## Goal
+PPC Lab is organized so that improving one research target improves the
+platform without making future targets inherit that project's assumptions.
 
-Provide a stable execution substrate for PowerPC reverse engineering that can survive many unrelated projects without turning into a monolithic emulator or a dependency of any one product.
+## Layer 1 — deterministic PPC machine model
 
-```text
-external target bytes
-      |
-+-------------------------------+
-| Generic image intake          |
-|  raw mapped sections          |
-|  ELF32 PPC ET_EXEC loader     |
-|  future justified loaders     |
-+---------------+---------------+
-                |
-profile-specific relocation/preparation when required
-                |
-PPC Lab deterministic memory image
-      |
-+--------------------------------+
-| CallHarness                    |
-|  CPU/ABI initialization        |
-|  map layout                    |
-|  import bindings               |
-|  return sentinel               |
-+---------------+----------------+
-                |
-+---------------v----------------+
-| ExecutionBackend               |
-|  builtin-ppc32be               |
-|  unicorn-ppc32be (optional)    |
-+---------------+----------------+
-                |
-CPU state + stop reason + memory
-                |
-JSON / trace / differential tools
-                |
-project-specific conclusions
-```
+Core components provide:
 
-## Core invariants
+- PPC32 big-endian CPU state;
+- mapped memory with explicit R/W/X permissions;
+- deterministic register/memory initialization;
+- execution stop reasons;
+- built-in interpreter;
+- optional alternative execution backends;
+- trace hooks and instruction limits.
 
-1. **Target-neutrality.** No application's hard-coded addresses belong in the reusable core.
-2. **Determinism.** Initial CPU/memory state and stop conditions must be controllable and reproducible.
-3. **Fail on unknowns.** Unsupported instructions/imports/memory accesses are explicit stops, not silent approximations.
-4. **Dependency-light baseline.** The built-in interpreter must remain usable without Unicorn or an emulated OS.
-5. **Evidence over completeness.** Implement what real research targets need and regression-test it.
-6. **Scriptability.** Headless CLI/JSON behavior is a first-class interface.
+This layer knows nothing about PEF, Mach-O, ELF, ReBirth, firmware products, or
+operating-system APIs.
 
-## Main components
+## Layer 2 — binary intake
 
-### `CpuState`
-
-Holds architectural state needed by the harness: GPRs, FPRs, PC, LR, CTR, CR, and related execution-visible state implemented by the backend.
-
-### `Memory`
-
-Owns deterministic mapped regions with read/write/execute permissions and explicit PPC big-endian accessors. The call harness uses separate conventional regions for code, data, imports, heap/scratch, stack, and return handling.
-
-### `Elf32Loader`
-
-Validates and maps fixed-address ELF32 big-endian `EM_PPC` `ET_EXEC` images. It owns reusable ELF file-format mechanics only: header validation, `PT_LOAD` bounds, permissions, BSS zero-fill, and entry-point metadata. It does not implement relocations, dynamic linking, syscalls, or an operating-system personality.
-
-### `CallHarness`
-
-Turns a raw image or supported ELF image plus call configuration into one deterministic experiment. Responsibilities include loading/mapping the image, applying register/memory initializers, resolving an explicit entry, ELF entry, or CFM transition vector, configuring the return sentinel, then invoking an execution backend.
-
-### `ExecutionBackend`
-
-Abstracts the instruction engine. PPC Lab currently provides:
-
-- `builtin-ppc32be`: dependency-free interpreter with deliberately incremental ISA coverage;
-- `unicorn-ppc32be`: optional wrapper around Unicorn when available.
-
-The rest of PPC Lab should not need to know which backend actually executed the routine.
-
-### Import traps and stubs
-
-Imported target calls live in a configured address range. Unknown imports stop execution. Generic known behaviors such as `sin`, `sqrt`, or `blockmove` can be bound to **target-supplied addresses** at invocation time.
-
-This split is critical:
+Native loaders translate file-format structures into a common research image:
 
 ```text
-core:    "I know how a generic blockmove behaves."
-profile: "this target's BlockMove entry is 0x300001c8."
+binary container
+      │
+      ├── Elf32Loader
+      ├── MachOLoader
+      └── PefLoader
+             │
+             ▼
+ mapped Memory + ImageSymbol[] + entry + relocation results
 ```
 
-### Result tooling
+Raw `--code`/`--data` remains available as an escape hatch for custom formats
+or already-relocated sections.
 
-The CLI can capture register state, stop information, memory dumps, and FNV fingerprints into a small JSON result. Python helpers compare deterministic dumps against external/native/reference outputs.
+Loaders own **format mechanics**: bounds checking, section/segment layout,
+rebasing, standard relocations, symbols, and format-provided entry metadata.
+They do not own a target's runtime environment.
 
-## Hard boundaries
+## Layer 3 — CallHarness
 
-### Core owns
+`CallHarness` provides a uniform isolated-function environment over every image
+source:
 
-- CPU state;
-- PPC big-endian memory semantics;
-- execution backends;
-- deterministic mappings;
-- reusable fixed-address executable-image loaders such as ELF32 PPC;
-- call setup;
-- CFM transition-vector mechanics;
-- generic import-stub behaviors;
-- tracing and stop reasons;
-- portable result formats.
+- exactly one image source;
+- deterministic heap and stack;
+- return trampoline;
+- entry selection;
+- optional CFM transition-vector setup;
+- GPR/FPR assignments;
+- initial memory writes;
+- import address range and runtime stub bindings;
+- execution configuration.
 
-### Profiles own
-
-- target addresses;
-- target TOC values;
-- import-address bindings;
-- symbols and routine names;
-- known-good hashes/fingerprints;
-- target-specific extraction/relocation instructions;
-- provenance/legal notes for external bytes.
-
-### External tooling may own
-
-- PEF/CFM parsing and relocation;
-- Mach-O loaders;
-- ELF relocation/dynamic-link preparation beyond the fixed-address loader;
-- firmware container extraction;
-- Ghidra/IDA/Binary Ninja integration;
-- real-PPC capture agents.
-
-These can migrate into PPC Lab when repeated reuse justifies it, but the execution core does not need to wait for them.
-
-## Default deterministic address model
-
-The CLI exposes all of these values, but conventional defaults make simple fixtures cheap:
+Entry selection is intentionally explicit and predictable:
 
 ```text
-code       0x10000000
- data      0x20000000
- imports   0x30000000
- heap      0x40000000
- stack     0x70000000
- return    0x7fff0000
+explicit transition vector
+        ↓
+explicit numeric entry
+        ↓
+explicit entry symbol
+        ↓
+loader-discovered entry
 ```
 
-These are harness conventions, not claims about a real target's original virtual memory map.
+## Layer 4 — target/runtime profile
 
-## CFM transition-vector support
+A profile may define:
 
-Classic Mac CFM code commonly passes a transition vector rather than a raw function address. PPC Lab's call harness can derive the entry point and TOC/r2 setup from the supplied vector and prepare `r12` as expected by the modeled calling pattern.
+- exact target/version hashes;
+- import address bindings;
+- symbol maps derived during research;
+- object/buffer addresses;
+- ABI/runtime assumptions;
+- fixture inputs;
+- known instruction counts/state hashes;
+- invocation scripts.
 
-CFM support here is a **call mechanism**, not a complete Classic Mac runtime.
+This is where application-specific knowledge belongs.
 
-## What PPC Lab intentionally is not
+## Symbol model
 
-- a full Classic Mac OS emulator;
-- a complete PowerPC ISA implementation;
-- a console emulator;
-- a hardware/electrical simulator;
-- a magical automatic decompiler;
-- a place to store proprietary binaries.
+All native loaders publish the shared `ImageSymbol` representation. External
+resolution uses `SymbolBinding { name, address }`. This keeps target-specific
+linking policy out of the parsers and allows future debugger/decompiler tooling
+to consume symbols without knowing which container produced them.
 
-It is the small deterministic layer between static reverse engineering and behavioral evidence.
+## Runtime stubs versus symbol bindings
 
-## Deliberate development model
+These are deliberately separate:
 
-Do not chase full ISA or OS coverage for its own sake. When a real target stops on opcode X or import Y:
+- `--bind name=address` answers **where does this imported symbol resolve?**
+- `--stub behavior@address` answers **what should happen when PPC execution
+  calls this address?**
 
-1. verify the stop;
-2. implement the smallest generally reusable capability;
-3. add a synthetic regression;
-4. rerun the target;
-5. preserve useful target evidence in its profile;
-6. return to the actual reverse-engineering project.
+That means a profile can model a target import map without forcing PPC Lab to
+pretend it has faithfully implemented the original library.
+
+## Backends
+
+The built-in interpreter is the dependency-free reference backend. Unicorn is
+an optional acceleration/cross-check backend. Backends consume the same mapped
+memory and prepared CPU state; they should not bypass loader or call-harness
+semantics.
+
+## Determinism
+
+PPC Lab defaults are intentionally stable:
+
+- image base: `0x10000000` where rebasing/layout is needed;
+- raw data base: `0x20000000`;
+- heap base: `0x40000000`;
+- stack base: `0x70000000`;
+- harness return trampoline: `0x7fff0000`.
+
+Changing addresses is supported, but recorded experiments should state the
+non-default values.
+
+## Failure is evidence
+
+The platform distinguishes unsupported instructions, memory faults, unresolved
+imports, instruction limits, and normal return. Loader errors likewise reject
+unsupported relocation/container behavior instead of silently guessing. A
+failure should identify the next piece of research infrastructure required.
+
+## Long-term invariant
+
+Generic areas (`include/`, `src/`, `tools/`, generic `scripts/`, synthetic
+`tests/`) must not acquire target-specific addresses or proprietary code. The
+repository invariant test enforces known extraction sentinels so accidental
+regression is caught in CI.

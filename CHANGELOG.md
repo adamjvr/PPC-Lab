@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-08-26 — Binary Intake Blitz
+
+- Added native PEF/CFM PowerPC parsing, section instantiation, pattern-initialized data, import/export metadata, main/init/term discovery, and standard relocation-bytecode execution.
+- Added thin and fat 32-bit big-endian PowerPC Mach-O intake for objects, executables, dylibs, and bundles, including symbol parsing, entry discovery, and common PowerPC relocations.
+- Expanded ELF32 PowerPC intake from fixed ET_EXEC files to ET_EXEC, ET_DYN, and ET_REL with section/symbol parsing, rebasing, and common System V PowerPC relocation types.
+- Added explicit `--bind NAME=ADDRESS`, `--entry-symbol`, and `--image-base` controls so target-specific linking policy stays outside the generic core.
+- Added auto-detecting `image-info` and `symbols` commands plus Mach-O/PEF support in `call` and `disasm`.
+- Added synthetic end-to-end regression fixtures for ELF relocatable objects, Mach-O executables, and PEF relocation streams.
+
+
 ## 0.2.0 — 2026-08-26
 
 - Added a dependency-free ELF32 big-endian PowerPC `ET_EXEC` loader.

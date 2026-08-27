@@ -1,72 +1,121 @@
 # PPC Lab
 
-**Deterministic PowerPC execution and reverse-engineering research platform.**
+**Deterministic PowerPC binary intake, execution, and reverse-engineering infrastructure.**
 
-PPC Lab is a headless, reusable harness for executing isolated PowerPC routines,
-firmware fragments, relocated application code, and executable images without
-booting the original operating system. It grew out of a working Classic Mac /
-ReBirth research harness, but the execution core is target-neutral.
+PPC Lab is a headless GPLv3 research harness for loading PowerPC binaries,
+executing isolated routines, tracing behavior, and turning original machine code
+into reproducible evidence for decompilation and clean-room reconstruction. It
+is deliberately project-neutral and deliberately low-maintenance: add a
+capability when a real target needs it, lock that capability down with a test,
+and get back to the actual reverse-engineering project.
 
-PPC Lab is intentionally **infrastructure, not a forever-project**: add
-capability when a real reverse-engineering target needs it, keep the
-implementation small and deterministic, add a regression test, and get back to
-the project that needed the research.
-
-**License:** GNU General Public License v3.0 only (`GPL-3.0-only`). See
+**License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
-## What works now
+## v0.3.0 — Binary Intake Blitz
 
-- dependency-free `builtin-ppc32be` interpreter;
-- optional Unicorn PPC32 big-endian backend when Unicorn 2.x is available;
-- **dependency-free ELF32 big-endian PowerPC `ET_EXEC` loader**;
-- automatic `PT_LOAD` mapping with permissions and BSS zero-fill;
-- `elf-info` inspection and lightweight raw/ELF `disasm` commands;
-- deterministic raw code/data/import/heap/stack maps;
-- direct entry-point calls;
-- ELF entry-point execution with explicit entry override;
-- Classic CFM transition-vector calls (`entry`, `TOC/r2`, `r12`);
-- GPR/FPR initialization and deterministic memory writes;
-- import-range traps for unresolved external calls;
-- target-supplied runtime stubs via `--stub KIND@ADDRESS`;
-- instruction limits and trace ranges;
-- memory dumps with FNV-1a64 fingerprints;
-- machine-readable JSON results;
-- byte and float32 differential comparison tools;
-- Release tests plus optional Clang ASan/UBSan verification;
-- target profiles kept outside the execution core.
+PPC Lab can now natively intake the three PowerPC formats most useful to our
+current and likely future work:
 
-The built-in interpreter already executes the original external ReBirth
-Distortion constructor regression used to qualify the first harness: **133,027
-PPC instructions** to normal return with the known object fingerprint. That
-workload is preserved under `profiles/rebirth/`; no commercial bytes are
-included.
+- **ELF32 big-endian PowerPC** — `ET_EXEC`, `ET_DYN`, and `ET_REL`, including
+  sections, symbols, rebasing, BSS, and common System V PPC relocations;
+- **32-bit big-endian PowerPC Mach-O** — thin or fat containers containing
+  `MH_OBJECT`, `MH_EXECUTE`, `MH_DYLIB`, or `MH_BUNDLE`, with symbols, entry
+  discovery, rebasing where required, and common PPC relocations;
+- **PEF/CFM PowerPC** — section instantiation, pattern-initialized data,
+  imports/exports, main/init/term discovery, and standard PEF relocation
+  bytecode.
 
-## Fastest start
+Raw relocated code/data remains supported for research cases where a custom
+extractor is still the right tool.
 
-macOS or Linux:
+## Fast start
 
 ```bash
 ./Tools/verify.command
 ./build/release/ppc-lab selftest --backend builtin
 ```
 
-Windows (PowerShell):
+Inspect any supported native image without executing it:
 
-```powershell
-cmake -S . -B build/release -DPPC_LAB_ENABLE_UNICORN=OFF
-cmake --build build/release --config Release
-ctest --test-dir build/release -C Release --output-on-failure
+```bash
+./build/release/ppc-lab image-info target.bin
+./build/release/ppc-lab symbols target.bin
 ```
 
-For the shortest useful walkthrough, read
-[`docs/QUICKSTART.md`](docs/QUICKSTART.md).
+Disassemble or execute it:
+
+```bash
+./build/release/ppc-lab disasm --pef target.pef --count 32
+./build/release/ppc-lab call --pef target.pef --backend builtin
+
+./build/release/ppc-lab disasm --macho target.macho --count 32
+./build/release/ppc-lab call --macho target.macho --backend builtin
+
+./build/release/ppc-lab disasm --elf target.elf --count 32
+./build/release/ppc-lab call --elf target.elf --backend builtin
+```
+
+For relocatable/shared images, choose a deterministic base and bind unresolved
+imports explicitly:
+
+```bash
+./build/release/ppc-lab call \
+  --elf object.o \
+  --image-base 0x12000000 \
+  --entry-symbol my_function \
+  --bind malloc=0x30001000 \
+  --stub blockmove@0x30002000 \
+  --set r3=5 \
+  --json /tmp/result.json
+```
+
+The important rule is that **addresses are target policy**. Generic PPC Lab
+knows formats and reusable runtime behaviors; profiles provide target-specific
+addresses, bindings, inputs, and expected results.
+
+## Core capabilities
+
+- dependency-free `builtin-ppc32be` interpreter;
+- optional Unicorn PPC32 big-endian backend when Unicorn 2.x is available;
+- deterministic memory maps and register initialization;
+- direct function calls and symbol-selected entry points;
+- Classic CFM transition-vector calls (`entry`, TOC/`r2`, `r12`);
+- GPR/FPR setup and deterministic memory writes;
+- import traps and explicit symbol bindings;
+- reusable runtime stubs (`pow`, `cos`, `sqrt`, `sin`, `exp`, `blockmove`);
+- instruction limits, trace output, and trace ranges;
+- memory dumps with FNV-1a64 fingerprints;
+- machine-readable JSON results;
+- byte/float differential comparison tools;
+- synthetic loader/relocation/execution regressions;
+- GPL/SPDX/version/target-neutrality repository invariants;
+- low-maintenance macOS/Linux/Windows CI.
+
+The original external Classic Mac regression remains preserved as a target
+profile: the ReBirth Distortion constructor has a known successful 133,027-
+instruction run and object fingerprint, but no proprietary bytes are included in
+PPC Lab.
+
+## Commands
+
+```text
+ppc-lab selftest [--backend auto|builtin|unicorn]
+ppc-lab image-info FILE
+ppc-lab elf-info FILE
+ppc-lab macho-info FILE
+ppc-lab pef-info FILE
+ppc-lab symbols FILE
+ppc-lab disasm (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
+ppc-lab call   (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
+```
+
+Run `ppc-lab` without arguments for the compact syntax summary. The complete
+contract is in [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md).
 
 ## Build
 
 ### macOS / Linux
-
-Full verification:
 
 ```bash
 ./Tools/verify.command
@@ -86,12 +135,6 @@ cmake --build build/release --parallel
 ctest --test-dir build/release --output-on-failure
 ```
 
-Binary:
-
-```bash
-./build/release/ppc-lab
-```
-
 ### Windows
 
 ```powershell
@@ -100,181 +143,70 @@ cmake --build build/release --config Release
 ctest --test-dir build/release -C Release --output-on-failure
 ```
 
-The dependency-free interpreter and ELF loader are always available. Unicorn is
-optional and discovered at configure time.
-
-## First useful commands
-
-```bash
-# CPU/memory/ABI self-tests
-./build/release/ppc-lab selftest --backend builtin
-
-# Inspect a PPC ELF without executing it
-./build/release/ppc-lab elf-info firmware.elf
-
-# Disassemble from its ELF entry point
-./build/release/ppc-lab disasm --elf firmware.elf --count 32
-
-# Execute a supported ELF32 PPC executable
-./build/release/ppc-lab call \
-  --elf firmware.elf \
-  --backend builtin \
-  --max-instructions 100000
-
-# Execute an isolated function from the ELF image
-./build/release/ppc-lab call \
-  --elf firmware.elf \
-  --entry 0x00104560 \
-  --set r3=5
-
-# Execute raw relocated PPC32-BE code
-./build/release/ppc-lab call \
-  --code code.bin \
-  --entry 0x10000000 \
-  --set r3=5
-
-# Execute through a CFM transition vector
-./build/release/ppc-lab call \
-  --code code.bin \
-  --data data.bin \
-  --transition-vector 0x20005224
-
-# Bind only the runtime calls this target needs
-./build/release/ppc-lab call \
-  --code code.bin \
-  --entry 0x10000000 \
-  --stub sin@0x30000014 \
-  --stub blockmove@0x300001c8
-
-# Emit deterministic result data
-./build/release/ppc-lab call \
-  --code code.bin \
-  --entry 0x10000000 \
-  --dump 0x40000000:128 \
-  --json /tmp/ppc-result.json
-```
-
-Run `./build/release/ppc-lab` with no arguments for the built-in syntax summary.
-See [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) for complete option
-semantics and exit codes.
-
-## ELF32 intake in v0.2.0
-
-PPC Lab now directly accepts fixed-address ELF32 PowerPC executables when they
-are:
-
-```text
-ELFCLASS32
-ELFDATA2MSB
-EM_PPC
-ET_EXEC
-```
-
-`PT_LOAD` segments are mapped at their virtual addresses, file bytes are copied,
-BSS tails are zero-filled, and `R/W/X` permissions are derived from ELF flags.
-The file's `e_entry` is used unless an explicit entry or transition vector
-overrides it.
-
-PPC Lab deliberately rejects relocatable/shared ELF, PPC64, and little-endian
-ELF until a real project justifies the corresponding relocation/architecture
-work. See [`docs/ELF32.md`](docs/ELF32.md).
-
-## Built-in import stubs
-
-The core knows **behaviors**, never target addresses:
-
-```text
-pow
-cos
-sqrt
-sin
-exp
-blockmove
-```
-
-A target profile binds those behaviors to addresses at runtime. Unknown imports
-remain traps. Host `libm` transcendental stubs are execution aids and are
-**not** claimed bit-exact to historical PowerPC math libraries.
+The built-in interpreter and all native image loaders have no mandatory
+third-party runtime dependency. Unicorn is optional.
 
 ## Repository layout
 
 ```text
 PPC-Lab/
-├── include/ppclab/ppc/   reusable C++ API, including ELF32 loader
-├── src/                  interpreter, memory, ELF loading, execution, stubs
+├── include/ppclab/ppc/   reusable public C++ API
+├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              build, verification, result/diff tooling
-├── tests/                synthetic deterministic regression tests
-├── profiles/             target-specific addresses/scripts/expectations
-│   └── rebirth/           first real external regression workload
-├── docs/                 user, architecture, loader, development, research docs
-├── Tools/                double-clickable shell entry points
-├── .github/workflows/    low-maintenance CI
-├── CONTRIBUTING.md       contribution and patch rules
-└── LICENSE               GNU GPL v3.0 only
+├── scripts/              build, verification, diff/result tooling
+├── tests/                synthetic deterministic regressions
+├── profiles/             target-specific metadata/scripts/expectations
+├── docs/                 usage, format, architecture, development docs
+├── Tools/                convenient shell entry points
+├── .github/workflows/    CI
+├── CONTRIBUTING.md
+└── LICENSE
 ```
 
-## Documentation map
+## Documentation
 
-| Document | Purpose |
+| Document | What it answers |
 |---|---|
-| [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | Clone to first deterministic PPC call quickly. |
-| [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) | Current CLI, defaults, commands, stop reasons, exit codes. |
-| [`docs/ELF32.md`](docs/ELF32.md) | Exact ELF32 PowerPC loader contract and limitations. |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Core/loader/profile/backend boundaries and invariants. |
-| [`docs/ADDING_A_TARGET.md`](docs/ADDING_A_TARGET.md) | Add a target profile without contaminating the core. |
-| [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md) | Recommended decompilation and behavioral-research loop. |
-| [`docs/RESULT_FORMAT.md`](docs/RESULT_FORMAT.md) | JSON schema and deterministic dump/fingerprint conventions. |
-| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Builds, tests, sanitizers, opcode/stub/loader additions, releases. |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Demand-driven capability buckets; explicitly not a schedule. |
-| [`docs/HISTORY.md`](docs/HISTORY.md) | Provenance of the original working harness extraction. |
-| [`profiles/rebirth/README.md`](profiles/rebirth/README.md) | External ReBirth regression workload and known baseline. |
+| [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
+| [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |
+| [`docs/ELF32.md`](docs/ELF32.md) | Exactly what ELF32 PPC does v0.3 accept? |
+| [`docs/MACHO_PPC.md`](docs/MACHO_PPC.md) | What Mach-O PPC container/file/relocation behavior is supported? |
+| [`docs/PEF_CFM.md`](docs/PEF_CFM.md) | How does PEF/CFM loading, pidata, imports, exports, and relocation work? |
+| [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) | What commands/options/defaults/exit behavior exist? |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Where are the core/loader/backend/profile boundaries? |
+| [`docs/ADDING_A_TARGET.md`](docs/ADDING_A_TARGET.md) | How do I add a new project without contaminating the core? |
+| [`docs/RESEARCH_WORKFLOW.md`](docs/RESEARCH_WORKFLOW.md) | How should PPC Lab be used alongside a decompiler? |
+| [`docs/RESULT_FORMAT.md`](docs/RESULT_FORMAT.md) | What does deterministic JSON/dump output contain? |
+| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | How do I add an opcode, relocation, loader feature, or backend? |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | What is left before v1.0? |
+| [`docs/HISTORY.md`](docs/HISTORY.md) | Where did PPC Lab come from? |
 
-## Design rule
+## Hard architecture rules
 
-**No target owns PPC Lab.**
+1. **No target owns PPC Lab.** Target names, addresses, proprietary bytes, and
+   application-specific runtime assumptions stay out of generic core code.
+2. **Loaders parse formats; profiles express policy.** Reusable format mechanics
+   belong in loaders. Target-specific imports and runtime behavior belong in
+   profiles or explicit CLI bindings.
+3. **Unsupported behavior fails visibly.** PPC Lab should stop rather than
+   silently invent relocation, ABI, syscall, or CPU behavior.
+4. **Every new capability gets a synthetic regression.** We should be able to
+   improve this tool years from now without wondering which old project broke.
+5. **PPC Lab is infrastructure, not a schedule.** Build the next capability when
+   an actual reverse-engineering target needs it.
 
-ReBirth, a Classic Mac application, an ELF firmware image, a console executable,
-or a future hardware project can add a profile. CPU/memory/execution code must
-not acquire target-specific addresses or commercial code.
+## Scope
 
-Generic loaders are allowed when the **file format itself** is reusable across
-targets. Target-specific relocation recipes and runtime assumptions remain in
-profiles until repeated reuse justifies promotion.
+PPC Lab v0.3 is a **PPC32 big-endian research execution platform**, not a full
+Mac OS, Linux, console, or firmware emulator. Loader support does not imply that
+the target operating system/runtime has been emulated. Dynamic-linker-heavy,
+scattered/complex relocations, missing CPU instructions, syscalls, traps, or
+runtime services may still stop execution; those stops are intentionally
+observable research tasks.
 
-## Current scope
+## License and target binaries
 
-PPC Lab is presently a **PPC32 big-endian research harness**. It is strongest on
-C/C++ code shaped like 1990s/2000s desktop PowerPC and fixed-address PPC ELF
-executables/firmware. It is not a full Mac OS emulator, Linux emulator, console
-emulator, firmware simulator, dynamic linker, or complete PowerPC ISA
-implementation.
-
-When execution stops on an unsupported instruction, import, relocation, or
-runtime assumption, that stop is deliberate: it becomes the next concrete
-implementation target only if a real project needs it.
-
-## ReBirth regression profile
-
-```bash
-export PPC_LAB_REBIRTH_CODE=/path/ReBirth_Engine.sec0.reloc.bin
-export PPC_LAB_REBIRTH_DATA=/path/ReBirth_Engine.sec1.reloc.bin
-./profiles/rebirth/scripts/distortion_ctor.sh
-```
-
-See [`profiles/rebirth/README.md`](profiles/rebirth/README.md).
-
-## License and external target bytes
-
-PPC Lab source code, scripts, tests, and the repository's redistributable profile
-material are licensed under the **GNU General Public License version 3.0 only**
-(`GPL-3.0-only`).
-
-PPC Lab does **not** include commercial/proprietary target executables. A binary
-supplied by a researcher at runtime is input data to the tool; placing or
-analyzing that binary with PPC Lab does not by itself make that binary part of
-PPC Lab or relicense it. Researchers remain responsible for having the right to
-possess and analyze their target material and for complying with applicable law
-and license terms.
-
-See [`LICENSE`](LICENSE) for the full GPLv3 text.
+PPC Lab source, scripts, tests, and repository profiles are distributed under
+GNU GPL version 3 only. Externally supplied binaries being analyzed are inputs
+to the tool. PPC Lab does not bundle, redistribute, or relicense proprietary
+software merely because a user points the harness at it.

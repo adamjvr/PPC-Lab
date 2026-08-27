@@ -132,7 +132,7 @@ int main() {
     assert(!ppclab::ppc::Elf32Loader::inspectFile(path.string(), info, error));
     assert(error.find("big-endian") != std::string::npos);
 
-    // Restore big-endian and reject ET_DYN until relocation support is real.
+    // ET_DYN is accepted in v0.3 and rebased by the loader.
     {
         std::fstream io(path, std::ios::binary | std::ios::in | std::ios::out);
         io.seekp(5);
@@ -142,8 +142,12 @@ int main() {
         const char dyn[2]{0, 3};
         io.write(dyn, 2);
     }
-    assert(!ppclab::ppc::Elf32Loader::inspectFile(path.string(), info, error));
-    assert(error.find("relocations are not implemented") != std::string::npos);
+    assert(ppclab::ppc::Elf32Loader::inspectFile(path.string(), info, error));
+    assert(info.type == 3);
+    ppclab::ppc::Memory dynMemory;
+    assert(ppclab::ppc::Elf32Loader::loadFile(path.string(), dynMemory, info, error, 0x10000000U));
+    assert(info.entry == 0x10100000U);
+    assert(dynMemory.executable(0x10100000U, 4));
 
     fs::remove_all(dir);
     return 0;

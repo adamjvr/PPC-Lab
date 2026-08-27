@@ -1,150 +1,76 @@
-# ELF32 PowerPC support
+# ELF32 PowerPC intake
 
-PPC Lab v0.2.0 adds a dependency-free loader for fixed-address, 32-bit,
-big-endian PowerPC ELF executables. The loader exists to remove repetitive
-manual extraction work for embedded, bare-metal, and Unix-like PPC research
-without turning PPC Lab into a full operating-system emulator or dynamic linker.
+PPC Lab v0.3 accepts **32-bit, big-endian, `EM_PPC` ELF** and deliberately
+rejects ELF64, little-endian ELF, and non-PowerPC machine types.
 
-## Supported input contract
+## Accepted ELF types
 
-The current loader accepts an ELF file only when all of the following are true:
+| ELF type | v0.3 behavior |
+|---|---|
+| `ET_EXEC` | Maps `PT_LOAD` segments at their original virtual addresses. |
+| `ET_DYN` | Rebases loadable image at `--image-base` and applies supported relocations. |
+| `ET_REL` | Lays out allocatable sections from `--image-base`, resolves symbols, applies supported section relocations. |
 
-- ELF class is `ELFCLASS32`;
-- byte order is `ELFDATA2MSB` (big-endian);
-- machine is `EM_PPC` (`20`);
-- ELF type is `ET_EXEC`;
-- the file contains at least one non-empty `PT_LOAD` program segment;
-- every load segment has `p_filesz <= p_memsz`;
-- every file and virtual-memory range is in bounds.
+For segments, file bytes are copied, `p_memsz - p_filesz` is zero-filled, and
+memory permissions are derived from `PF_R/PF_W/PF_X`.
 
-The loader deliberately rejects `ET_REL`, `ET_DYN`, PPC64, and little-endian
-ELF rather than guessing at relocation or ABI behavior that has not been
-implemented.
+For relocatable objects, `SHF_ALLOC` sections are laid out deterministically
+while honoring section alignment. `SHT_NOBITS` is zero-filled.
 
-## What mapping does
-
-For each `PT_LOAD` segment PPC Lab:
-
-1. maps `p_memsz` bytes at `p_vaddr`;
-2. copies `p_filesz` bytes from `p_offset`;
-3. leaves the remainder zero-filled, which provides normal BSS semantics;
-4. derives read/write/execute permissions from `p_flags`;
-5. records a deterministic mapping name such as `elf:PT_LOAD[0]`.
-
-Executable mappings are internally readable because PPC Lab's instruction
-fetch path reads the same backing byte store. This does not make a claim about
-host or target MMU page-protection behavior.
-
-`p_paddr`, alignment, and ELF flags are preserved as inspection metadata but do
-not currently cause extra physical-memory/MMU behavior.
-
-## Inspect without executing
+## Metadata and symbols
 
 ```bash
-./build/release/ppc-lab elf-info firmware.elf
+ppc-lab elf-info target.elf
+ppc-lab image-info target.elf
+ppc-lab symbols target.elf
 ```
 
-Example output shape:
+PPC Lab parses section metadata and `SHT_SYMTAB`/`SHT_DYNSYM` where present.
+Defined symbols are translated to runtime addresses after rebasing/layout.
+Undefined symbols used by relocations must be resolved with `--bind`, except
+weak unresolved symbols which may resolve to zero.
+
+## Entry behavior
+
+- `ET_EXEC`/`ET_DYN`: `e_entry`, adjusted by load bias where appropriate;
+- `ET_REL`: normally use `--entry-symbol NAME` or `--entry ADDRESS` because
+  relocatable objects do not have a normal process entry point.
+
+Example:
+
+```bash
+ppc-lab call --elf module.o \
+  --image-base 0x12000000 \
+  --entry-symbol render \
+  --set r3=0x40010000
+```
+
+## Supported common PPC relocation families
+
+v0.3 implements the static/research-oriented relocation subset currently needed
+by our fixtures and expected near-term targets, including:
 
 ```text
-PPC Lab ELF32 PowerPC image
-file=firmware.elf
-type=2 (ET_EXEC)
-machine=20 (EM_PPC)
-entry=0x00100000
-flags=0x00000000
-load_segments=2
-  [0] R-X vaddr=0x00100000 ...
-  [1] RW- vaddr=0x00200000 ...
+R_PPC_NONE
+R_PPC_ADDR32 / R_PPC_UADDR32
+R_PPC_ADDR16 / R_PPC_UADDR16
+R_PPC_ADDR16_LO / HI / HA
+R_PPC_ADDR24
+R_PPC_ADDR14 and branch-prediction variants
+R_PPC_REL24 / R_PPC_PLTREL24 / R_PPC_LOCAL24PC
+R_PPC_REL14 and branch-prediction variants
+R_PPC_REL32 / R_PPC_PLTREL32
+R_PPC_GLOB_DAT / R_PPC_JMP_SLOT / R_PPC_PLT32
+R_PPC_RELATIVE
+R_PPC_SECTOFF / LO / HI / HA
 ```
 
-Use this before execution to catch wrong architecture, endianness, executable
-type, suspicious ranges, or an unexpected entry point.
+`SHT_REL` and `SHT_RELA` are parsed. `R_PPC_COPY` and unknown/unsupported
+relocation semantics are rejected explicitly rather than approximated.
 
-## Disassemble loaded code
+## What this does not imply
 
-Start at the ELF `e_entry` value:
-
-```bash
-./build/release/ppc-lab disasm --elf firmware.elf --count 40
-```
-
-Start at another mapped executable address:
-
-```bash
-./build/release/ppc-lab disasm \
-  --elf firmware.elf \
-  --start 0x00101234 \
-  --count 80
-```
-
-The disassembler intentionally shares PPC Lab's built-in instruction decoder.
-It is a lightweight research view, not a replacement for Ghidra, IDA, Binary
-Ninja, or a complete ISA disassembler. Unknown encodings remain visible as raw
-`.long` values instead of being hidden.
-
-## Execute an ELF image
-
-The ELF entry point is used automatically:
-
-```bash
-./build/release/ppc-lab call \
-  --elf firmware.elf \
-  --backend builtin \
-  --max-instructions 100000
-```
-
-Override the entry when calling an isolated function inside the image:
-
-```bash
-./build/release/ppc-lab call \
-  --elf firmware.elf \
-  --entry 0x00104560 \
-  --set r3=0x40010000 \
-  --set r4=64
-```
-
-A CFM transition vector may also override the entry when the mapped ELF image
-is being used only as a convenient container for already-prepared target
-memory. This is unusual but the call-harness precedence remains consistent:
-
-1. `--transition-vector`, when supplied;
-2. explicit `--entry`;
-3. ELF `e_entry`.
-
-## Auxiliary PPC Lab mappings
-
-PPC Lab still creates its deterministic import, heap, and stack mappings around
-an ELF call. If the ELF already occupies one of those address ranges, the call
-fails with `invalid-configuration` rather than silently remapping target
-memory. Move the harness-owned range explicitly, for example:
-
-```bash
-./build/release/ppc-lab call \
-  --elf firmware.elf \
-  --heap-base 0x50000000 \
-  --stack-base 0x78000000
-```
-
-Unlike raw mode, ELF mode does **not** create the default synthetic data mapping
-at `0x20000000`; writable ELF `PT_LOAD` segments are already the program's data
-image. An additional external `--data FILE` can still be mapped explicitly when
-a research fixture needs it.
-
-## What is intentionally not implemented yet
-
-PPC Lab v0.2.0 does not perform:
-
-- section-header-based loading;
-- symbol-table parsing;
-- dynamic linking;
-- ELF relocations;
-- GOT/PLT construction;
-- Linux process startup (`argc`, `argv`, `envp`, auxv);
-- syscalls or an operating-system personality;
-- MMU/TLB/physical-address simulation;
-- PPC64 ELF.
-
-Those features should be added only when a real research target requires them.
-The current loader is intentionally small enough to audit and stable enough to
-leave alone.
+Loading an ELF does **not** emulate a Linux/POSIX runtime or a dynamic linker.
+GOT/PLT-heavy images, TLS, syscalls, libc dependencies, unusual ABI startup
+state, or relocation types outside the implemented subset may require a future
+runtime personality or loader extension.
