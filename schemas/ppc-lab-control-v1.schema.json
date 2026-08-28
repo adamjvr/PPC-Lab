@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"ppc-lab-control-v1","title":"PPC Lab control-plane root v1","type":"object","required":["schema","created_unix","next_seq"],"properties":{"schema":{"const":"ppc-lab-control-v1"},"created_unix":{"type":"number"},"next_seq":{"type":"integer","minimum":1}},"additionalProperties":true}

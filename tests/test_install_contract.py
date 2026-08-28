@@ -62,6 +62,8 @@ def main() -> int:
         assert campaign.is_file(), campaign
         scheduler = prefix / "bin" / "ppc-lab-schedule"
         assert scheduler.is_file(), scheduler
+        control = prefix / "bin" / "ppc-lab-control"
+        assert control.is_file(), control
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -96,11 +98,16 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-state-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-summary-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-item-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-telemetry-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-history-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-history-record-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 2.2.0"
+        assert version.stdout.strip() == "PPC Lab 2.3.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -122,6 +129,8 @@ def main() -> int:
         assert '"campaign_triage_summary": "ppc-lab-campaign-triage-summary-v1"' in caps.stdout
         assert '"priority_policy": "ppc-lab-priority-policy-v1"' in caps.stdout
         assert '"priority_report": "ppc-lab-priority-report-v1"' in caps.stdout
+        assert '"control": "ppc-lab-control-v1"' in caps.stdout
+        assert '"control_telemetry": "ppc-lab-control-telemetry-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()

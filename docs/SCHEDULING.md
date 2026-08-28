@@ -57,3 +57,7 @@ Fair-share ordering uses project `dispatched / weight`; lower service ratio wins
 ## Boundaries
 
 The scheduler does not copy target binaries, interpret campaign manifests, bypass campaign root policy, or become a multi-user security boundary. It is process orchestration for trusted PPC Lab research hosts. Use normal OS users/containers/VMs for mutually untrusted tenants.
+
+## Persistent control-plane operation
+
+For a long-lived host with many scheduler manifests, v2.3 adds `ppc-lab-control` above this scheduler. It owns persistent scheduler-run queueing and operational supervision while this document's fair-share/quota semantics remain unchanged inside each admitted scheduler run. See [`CONTROL_PLANE.md`](CONTROL_PLANE.md).

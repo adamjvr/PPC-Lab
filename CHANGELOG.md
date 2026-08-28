@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.0 — 2026-08-28 — Campaign Control Plane
+
+- Add installed `ppc-lab-control`, a dependency-free persistent queue/supervisor above `ppc-lab-schedule`.
+- Add durable scheduler-run submission with deterministic priority/sequence ordering, SHA-256 revalidation at dispatch, bounded active scheduler processes, and exact scheduler `--resume` reuse when checkpoint state already exists.
+- Add live atomic telemetry with queue counts, active scheduler PIDs/liveness, uptime, scheduler campaign counts, campaign subprocess PIDs, project/event counts, and history depth.
+- Add supervisor-friendly pause/resume/drain, per-run cancellation, and global cancellation without replacing the scheduler/campaign control markers underneath.
+- Add append-only terminal run history plus per-run history records carrying manifest SHA-256, attempts, timestamps, output paths, return codes, and scheduler summaries without copying target binaries.
+- Add single-supervisor locking, conservative orphan-process detection after hard supervisor failure, concurrent-writer-safe atomic JSON replacement, stable control/item/telemetry/history-list/history-record v1 schemas, capability advertising, install coverage, documentation, and end-to-end control-plane regression tests.
+
 ## 2.2.0 — 2026-08-28 — Campaign Scheduling & Resource Governance
 
 - Add installed `ppc-lab-schedule`, a dependency-free scheduler above the existing autonomous-campaign command.

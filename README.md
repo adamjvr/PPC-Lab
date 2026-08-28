@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.3.0 — Campaign Control Plane
+
+v2.3 turns the v2.2 scheduler into long-lived server infrastructure without adding a database or service framework. `ppc-lab-control` provides a persistent scheduler-run queue, deterministic priority ordering, foreground supervision, live process/scheduler telemetry, pause/resume/drain/cancel controls, and append-only campaign-run history. Existing `ppc-lab-schedule` and `ppc-lab-campaign` semantics remain unchanged underneath it.
+
+```bash
+ppc-lab-control init /srv/ppc-control
+ppc-lab-control submit /srv/ppc-control scheduler.json --id nightly --priority 50
+ppc-lab-control serve /srv/ppc-control --max-active 2
+ppc-lab-control status /srv/ppc-control --json
+```
+
+See [`docs/CONTROL_PLANE.md`](docs/CONTROL_PLANE.md).
+
 ## v2.2.0 — Campaign Scheduling & Resource Governance
 
 v2.2 adds `ppc-lab-schedule`, a deterministic outer scheduler for running many existing autonomous campaigns without letting one research project monopolize a server. It provides weighted project fair-share, per-project priority/concurrency/case quotas, process wall-time accounting, exact checkpoint/resume, and filesystem drain/cancel controls while leaving `ppc-lab-campaign` itself unchanged.

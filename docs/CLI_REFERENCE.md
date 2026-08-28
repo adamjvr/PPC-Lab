@@ -313,3 +313,22 @@ ppc-lab-prioritize ./explore-run --json priority.json --top 16
 ```
 
 Key controls are `--plateau-window`, `--plateau-novelty-rate`, `--weight-new-pc`, `--weight-behavior`, `--weight-failure`, and `--weight-pc-rarity`.
+
+## `ppc-lab-control`
+
+Persistent operational control above `ppc-lab-schedule`:
+
+```text
+ppc-lab-control init ROOT
+ppc-lab-control submit ROOT SCHEDULER.json [--id ID] [--priority N]
+ppc-lab-control serve ROOT [--scheduler-tool PATH] [--max-active N] [--poll-seconds S] [--until-idle]
+ppc-lab-control status ROOT [--json] [--watch [SECONDS]]
+ppc-lab-control history ROOT [--json] [--limit N]
+ppc-lab-control pause ROOT
+ppc-lab-control resume ROOT
+ppc-lab-control drain ROOT
+ppc-lab-control cancel ROOT ITEM_ID
+ppc-lab-control cancel ROOT --all
+```
+
+See [`CONTROL_PLANE.md`](CONTROL_PLANE.md) for persistent state, telemetry, restart, and security semantics.

@@ -54,6 +54,18 @@ The individual v1.x research primitives now compose into a bounded checkpointed 
 
 Campaign execution is now yield-aware without becoming nondeterministic. Adaptive exploration can favor high-yield mutation axes and stop on a configured novelty plateau; a separate deterministic priority report ranks completed cases, quantifies axis/value yield, and drives campaign triage ordering. The hard case/wall/triage budgets remain authoritative, and all ranking inputs/weights are recorded for replay.
 
+## v2.2 — Campaign scheduling & resource governance — COMPLETE
+
+Autonomous campaigns can share long-lived research hosts under deterministic weighted fair-share, within-project priority, global/per-project concurrency limits, case-admission quotas, wall accounting, exact resume, graceful drain, and cancellation policy. The scheduler remains a local process layer above campaigns rather than a permanent queue/database requirement.
+
+## v2.3 — Campaign control plane — COMPLETE
+
+Scheduler runs can now live in a persistent priority queue with foreground supervision, live process/scheduler telemetry, pause/resume/drain/cancel controls, restart-aware recovery, single-supervisor coordination, and append-only run history. The control plane deliberately stays filesystem-backed and dependency-free.
+
+## v2.4 — Research knowledge graph — NEXT WHEN CONTINUING
+
+The next dense milestone is accumulated research knowledge rather than more queue machinery: connect target hashes, images, symbols/functions, traces, coverage, corpus cases, triage findings, campaign/evidence records, and decompiler annotations into queryable cross-project relationships so PPC Lab can answer “where have we seen this code/behavior/state relationship before?” without copying private target binaries.
+
 ## Post-2.0 — only when justified
 
 Potential future capability buckets:
@@ -67,8 +79,3 @@ Potential future capability buckets:
 - additional ISA fidelity where a real workload exposes a missing/approximate instruction.
 
 None of these are standing obligations. A missing capability should arrive with a real target, a minimal reproduction, and a regression test.
-
-
-## v2.2 scheduling checkpoint
-
-Campaign scheduling/resource governance is complete: autonomous campaigns can share long-lived research hosts under deterministic fair-share, priority, quota, concurrency, resume, drain, and cancellation policy. Further scheduler complexity should remain demand-driven; PPC Lab does not need a mandatory distributed queue/database simply to be useful.

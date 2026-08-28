@@ -99,3 +99,7 @@ PPC Lab 2.1 extends `ppc-lab-exploration-v1` additively with the deterministic `
 ## v2.2 scheduler compatibility
 
 `ppc-lab-scheduler-v1`, `ppc-lab-scheduler-state-v1`, and `ppc-lab-scheduler-summary-v1` are additive 2.x contracts above the existing campaign layer. Project weights/priorities govern deterministic admission only; they do not redefine campaign or guest execution semantics. Terminal scheduler admission states remain terminal on exact resume. Additive optional resource/accounting fields may appear in 2.x; incompatible meanings require a new schema identifier.
+
+## v2.3 control-plane compatibility
+
+`ppc-lab-control-v1`, `ppc-lab-control-item-v1`, `ppc-lab-control-telemetry-v1`, `ppc-lab-control-history-v1`, and `ppc-lab-control-history-record-v1` are additive 2.x operational contracts above the scheduler. Queue priority controls scheduler-run admission only; it does not alter scheduler project fairness or guest execution behavior. Optional telemetry/history fields may be added in 2.x. Existing field meanings and terminal-history semantics require a new schema identifier if changed incompatibly.

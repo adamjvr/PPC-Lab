@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v2.3.0 — Campaign Control Plane — 2026-08-28
+
+PPC Lab added a durable operational layer above the v2.2 scheduler: persistent scheduler-run queueing, live process/scheduler telemetry, pause/resume/drain/cancel controls, single-supervisor coordination, conservative restart recovery, and append-only run history. The control plane remains a local standard-library filesystem supervisor rather than a mandatory daemon/database stack.
+
 ## v2.2.0 — Campaign Scheduling & Resource Governance — 2026-08-28
 
 PPC Lab gained a deterministic scheduler above autonomous campaigns: weighted fair-share projects, priorities, concurrency/quota governance, resumable accounting, and drain/cancel markers. Campaigns remain the research unit; the scheduler only governs admission and process resources.

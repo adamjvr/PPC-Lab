@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"ppc-lab-control-history-v1","title":"PPC Lab control-plane history list v1","type":"object","required":["schema","records"],"properties":{"schema":{"const":"ppc-lab-control-history-v1"},"records":{"type":"array","items":{"type":"object"}}},"additionalProperties":true}

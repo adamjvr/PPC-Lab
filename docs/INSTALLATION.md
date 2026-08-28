@@ -71,3 +71,7 @@ ppc-lab-campaign /srv/research/campaign.json --out /srv/research/runs/001
 Long-lived corpus/evidence directories may be outside the run directory. Target binary input paths remain subject to the campaign/worker root boundary.
 
 PPC Lab v2.1 also installs `ppc-lab-prioritize` plus `ppc-lab-priority-policy-v1` and `ppc-lab-priority-report-v1` schemas. The tool uses only Python's standard library.
+
+## Campaign control plane
+
+A normal v2.3 install also installs `ppc-lab-control` beside `ppc-lab-schedule`. No extra Python packages, database, broker, or service framework are required. The four control-plane JSON schemas are installed under the normal `share/ppc-lab/schemas` directory. `ppc-lab-control serve` is a foreground process so deployments can use their existing OS/container supervisor rather than a PPC-Lab-specific daemon installer.
