@@ -42,7 +42,8 @@ def check_spdx() -> None:
     required.extend(ROOT.glob("integrations/**/*.py"))
     required.extend(ROOT.glob("Tools/*.command"))
     required.extend(ROOT.glob("profiles/*/scripts/*.sh"))
-    required.extend([ROOT / "CMakeLists.txt", ROOT / "cmake/FindUnicorn.cmake", ROOT / ".github/workflows/ci.yml"])
+    required.extend(path for path in (ROOT / "cmake").glob("*") if path.is_file())
+    required.extend([ROOT / "CMakeLists.txt", ROOT / ".github/workflows/ci.yml"])
 
     missing = []
     for path in required:
@@ -64,8 +65,8 @@ def check_version_sync() -> None:
         fail("cannot determine project version from CMakeLists.txt")
     version = match.group(1)
     cli = (ROOT / "tools" / "ppc_lab.cpp").read_text(encoding="utf-8", errors="replace")
-    if f"PPC Lab {version}" not in cli:
-        fail(f"CLI version is not synchronized with CMake project version {version}")
+    if 'PPC_LAB_VERSION="${PROJECT_VERSION}"' not in cmake or "kVersion = PPC_LAB_VERSION" not in cli:
+        fail(f"CLI version is not sourced from the CMake project version {version}")
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8", errors="replace")
     if f"## {version} " not in changelog:
         fail(f"CHANGELOG.md has no release heading for {version}")

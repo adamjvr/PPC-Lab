@@ -20,10 +20,11 @@ Sanity check:
 ./build/release/ppc-lab selftest --backend builtin
 ```
 
-## 2. Identify a native PPC image
+## 2. Diagnose the build and identify a native PPC image
 
 ```bash
-./build/release/ppc-lab image-info /path/to/target
+./build/release/ppc-lab doctor
+./build/release/ppc-lab analyze /path/to/target
 ```
 
 Supported native intake:
@@ -47,15 +48,13 @@ an isolated experiment.
 ## 4. Disassemble a small region
 
 ```bash
-./build/release/ppc-lab disasm --elf target.elf --count 32
-./build/release/ppc-lab disasm --macho target.macho --count 32
-./build/release/ppc-lab disasm --pef target.pef --count 32
+./build/release/ppc-lab disasm --image /path/to/target --count 32
 ```
 
 Override the start address when useful:
 
 ```bash
-./build/release/ppc-lab disasm --elf target.elf --start 0x00104560 --count 64
+./build/release/ppc-lab disasm --image /path/to/target --start 0x00104560 --count 64
 ```
 
 ## 5. Execute an entry or function
@@ -63,14 +62,14 @@ Override the start address when useful:
 Native default entry:
 
 ```bash
-./build/release/ppc-lab call --elf target.elf --backend builtin
+./build/release/ppc-lab run --image /path/to/target --backend builtin
 ```
 
 Named function in a relocatable/shared image:
 
 ```bash
-./build/release/ppc-lab call \
-  --elf module.o \
+./build/release/ppc-lab run \
+  --image module.o \
   --image-base 0x12000000 \
   --entry-symbol process \
   --set r3=5
@@ -79,8 +78,8 @@ Named function in a relocatable/shared image:
 Numeric function entry:
 
 ```bash
-./build/release/ppc-lab call \
-  --macho target.macho \
+./build/release/ppc-lab run \
+  --image target.macho \
   --entry 0x00104560 \
   --set r3=0x40010000
 ```
@@ -88,8 +87,8 @@ Numeric function entry:
 PEF default main:
 
 ```bash
-./build/release/ppc-lab call \
-  --pef application.pef \
+./build/release/ppc-lab run \
+  --image application.pef \
   --image-base 0x11000000
 ```
 
@@ -98,8 +97,8 @@ PEF default main:
 If relocation/loading reports a missing symbol:
 
 ```bash
-./build/release/ppc-lab call \
-  --elf module.o \
+./build/release/ppc-lab run \
+  --image module.o \
   --entry-symbol process \
   --bind memcpy=0x30000100
 ```

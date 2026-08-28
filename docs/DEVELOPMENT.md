@@ -183,3 +183,7 @@ not a replacement for instruction-specific reference vectors.
 is compiled in and otherwise records a clean skip. `tests/test_malformed_intake.py`
 stresses native loaders with deterministic malformed inputs and treats any crash
 or hang as a regression.
+
+## v1 release/install check
+
+A release is not complete merely because the in-tree library tests pass. `ctest` must also pass `ppc_lab_install_contract`, which installs PPC Lab to a clean prefix and builds an external consumer with `find_package(PPCLab CONFIG)`. Keep the project version in `project(PPCLab VERSION ...)`; the CLI receives that value from CMake and should not gain a second hand-maintained version string.

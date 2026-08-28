@@ -91,9 +91,34 @@ def main() -> int:
         assert "stop=returned" in call.stdout
         assert "r03=0x0000000c" in call.stdout
 
+        analyze = run(exe, "analyze", str(elf), "--json")
+        assert analyze.returncode == 0, analyze.stderr
+        analysis = json.loads(analyze.stdout)
+        assert analysis["schema"] == "ppc-lab-analysis-v1"
+        assert analysis["format"] == "ELF32-PPC-BE"
+
+        auto_dis = run(exe, "disasm", "--image", str(elf), "--count", "2")
+        assert auto_dis.returncode == 0, auto_dis.stderr
+        assert "addi r3,r3,7" in auto_dis.stdout
+
+        auto_call = run(exe, "run", "--image", str(elf), "--backend", "builtin", "--set", "r3=5")
+        assert auto_call.returncode == 0, auto_call.stderr + auto_call.stdout
+        assert "r03=0x0000000c" in auto_call.stdout
+
+        caps = run(exe, "capabilities", "--json")
+        assert caps.returncode == 0, caps.stderr
+        cap = json.loads(caps.stdout)
+        assert cap["schema"] == "ppc-lab-capabilities-v1"
+        assert cap["guest"] == {"architecture": "ppc32", "endian": "big"}
+        assert "ELF32-PPC-BE" in cap["formats"]
+
+        doctor = run(exe, "doctor")
+        assert doctor.returncode == 0, doctor.stderr + doctor.stdout
+        assert "status=PASS" in doctor.stdout
+
         version = run(exe, "--version")
         assert version.returncode == 0
-        assert version.stdout.strip() == "PPC Lab 0.5.0"
+        assert version.stdout.strip() == "PPC Lab 1.0.0"
 
     print("PASS: ELF32 CLI inspect/disasm/call")
     return 0

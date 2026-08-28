@@ -138,6 +138,10 @@ def main() -> None:
         out = run("call", "--macho", macho, "--backend", "builtin", "--set", "r3=5")
         assert "stop=returned" in out.lower()
         assert "r03=0x0000000c" in out.lower()
+        out = run("run", "--image", macho, "--backend", "builtin", "--set", "r3=5")
+        assert "r03=0x0000000c" in out.lower()
+        out = run("analyze", macho)
+        assert "format=Mach-O-PPC32-BE" in out
 
         out = run("image-info", pef)
         assert "format=pef-cfm-ppc" in out.lower()
@@ -150,6 +154,10 @@ def main() -> None:
         out = run("call", "--pef", pef, "--image-base", "0x11000000", "--backend", "builtin", "--set", "r3=5")
         assert "stop=returned" in out.lower()
         assert "r03=0x0000000c" in out.lower()
+        out = run("run", "--image", pef, "--image-base", "0x11000000", "--backend", "builtin", "--set", "r3=5")
+        assert "r03=0x0000000c" in out.lower()
+        out = run("analyze", pef)
+        assert "format=PEF-CFM-PPC" in out
 
     print("PPC Lab binary-intake CLI tests passed")
 

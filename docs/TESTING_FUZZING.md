@@ -46,3 +46,9 @@ The deterministic malformed-input suite is a regression/fuzz-style stress layer,
 not a claim of exhaustive security fuzzing. If PPC Lab becomes exposed to
 untrusted remote inputs, add a dedicated coverage-guided fuzzing deployment and
 threat model rather than relying on these tests alone.
+
+## v1 install/package contract
+
+`ppc_lab_install_contract` installs the current build into a temporary prefix, runs the installed CLI, discovers PPC Lab through `find_package(PPCLab CONFIG)`, and compiles a separate downstream C++ consumer against `PPCLab::core`. This catches exported-target, include-path, language-standard, config-selection, and install-tree regressions that in-tree unit tests cannot detect.
+
+The v1 CLI intake regressions also exercise the `--image` auto-detection path for synthetic ELF32 PPC, Mach-O PPC32, and PEF/CFM images so the format-neutral public path cannot silently diverge from the explicit loaders.

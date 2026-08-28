@@ -2,6 +2,16 @@
 
 Executable name: `ppc-lab`.
 
+## v1 discovery commands
+
+```bash
+ppc-lab doctor
+ppc-lab capabilities [--json]
+ppc-lab analyze FILE [--json] [--symbols]
+```
+
+`doctor` runs the built-in execution microtests and, when compiled in, the Unicorn microtests. `capabilities --json` emits the stable `ppc-lab-capabilities-v1` discovery schema. `analyze` auto-detects a supported native container and summarizes format, entry, and symbol state without executing target code.
+
 ## `selftest`
 
 ```bash
@@ -42,7 +52,7 @@ metadata may contain original/container-relative values depending on format.
 ## `disasm`
 
 ```bash
-ppc-lab disasm (--code FILE | --elf FILE | --macho FILE | --pef FILE) \
+ppc-lab disasm (--image FILE | --code FILE | --elf FILE | --macho FILE | --pef FILE) \
   [--base ADDRESS] \
   [--image-base ADDRESS] \
   [--start ADDRESS] \
@@ -65,7 +75,7 @@ falls back to the first executable mapped region.
 ## `call`
 
 ```bash
-ppc-lab call (--code FILE | --elf FILE | --macho FILE | --pef FILE) [--data FILE] \
+ppc-lab call|run (--image FILE | --code FILE | --elf FILE | --macho FILE | --pef FILE) [--data FILE] \
   [--entry ADDRESS | --entry-symbol NAME | --transition-vector ADDRESS] \
   [--image-base ADDRESS] [--bind NAME=ADDRESS] \
   [--backend auto|builtin|unicorn] \
@@ -87,6 +97,7 @@ ppc-lab call (--code FILE | --elf FILE | --macho FILE | --pef FILE) [--data FILE
 
 Exactly one primary input is required:
 
+- `--image FILE` — auto-detect a supported native ELF32 PPC, Mach-O PPC32, or PEF/CFM image;
 - `--code FILE` — raw PPC bytes;
 - `--elf FILE` — ELF32 big-endian PowerPC;
 - `--macho FILE` — PPC32 big-endian Mach-O;
@@ -174,7 +185,7 @@ original runtime.
 ### System calls and traps
 
 The PPC `sc` instruction is an architectural boundary, not an operating-system
-emulation promise. PPC Lab exposes it explicitly. The v0.5 deterministic syscall
+emulation promise. PPC Lab exposes it explicitly. The v1 deterministic syscall
 binding convention uses `r0` as the syscall selector and `r3` as the fixed return
 value:
 

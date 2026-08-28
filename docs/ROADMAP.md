@@ -1,40 +1,25 @@
 # PPC Lab roadmap
 
-This is a **capability roadmap, not a schedule**. PPC Lab is infrastructure: ship
-large useful chunks, then leave it alone until a real PPC target exposes the
-next missing capability.
+This is a **capability roadmap, not a schedule**. PPC Lab is infrastructure: ship a large useful chunk when a real PPC target needs it, then leave the tool alone and return to the actual reverse-engineering project.
 
-## Current: v0.5 — PPC Coverage Monster — COMPLETE
+## v1.0 — General PPC research platform — COMPLETE
 
-v0.5 concentrates on execution hardening rather than adding another container
-format:
+The original platform goal is met:
 
-- materially broader PPC32 integer, CR, load/store, atomic, byte-reverse,
-  cache/order, arithmetic-overflow, and floating-point execution coverage;
-- structured `sc`, `tw`, and `twi` interception;
-- deterministic syscall-return bindings and explicit trap-ignore policy;
-- stronger CR/XER/FPSCR behavior around newly supported instructions;
-- builtin-vs-Unicorn parity regression when Unicorn is available;
-- deterministic interpreter/disassembler/memory property tests;
-- malformed ELF/Mach-O/PEF intake stress tests.
+> Throw a supported PPC binary at PPC Lab, inspect it, find an interesting routine, execute it in a controlled environment, trace/stub/bind what it touches, compare behavior, and feed the evidence back into decompilation.
 
-**Exit condition achieved for the milestone:** PPC Lab now covers a substantially
-larger body of ordinary PPC32 compiler output while keeping unknown OS/runtime
-behavior visible rather than pretending to emulate it. New opcode work remains
-demand-driven: a real unsupported instruction should arrive with a regression.
+v1.0 includes native ELF32 PPC, Mach-O PPC32, and PEF/CFM intake; auto-detected `--image` execution; raw-image escape hatches; deterministic PPC32-BE execution; runtime/import boundaries; symbol-aware traces; snapshots/results/metadata; batch/differential tooling; decompiler evidence bridges; cross-platform CI; and an installed public C++ package.
 
-## v1.0 — Useful general PPC research platform
+## Post-1.0 — only when justified
 
-> Throw a supported PPC binary at PPC Lab, inspect it, find an interesting
-> routine, execute it in a controlled environment, trace/stub/bind what it
-> touches, compare behavior, and feed the evidence back into decompilation.
+Potential future capability buckets:
 
-v1.0 does not require emulating every PowerPC machine or operating system. It
-requires a stable, documented, extensible research platform proven across
-unrelated projects.
+- PPC64 and/or little-endian PowerPC when an actual target requires them;
+- deeper Classic Mac, POSIX, console, firmware, or other runtime personalities;
+- additional loader relocation families exposed by real binaries;
+- richer debugger protocols, remote workers, or service-mode execution;
+- JIT/alternate execution backends;
+- deeper Ghidra/IDA/Binary Ninja plugins;
+- additional ISA fidelity where a real workload exposes a missing/approximate instruction.
 
-## Later, only when justified
-
-Potential post-1.0 work: PPC64, little-endian PowerPC, deeper OS personalities,
-JIT backends, remote workers, richer debugger protocols, and deeper decompiler
-plugins. None are obligations.
+None of these are standing obligations. A missing capability should arrive with a real target, a minimal reproduction, and a regression test.

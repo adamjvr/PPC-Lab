@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 0.5.0 LANGUAGES CXX)
+project(PPCLab VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,6 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(PPC_LAB_ENABLE_UNICORN "Enable Unicorn PPC32 backend when development files are available" ON)
 option(PPC_LAB_ENABLE_SANITIZERS "Build with AddressSanitizer and UBSan" OFF)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 if(PPC_LAB_ENABLE_UNICORN)
@@ -23,11 +26,15 @@ add_library(ppc_lab STATIC
     src/Elf32Loader.cpp
     src/MachOLoader.cpp
     src/PefLoader.cpp
+    src/UniversalImage.cpp
     src/BuiltinInterpreter.cpp
     src/UnicornBackend.cpp
     src/Microtests.cpp)
 
-target_include_directories(ppc_lab PUBLIC include)
+target_include_directories(ppc_lab PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_features(ppc_lab PUBLIC cxx_std_20)
 
 if(PPC_LAB_ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ppc_lab PUBLIC -fsanitize=address,undefined -fno-omit-frame-pointer)
@@ -48,7 +55,35 @@ endif()
 
 add_executable(ppc_lab_cli tools/ppc_lab.cpp)
 target_link_libraries(ppc_lab_cli PRIVATE ppc_lab)
-set_target_properties(ppc_lab_cli PROPERTIES OUTPUT_NAME ppc-lab)
+target_compile_definitions(ppc_lab_cli PRIVATE PPC_LAB_VERSION="${PROJECT_VERSION}")
+set_target_properties(ppc_lab PROPERTIES EXPORT_NAME core)
+set_target_properties(ppc_lab_cli PROPERTIES OUTPUT_NAME ppc-lab EXPORT_NAME cli)
+
+
+install(TARGETS ppc_lab ppc_lab_cli
+    EXPORT PPCLabTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES LICENSE README.md CHANGELOG.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DOCDIR}/docs)
+install(EXPORT PPCLabTargets
+    FILE PPCLabTargets.cmake
+    NAMESPACE PPCLab::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PPCLab)
+configure_package_config_file(
+    cmake/PPCLabConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/PPCLabConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PPCLab)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/PPCLabConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/PPCLabConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/PPCLabConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PPCLab)
 
 add_executable(ppc_lab_tests tests/test_ppc_harness.cpp)
 target_link_libraries(ppc_lab_tests PRIVATE ppc_lab)
@@ -104,4 +139,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_research_tools COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_research_tools.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_malformed_intake COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_malformed_intake.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_repository_invariants COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/check_repository_invariants.py)
+    add_test(NAME ppc_lab_install_contract COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_install_contract.py ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR})
 endif()

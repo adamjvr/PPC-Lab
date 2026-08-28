@@ -4,6 +4,7 @@
 #include "ppclab/ppc/Elf32Loader.hpp"
 #include "ppclab/ppc/MachOLoader.hpp"
 #include "ppclab/ppc/PefLoader.hpp"
+#include "ppclab/ppc/UniversalImage.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -40,18 +41,26 @@ bool CallHarness::prepare(const CallConfig& config,
                           std::string& error,
                           std::vector<ImageSymbol>* symbols) {
     const bool hasRaw = !config.image.codePath.empty();
+    const bool hasImage = !config.image.imagePath.empty();
     const bool hasElf = !config.image.elfPath.empty();
     const bool hasMacho = !config.image.machoPath.empty();
     const bool hasPef = !config.image.pefPath.empty();
-    const unsigned inputCount = static_cast<unsigned>(hasRaw) + static_cast<unsigned>(hasElf) +
-                                static_cast<unsigned>(hasMacho) + static_cast<unsigned>(hasPef);
+    const unsigned inputCount = static_cast<unsigned>(hasRaw) + static_cast<unsigned>(hasImage) +
+                                static_cast<unsigned>(hasElf) + static_cast<unsigned>(hasMacho) + static_cast<unsigned>(hasPef);
     if (inputCount != 1) {
-        error = "exactly one of --code, --elf, --macho or --pef is required";
+        error = "exactly one of --code, --image, --elf, --macho or --pef is required";
         return false;
     }
 
     std::uint32_t imageEntry = 0;
-    if (hasElf) {
+    if (hasImage) {
+        UniversalImageInfo image{};
+        if (!UniversalImageLoader::loadFile(config.image.imagePath, memory, image, error,
+                                            config.image.imageBase, config.image.symbolBindings)) return false;
+        imageEntry = image.entry;
+        if (symbols) *symbols = image.symbols;
+        if (!chooseSymbolEntry(config.entrySymbol, image.symbols, imageEntry, error)) return false;
+    } else if (hasElf) {
         Elf32ImageInfo elf{};
         if (!Elf32Loader::loadFile(config.image.elfPath, memory, elf, error,
                                    config.image.imageBase, config.image.symbolBindings)) return false;

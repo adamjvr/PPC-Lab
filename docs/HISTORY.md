@@ -56,3 +56,7 @@ structured execution boundaries; and disassembly grew alongside execution. The
 regression suite added deterministic property/stress coverage, malformed native
 image intake, and optional builtin-vs-Unicorn state parity. PPC64/little-endian
 work was intentionally left out rather than diluting the stable PPC32-BE path.
+
+## v1.0.0 — General PPC Research Platform — 2026-08-27
+
+v1.0 unified native intake behind `UniversalImageLoader`, added the `--image`/`run` fast path, analysis/capability/doctor commands, and promoted PPC Lab to an installable C++ package with a tested downstream `find_package(PPCLab CONFIG)` contract. This marks completion of the original roadmap goal: a reusable, project-neutral PPC32-BE research platform that can accept supported binaries, isolate routines, model runtime boundaries, capture deterministic evidence, and feed results back into decompilation.

@@ -15,6 +15,7 @@ namespace ppclab::ppc {
 
 struct ImageConfig {
     std::string codePath{};
+    std::string imagePath{};
     std::string elfPath{};
     std::string machoPath{};
     std::string pefPath{};

@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0 — 2026-08-27 — General PPC Research Platform
+
+- Added `UniversalImageLoader`, a reusable core auto-detection/loading boundary for supported ELF32 PPC, Mach-O PPC32, and PEF/CFM images.
+- Added `--image FILE` to `call`/`run` and `disasm`; explicit format switches remain available for scripts that want them.
+- Added `run` as a readable alias for `call`.
+- Added `analyze FILE` for one-command format/entry/symbol triage.
+- Added `capabilities [--json]` for automation/decompiler/tool discovery and `doctor` for executable/backend self-diagnostics.
+- Made the CMake project version the CLI version source of truth rather than duplicating release strings in code.
+- Added a complete install/export contract: CLI, static core library, public headers, docs, `PPCLabConfig.cmake`, version file, and exported `PPCLab::core` target.
+- Added an install-contract regression that installs PPC Lab into a clean prefix, runs the installed CLI, discovers it with `find_package(PPCLab CONFIG)`, and compiles a downstream C++ consumer.
+- Promoted the binary-intake CLI regressions to exercise auto-detected ELF, Mach-O, and PEF execution paths.
+- Added v1.0 installation and stability/compatibility documentation and updated the quick start, architecture, binary-intake, CLI, and roadmap contracts.
+- v1.0 remains intentionally PPC32 big-endian first; PPC64, little-endian PowerPC, deeper OS personalities, JIT/debugger-server work, and richer decompiler plugins remain demand-driven post-1.0 capabilities.
+
 ## 0.5.0 — 2026-08-27 — PPC Coverage Monster
 
 - Expand builtin PPC32 execution across common integer, rotate, CR logical, update-indexed, byte-reversed, atomic reservation, cache/order, multiply/divide overflow, and floating-point instruction families.

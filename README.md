@@ -12,25 +12,20 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
-## v0.5.0 — PPC Coverage Monster
+## v1.0.0 — General PPC Research Platform
 
-v0.5 hardens the dependency-free PPC32 big-endian execution engine so real
-user-space routines are more likely to stop on a missing environment service
-than on an ordinary compiler-generated instruction:
+v1.0 closes the original roadmap promise: for a supported native container, you can hand PPC Lab the file itself, inspect it, choose a routine, execute it deterministically, bind/stub its environment, capture evidence, and feed that evidence back into decompilation without building target-specific execution infrastructure first.
 
-- broad PPC32 integer, load/store, CR, arithmetic-overflow, byte-reverse,
-  atomic-reservation, cache/order, and floating-point coverage expansion;
-- structured `sc`, `tw`, and `twi` interception with deterministic syscall
-  return bindings and explicit trap policy;
-- stronger CR/XER/FPSCR behavior for newly covered instruction families;
-- builtin-vs-Unicorn backend parity regression when Unicorn is available;
-- deterministic property/stress tests for interpreter, disassembler, memory,
-  and malformed ELF/Mach-O/PEF intake;
-- expanded disassembly names for the same instruction families the builtin
-  backend can execute.
+The v1.0 release adds:
 
-PPC Lab is still intentionally PPC32-BE first. PPC64 and little-endian support
-remain post-1.0 work unless a live target demands them.
+- a reusable `UniversalImageLoader` core that auto-detects ELF32 PPC, PPC32 Mach-O, and PowerPC PEF/CFM;
+- `--image FILE` for auto-detected disassembly/execution, plus `run` as an alias for `call`;
+- one-command `analyze`, machine-readable `capabilities --json`, and `doctor` diagnostics;
+- a proper installed C++ package (`find_package(PPCLab CONFIG)`, `PPCLab::core`) alongside the CLI;
+- an external-consumer install regression, so the public API is tested from outside the source tree;
+- a single version source in CMake and explicit v1 compatibility/stability documentation.
+
+PPC Lab remains intentionally **PPC32 big-endian first**. v1.0 is a stable research platform, not a claim to emulate every PowerPC CPU, operating system, or runtime. Missing behavior stays visible and demand-driven.
 
 ## Fast start
 
@@ -39,26 +34,22 @@ remain post-1.0 work unless a live target demands them.
 ./build/release/ppc-lab selftest --backend builtin
 ```
 
-Inspect any supported native image without executing it:
+Triage any supported native image without executing it:
 
 ```bash
-./build/release/ppc-lab image-info target.bin
+./build/release/ppc-lab analyze target.bin
 ./build/release/ppc-lab symbols target.bin
 ./build/release/ppc-lab metadata target.bin > target.metadata.json
 ```
 
-Disassemble or execute it:
+Then use the v1 fast path—no format switch required:
 
 ```bash
-./build/release/ppc-lab disasm --pef target.pef --count 32
-./build/release/ppc-lab call --pef target.pef --backend builtin
-
-./build/release/ppc-lab disasm --macho target.macho --count 32
-./build/release/ppc-lab call --macho target.macho --backend builtin
-
-./build/release/ppc-lab disasm --elf target.elf --count 32
-./build/release/ppc-lab call --elf target.elf --backend builtin
+./build/release/ppc-lab disasm --image target.bin --count 32
+./build/release/ppc-lab run --image target.bin --backend builtin
 ```
+
+Explicit `--elf`, `--macho`, and `--pef` switches remain supported when a script wants to assert one exact container type.
 
 For relocatable/shared images, choose a deterministic base and bind unresolved
 imports explicitly:
@@ -105,15 +96,15 @@ PPC Lab.
 ## Commands
 
 ```text
+ppc-lab doctor
+ppc-lab capabilities [--json]
 ppc-lab selftest [--backend auto|builtin|unicorn]
+ppc-lab analyze FILE [--json] [--symbols]
 ppc-lab image-info FILE
-ppc-lab elf-info FILE
-ppc-lab macho-info FILE
-ppc-lab pef-info FILE
 ppc-lab symbols FILE
 ppc-lab metadata FILE [--image-base HEX] [--bind NAME=ADDRESS]
-ppc-lab disasm (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
-ppc-lab call   (--code FILE | --elf FILE | --macho FILE | --pef FILE) ...
+ppc-lab disasm (--image FILE | --code FILE | --elf FILE | --macho FILE | --pef FILE) ...
+ppc-lab call|run (--image FILE | --code FILE | --elf FILE | --macho FILE | --pef FILE) ...
 ```
 
 Run `ppc-lab` without arguments for the compact syntax summary. The complete
@@ -152,6 +143,23 @@ ctest --test-dir build/release -C Release --output-on-failure
 The built-in interpreter and all native image loaders have no mandatory
 third-party runtime dependency. Unicorn is optional.
 
+## Install / consume as a library
+
+```bash
+cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+cmake --build build/release --parallel
+cmake --install build/release --prefix "$HOME/.local"
+```
+
+Downstream CMake projects can use:
+
+```cmake
+find_package(PPCLab 1.0 CONFIG REQUIRED)
+target_link_libraries(my_tool PRIVATE PPCLab::core)
+```
+
+See [`docs/INSTALLATION.md`](docs/INSTALLATION.md) and [`docs/STABILITY.md`](docs/STABILITY.md).
+
 ## Repository layout
 
 ```text
@@ -176,8 +184,10 @@ PPC-Lab/
 | Document | What it answers |
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
+| [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
+| [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |
-| [`docs/ELF32.md`](docs/ELF32.md) | Exactly what ELF32 PPC does v0.3 accept? |
+| [`docs/ELF32.md`](docs/ELF32.md) | What ELF32 PPC intake/relocation behavior is supported? |
 | [`docs/MACHO_PPC.md`](docs/MACHO_PPC.md) | What Mach-O PPC container/file/relocation behavior is supported? |
 | [`docs/PEF_CFM.md`](docs/PEF_CFM.md) | How does PEF/CFM loading, pidata, imports, exports, and relocation work? |
 | [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) | What commands/options/defaults/exit behavior exist? |
@@ -194,7 +204,7 @@ PPC-Lab/
 | [`docs/EXCEPTIONS_SYSCALLS.md`](docs/EXCEPTIONS_SYSCALLS.md) | How are `sc`, `tw`, and `twi` surfaced or stubbed? |
 | [`docs/TESTING_FUZZING.md`](docs/TESTING_FUZZING.md) | What parity, property, malformed-input, and sanitizer tests protect the engine? |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | How do I add an opcode, relocation, loader feature, or backend? |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | What is left before v1.0? |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | What remains deliberately post-1.0 and demand-driven? |
 | [`docs/HISTORY.md`](docs/HISTORY.md) | Where did PPC Lab come from? |
 
 ## Hard architecture rules
@@ -213,7 +223,7 @@ PPC-Lab/
 
 ## Scope
 
-PPC Lab v0.5 is a **PPC32 big-endian research execution platform**, not a full
+PPC Lab v1.0 is a **PPC32 big-endian research execution platform**, not a full
 Mac OS, Linux, console, or firmware emulator. Loader support does not imply that
 the target operating system/runtime has been emulated. Dynamic-linker-heavy,
 scattered/complex relocations, missing CPU instructions, syscalls, traps, or

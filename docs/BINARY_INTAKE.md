@@ -1,6 +1,6 @@
 # Binary intake architecture
 
-v0.3 turns PPC Lab from a raw-section harness into a reusable PowerPC image
+PPC Lab v1 exposes its native loaders through a shared `UniversalImageLoader`
 intake layer. ELF, Mach-O, and PEF use different file-format mechanics but feed
 the same execution model.
 
@@ -23,7 +23,13 @@ format.
 
 ## Format selection
 
-The CLI accepts exactly one input per call/disassembly:
+The v1 CLI accepts exactly one primary input per call/disassembly. The preferred native-image form is:
+
+```text
+--image FILE    auto-detect ELF32 PPC, Mach-O PPC32, or PEF/CFM
+```
+
+Explicit selectors remain supported for scripts that want to assert the format:
 
 ```text
 --code FILE     raw relocated PPC bytes
@@ -32,9 +38,7 @@ The CLI accepts exactly one input per call/disassembly:
 --pef FILE      PowerPC PEF/CFM
 ```
 
-`image-info FILE` and `symbols FILE` auto-detect supported native containers by
-magic. Execution still requires an explicit format switch so command lines are
-self-documenting and deterministic.
+`analyze FILE`, `image-info FILE`, and `symbols FILE` use the same format detection boundary as `--image`, preventing CLI and core detection rules from drifting apart.
 
 ## Address policy
 
@@ -98,10 +102,10 @@ needs it and preserve a minimal synthetic fixture as a regression.
 The public loader APIs are:
 
 ```text
+UniversalImageLoader::detectFile / inspectFile / loadFile
 Elf32Loader::inspectFile / loadFile
 MachOLoader::inspectFile / loadFile
 PefLoader::inspectFile / loadFile
 ```
 
-All loaders publish target-independent metadata structures and use the shared
-`ImageSymbol`/`SymbolBinding` model.
+`UniversalImageLoader` is the format-neutral v1 boundary. Format-specific loaders remain public for tooling that needs container-specific metadata. All loaders publish target-independent symbol state through the shared `ImageSymbol`/`SymbolBinding` model.

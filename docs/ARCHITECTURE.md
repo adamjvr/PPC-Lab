@@ -25,6 +25,9 @@ Native loaders translate file-format structures into a common research image:
 ```text
 binary container
       │
+      ▼
+ UniversalImageLoader (detect / common v1 boundary)
+      │
       ├── Elf32Loader
       ├── MachOLoader
       └── PefLoader
@@ -45,7 +48,7 @@ They do not own a target's runtime environment.
 `CallHarness` provides a uniform isolated-function environment over every image
 source:
 
-- exactly one image source;
+- exactly one image source (`--image` auto-detected, explicit native format, or raw);
 - deterministic heap and stack;
 - return trampoline;
 - entry selection;
@@ -163,3 +166,9 @@ runtime assumptions are policy rather than loader behavior.
 Snapshots and evidence formats are intentionally separate from backend internals.
 A future backend can participate if it honors `ExecutionBackend` and produces the
 same architectural state.
+
+## v1 public package boundary
+
+The source-tree API and installed API are the same public headers under `include/ppclab/ppc/`. CMake exports the static core as `PPCLab::core`; a downstream project can use `find_package(PPCLab 1.0 CONFIG REQUIRED)` after installation. The install-contract test compiles an external consumer against that exported target, so accidental source-tree-only include/link assumptions are release-blocking failures.
+
+The CLI version is sourced from the CMake project version. `capabilities --json` is the machine-readable discovery boundary for automation; `doctor` is the human/runtime sanity boundary.
