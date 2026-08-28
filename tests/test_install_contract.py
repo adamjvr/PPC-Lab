@@ -40,11 +40,15 @@ def main() -> int:
         exe = prefix / "bin" / exe_name
         assert exe.is_file(), exe
         assert (prefix / "include" / "ppclab" / "ppc" / "UniversalImage.hpp").is_file()
+        worker = prefix / "bin" / "ppc-lab-worker"
+        assert worker.is_file(), worker
+        schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
+        assert schema_candidates, "worker job schema was not installed"
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 1.0.0"
+        assert version.stdout.strip() == "PPC Lab 1.1.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
 

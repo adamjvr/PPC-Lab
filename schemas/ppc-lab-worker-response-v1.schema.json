@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-worker-response-v1.schema.json",
+  "title": "PPC Lab worker response v1",
+  "type": "object",
+  "required": ["schema", "ok", "exit_code", "timed_out"],
+  "properties": {
+    "schema": {"const": "ppc-lab-worker-response-v1"},
+    "id": {},
+    "ok": {"type": "boolean"},
+    "exit_code": {"type": ["integer", "null"]},
+    "timed_out": {"type": "boolean"},
+    "error": {"type": "string"},
+    "result": {"type": "object"},
+    "snapshot": {"type": "object"},
+    "stdout": {"type": "string"},
+    "stderr": {"type": "string"},
+    "command": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

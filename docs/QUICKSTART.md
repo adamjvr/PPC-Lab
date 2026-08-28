@@ -147,3 +147,19 @@ metadata/script/expected hashes under `profiles/<target>/`. Keep proprietary
 binary bytes external.
 
 See [`ADDING_A_TARGET.md`](ADDING_A_TARGET.md).
+
+## 9. Submit the same work as a server job
+
+For automation that should not depend on CLI spelling, use the v1 worker protocol:
+
+```bash
+ppc-lab-worker --ppc-lab ./build/release/ppc-lab --root "$PWD" run job.json
+```
+
+For a persistent pipe (including over SSH), use NDJSON stream mode:
+
+```bash
+ppc-lab-worker --root /srv/ppc-work stream
+```
+
+See [`WORKER_PROTOCOL.md`](WORKER_PROTOCOL.md).

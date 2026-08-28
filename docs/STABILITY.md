@@ -34,3 +34,9 @@ PPC Lab is a small research library, not an ABI-stable shared-library distributi
 - identical floating-point edge behavior across every host/backend unless covered by an explicit regression.
 
 When a real target exposes a missing capability, add the smallest correct implementation and preserve a regression. That demand-driven rule remains part of the platform contract.
+
+## Server-worker protocol
+
+Starting with v1.1, `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` are compatibility contracts. Fields may be added compatibly, but existing field meanings are not silently repurposed within the v1 major line. A breaking job/response change requires a new schema name rather than changing `*-v1` in place.
+
+The worker transport is intentionally not fixed to HTTP or any network stack. NDJSON framing is stable for stream mode; authentication, encryption, queues, scheduling, and network exposure remain deployment concerns.

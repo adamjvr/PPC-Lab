@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.1.0 — Server Worker Protocol
+
+v1.1 promotes PPC Lab's original server-side use case to a stable transport boundary. `ppc-lab-worker` accepts `ppc-lab-job-v1` JSON, executes it through the installed PPC Lab engine, and returns `ppc-lab-worker-response-v1` with deterministic result and snapshot evidence inline. Streaming mode uses NDJSON and is designed to survive individual guest failures without restarting the worker.
+
+The worker intentionally stays transport-neutral and dependency-light: pipe it locally, keep it open over SSH, run it in CI/container workers, or wrap it in infrastructure owned by the deployment. PPC Lab itself does not acquire an HTTP server, database, authentication stack, or cloud SDK.
+
+```bash
+ppc-lab-worker --root /srv/ppc-work run /srv/ppc-work/jobs/probe.json
+ssh ppc-host 'ppc-lab-worker --root /srv/ppc-work stream'
+```
+
+See [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) and the machine-readable contracts under [`schemas/`](schemas/).
+
 ## v1.0.0 — General PPC Research Platform
 
 v1.0 closes the original roadmap promise: for a supported native container, you can hand PPC Lab the file itself, inspect it, choose a routine, execute it deterministically, bind/stub its environment, capture evidence, and feed that evidence back into decompilation without building target-specific execution infrastructure first.
@@ -86,6 +99,7 @@ addresses, bindings, inputs, and expected results.
 - byte/float comparison, snapshot diffing, batch sweeps, and differential execution;
 - synthetic loader/relocation/execution regressions plus property/malformed-input stress coverage;
 - GPL/SPDX/version/target-neutrality repository invariants;
+- stable JSON/NDJSON server-worker protocol for remote/headless execution;
 - low-maintenance macOS/Linux/Windows CI.
 
 The original external Classic Mac regression remains preserved as a target
@@ -173,6 +187,7 @@ PPC-Lab/
 ├── tests/                synthetic deterministic regressions
 ├── profiles/             target-specific metadata/scripts/expectations
 ├── docs/                 usage, format, architecture, development docs
+├── schemas/              stable server-worker JSON contracts
 ├── Tools/                convenient shell entry points
 ├── .github/workflows/    CI
 ├── CONTRIBUTING.md
@@ -184,6 +199,7 @@ PPC-Lab/
 | Document | What it answers |
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
+| [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |
@@ -223,7 +239,7 @@ PPC-Lab/
 
 ## Scope
 
-PPC Lab v1.0 is a **PPC32 big-endian research execution platform**, not a full
+PPC Lab v1.x is a **PPC32 big-endian research execution platform**, not a full
 Mac OS, Linux, console, or firmware emulator. Loader support does not imply that
 the target operating system/runtime has been emulated. Dynamic-linker-heavy,
 scattered/complex relocations, missing CPU instructions, syscalls, traps, or

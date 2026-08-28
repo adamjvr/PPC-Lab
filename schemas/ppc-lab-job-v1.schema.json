@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-job-v1.schema.json",
+  "title": "PPC Lab execution job v1",
+  "type": "object",
+  "required": ["schema", "image"],
+  "properties": {
+    "schema": {"const": "ppc-lab-job-v1"},
+    "id": {"type": ["string", "number", "null"]},
+    "operation": {"const": "run"},
+    "image": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["auto", "raw", "elf", "macho", "pef"]},
+        "data_path": {"type": "string"},
+        "image_base": {}, "code_base": {}, "data_base": {}, "data_map_size": {},
+        "heap_base": {}, "heap_size": {}, "stack_base": {}, "stack_size": {}
+      },
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "backend": {"enum": ["auto", "builtin", "unicorn"]},
+        "entry": {}, "entry_symbol": {"type": "string"}, "toc": {}, "transition_vector": {},
+        "import_base": {}, "import_size": {}, "return_address": {}, "max_instructions": {},
+        "default_syscall_return": {}, "trace": {"type": "boolean"},
+        "ignore_traps": {"type": "boolean"}, "trace_range": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "registers": {"type": "object"},
+    "float_registers": {"type": "object"},
+    "bindings": {"type": "object"},
+    "writes_u32": {"type": "object"},
+    "writes_f32": {"type": "object"},
+    "stubs": {"type": "array", "items": {"type": "string"}},
+    "syscall_returns": {"type": "object"},
+    "dumps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["address", "size"],
+        "properties": {"address": {}, "size": {}},
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

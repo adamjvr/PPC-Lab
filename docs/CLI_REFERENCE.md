@@ -285,3 +285,7 @@ python3 scripts/ppc_evidence_pack.py --metadata META.json [--snapshot SNAP.json]
 
 See `RUNTIMES.md`, `SNAPSHOTS.md`, `EXPERIMENTS.md`, and
 `DECOMPILER_INTEGRATION.md` for the corresponding schemas and workflows.
+
+## Server worker
+
+`ppc-lab-worker` is installed beside the CLI but is a separate transport adapter rather than a `ppc-lab` subcommand. It accepts the stable `ppc-lab-job-v1` JSON contract in one-shot or NDJSON stream mode. See [`WORKER_PROTOCOL.md`](WORKER_PROTOCOL.md).

@@ -1,0 +1,16 @@
+{
+  "schema": "ppc-lab-job-v1",
+  "id": "raw-leaf-example",
+  "operation": "run",
+  "image": {
+    "path": "leaf.bin",
+    "kind": "raw",
+    "code_base": "0x10000000"
+  },
+  "execution": {
+    "backend": "builtin",
+    "entry": "0x10000000",
+    "max_instructions": 1000
+  },
+  "dumps": []
+}

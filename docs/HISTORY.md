@@ -60,3 +60,7 @@ work was intentionally left out rather than diluting the stable PPC32-BE path.
 ## v1.0.0 — General PPC Research Platform — 2026-08-27
 
 v1.0 unified native intake behind `UniversalImageLoader`, added the `--image`/`run` fast path, analysis/capability/doctor commands, and promoted PPC Lab to an installable C++ package with a tested downstream `find_package(PPCLab CONFIG)` contract. This marks completion of the original roadmap goal: a reusable, project-neutral PPC32-BE research platform that can accept supported binaries, isolate routines, model runtime boundaries, capture deterministic evidence, and feed results back into decompilation.
+
+## v1.1.0 — Server Worker Protocol — 2026-08-27
+
+v1.1 returned to PPC Lab's original server-side motivation without turning the repository into a service-maintenance burden. A small standard-library worker now translates stable JSON/NDJSON jobs into the v1 execution platform, returns deterministic results/snapshots, and adds filesystem/time containment suitable for subprocess, SSH, CI, and container deployments.

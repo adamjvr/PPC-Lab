@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0 — 2026-08-27 — Server Worker Protocol
+
+- Added `ppc-lab-worker`, a standard-library JSON/NDJSON execution adapter for server, SSH, CI, container, and subprocess deployments.
+- Added stable `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` contracts so client projects do not need to construct PPC Lab CLI arguments directly.
+- Worker responses embed the existing deterministic result and full snapshot formats, preserving v1 research evidence across transport boundaries.
+- Added `--root` filesystem containment, symlink-safe path resolution, per-job wall-clock timeouts, and optional command exposure for deployment/debugging policy.
+- Added machine-readable JSON Schema files and capability discovery for the worker protocols.
+- Added one-shot, failed-execution, root-containment, resilient NDJSON stream, and malformed-transport regressions.
+- Install trees now include `ppc-lab-worker` and the protocol schemas alongside the CLI/core package.
+
 ## 1.0.0 — 2026-08-27 — General PPC Research Platform
 
 - Added `UniversalImageLoader`, a reusable core auto-detection/loading boundary for supported ELF32 PPC, Mach-O PPC32, and PEF/CFM images.
