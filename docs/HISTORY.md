@@ -72,3 +72,7 @@ v1.2 moved PPC Lab's server use from individual transport-neutral jobs to durabl
 
 v1.3 extended the stable server-side stack across multiple machines while preserving the low-maintenance design. A standard-library controller now negotiates installed host capabilities, stages target bytes by SHA-256 over local/OpenSSH transports, bounds concurrency per host, filters placement by tags/backend support, and retries transient infrastructure failures without retrying ordinary deterministic guest failures. The job/worker protocol remains unchanged; the fleet is an outer deployment layer rather than a new execution API.
 
+## v1.4.0 — Evidence Server & Result Index — 2026-08-28
+
+v1.4 made fleet/orchestration output durable without adding a server daemon. PPC Lab now has a standard-library evidence tool that canonicalizes and content-addresses PPC Lab JSON, records every original source/raw hash, indexes execution/provenance fields in a local SQLite database, and verifies the object store by hash. Orchestration and fleet runs can publish directly into the store. The evidence boundary intentionally records target-input hashes rather than silently copying proprietary binary bytes.
+

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0 — 2026-08-28 — Evidence Server & Result Index
+
+- Add `ppc-lab-evidence`, a standard-library content-addressed JSON evidence store backed by local SQLite indexing.
+- Index worker, orchestration, fleet, result, snapshot, metadata, and other `ppc-lab-*` JSON evidence without copying target binaries into the store.
+- Deduplicate semantically identical JSON regardless of whitespace/key ordering; preserve every source path/raw SHA-256 as provenance.
+- Add indexed query filters for schema, engine version, backend, stop reason, host, name, success, cache-key prefix, and input SHA-256 prefix.
+- Add artifact lookup, aggregate reporting, and full object/hash verification with missing/corrupt/orphan detection.
+- Add optional `--evidence-store` publication to local orchestration and distributed fleet runs.
+- Add stable evidence query/report/verify v1 schemas, installed tooling, capability advertising, documentation, and end-to-end evidence-store regressions.
+- Preserve the low-maintenance server architecture: SQLite is a local index file, not a daemon/database service, and target binaries remain external unless explicitly handled by project-owned infrastructure.
+
 ## 1.3.0 — 2026-08-27 — Distributed Worker Fleet
 
 - Add `ppc-lab-fleet`, a dependency-free scheduler for local and OpenSSH worker fleets.

@@ -209,3 +209,14 @@ Real SSH deployments should additionally be validated in the environment that ow
 Use `ppc-lab-orchestrate` when one machine is enough. It is simpler and has fewer moving parts.
 
 Use `ppc-lab-fleet` when the same stable job set needs to span multiple installed PPC Lab hosts. Fleet mode does not replace the worker protocol or require client projects to understand SSH details; jobs remain `ppc-lab-job-v1`.
+
+## Publish completed fleet evidence
+
+A controller can index a completed run immediately:
+
+```bash
+ppc-lab-fleet fleet.json --out /srv/results/run-001 --evidence-store /srv/ppc-evidence
+```
+
+Only PPC Lab JSON output is copied into the evidence store. The fleet's staged target objects and source binaries are not copied by evidence ingestion; their SHA-256 fingerprints remain searchable provenance. See [`EVIDENCE_STORE.md`](EVIDENCE_STORE.md).
+

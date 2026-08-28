@@ -12,6 +12,26 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.4.0 — Evidence Server & Result Index
+
+v1.4 closes the loop between large server/fleet runs and long-lived reverse-engineering research. `ppc-lab-evidence` ingests PPC Lab JSON result directories into a content-addressed object store plus a local SQLite index, deduplicates semantic duplicates, preserves source/raw hashes, and makes old runs queryable by engine, backend, host, result status, cache key, or target-input SHA-256. It stores **evidence JSON, not proprietary target binaries**.
+
+```bash
+ppc-lab-evidence init /srv/ppc-evidence
+ppc-lab-evidence ingest /srv/ppc-evidence /srv/results/run-001
+ppc-lab-evidence query /srv/ppc-evidence --input-sha256 8f31d9 --ok yes
+ppc-lab-evidence report /srv/ppc-evidence
+ppc-lab-evidence verify /srv/ppc-evidence
+```
+
+Or publish automatically when a run finishes:
+
+```bash
+ppc-lab-fleet fleet.json --out /srv/results/run-002 --evidence-store /srv/ppc-evidence
+```
+
+See [`docs/EVIDENCE_STORE.md`](docs/EVIDENCE_STORE.md) for storage, query, integrity, provenance, and privacy/copyright boundaries.
+
 ## v1.3.0 — Distributed Worker Fleet
 
 v1.3 takes the stable server worker/orchestration stack across multiple machines without adding a daemon, database, cloud SDK, or bespoke network protocol. `ppc-lab-fleet` capability-probes local/OpenSSH workers, enforces one engine version, stages binary inputs by SHA-256, respects per-host slots/tags/backend availability, retries transient transport/time-out failures on another compatible host, and preserves deterministic result/cache identity.
@@ -129,6 +149,7 @@ addresses, bindings, inputs, and expected results.
 - stable JSON/NDJSON server-worker protocol for remote/headless execution;
 - parallel/resumable server orchestration with deterministic content-addressed execution caching;
 - multi-host local/OpenSSH fleet execution with capability negotiation, SHA-256 staging, host slots/tags, and failover;
+- content-addressed evidence storage/indexing with semantic JSON deduplication, provenance, queries, reports, and integrity verification;
 - low-maintenance macOS/Linux/Windows CI.
 
 The original external Classic Mac regression remains preserved as a target
@@ -210,7 +231,7 @@ PPC-Lab/
 ├── include/ppclab/ppc/   reusable public C++ API
 ├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              worker/orchestration/fleet, experiments, trace/diff tooling
+├── scripts/              worker/orchestration/fleet/evidence, experiments, trace/diff tooling
 ├── runtimes/             reusable runtime personality maps
 ├── integrations/         Ghidra / IDA / Binary Ninja evidence adapters
 ├── tests/                synthetic deterministic regressions
@@ -231,6 +252,7 @@ PPC-Lab/
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
 | [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
 | [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |
+| [`docs/EVIDENCE_STORE.md`](docs/EVIDENCE_STORE.md) | How do I index, query, deduplicate, and verify long-lived PPC Lab evidence? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |

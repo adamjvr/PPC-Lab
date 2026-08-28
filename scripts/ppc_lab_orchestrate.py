@@ -239,6 +239,24 @@ def _run_worker(spec: JobSpec, *, worker: Path, ppc_lab: Path, root: Path | None
     return response, elapsed
 
 
+def _publish_evidence(store: Path, result_dir: Path) -> tuple[bool, str]:
+    source = Path(__file__).with_name("ppc_lab_evidence.py")
+    installed = Path(__file__).with_name("ppc-lab-evidence")
+    if source.is_file():
+        command = [sys.executable, str(source)]
+    elif installed.is_file():
+        command = [str(installed)]
+    else:
+        tool = shutil.which("ppc-lab-evidence")
+        if not tool:
+            return False, "cannot find ppc-lab-evidence"
+        command = [tool]
+    proc = subprocess.run(command + ["ingest", str(store), str(result_dir), "--strict"], text=True, capture_output=True, check=False)
+    if proc.returncode != 0:
+        return False, proc.stderr.strip() or proc.stdout.strip() or f"exit {proc.returncode}"
+    return True, proc.stdout.strip()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Parallel/resumable PPC Lab job orchestration")
     parser.add_argument("manifest", type=Path, help=f"{MANIFEST_SCHEMA} JSON file")
@@ -253,6 +271,7 @@ def main() -> int:
     parser.add_argument("--no-cache-read", action="store_true", help="do not reuse records from --cache")
     parser.add_argument("--no-cache-write", action="store_true", help="do not write successful records to --cache")
     parser.add_argument("--expose-command", action="store_true", help="retain worker command details for debugging")
+    parser.add_argument("--evidence-store", type=Path, help="ingest the completed result directory into a PPC Lab evidence store")
     args = parser.parse_args()
     if args.parallel is not None and args.parallel < 1:
         parser.error("--parallel must be at least 1")
@@ -386,7 +405,14 @@ def main() -> int:
             for record in ordered
         ],
     }
+    if args.evidence_store is not None:
+        summary["evidence_store"] = str(args.evidence_store.expanduser().resolve())
     _atomic_json(out / "summary.json", summary)
+    if args.evidence_store is not None:
+        ok, detail = _publish_evidence(args.evidence_store.expanduser().resolve(), out)
+        if not ok:
+            print(f"ppc-lab-orchestrate: evidence ingestion failed: {detail}", file=sys.stderr)
+            return 2
     print(f"jobs={len(ordered)} executed={executed} resumed={resumed} cache_hits={cache_hits} failed={failures} summary={out/'summary.json'}")
     return 0 if failures == 0 else 1
 

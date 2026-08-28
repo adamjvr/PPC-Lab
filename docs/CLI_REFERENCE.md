@@ -289,3 +289,15 @@ See `RUNTIMES.md`, `SNAPSHOTS.md`, `EXPERIMENTS.md`, and
 ## Server worker
 
 `ppc-lab-worker` is installed beside the CLI but is a separate transport adapter rather than a `ppc-lab` subcommand. It accepts the stable `ppc-lab-job-v1` JSON contract in one-shot or NDJSON stream mode. See [`WORKER_PROTOCOL.md`](WORKER_PROTOCOL.md).
+
+## Installed operational companion commands
+
+The C++ `ppc-lab` CLI remains the execution/intake interface. Installed deployments also provide:
+
+- `ppc-lab-worker` — stable one-shot/NDJSON job execution;
+- `ppc-lab-orchestrate` — local parallel/resumable execution;
+- `ppc-lab-fleet` — local/OpenSSH distributed scheduling;
+- `ppc-lab-evidence` — content-addressed evidence storage/index/query/verification.
+
+Their full contracts live in `WORKER_PROTOCOL.md`, `ORCHESTRATION.md`, `FLEET.md`, and `EVIDENCE_STORE.md` respectively rather than expanding the core execution CLI parser.
+

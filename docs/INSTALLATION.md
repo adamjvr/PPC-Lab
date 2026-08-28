@@ -48,3 +48,8 @@ The exported core target propagates the required C++20 language feature and inst
 The same install step places `ppc-lab-worker`, `ppc-lab-orchestrate`, and `ppc-lab-fleet` in the install `bin` directory and the v1 JSON schemas under `share/ppc-lab/schemas/`. These tools use only Python's standard library. Fleet SSH transport additionally expects ordinary OpenSSH `ssh`/`scp` commands on the controller.
 
 The worker locates `ppc-lab` through `--ppc-lab`, `PPC_LAB_BIN`, or `PATH`. A normal fleet host therefore needs the installed `bin` directory on the noninteractive SSH `PATH`; see `docs/FLEET.md`.
+
+## Installed operational tools
+
+The install tree also provides `ppc-lab-worker`, `ppc-lab-orchestrate`, `ppc-lab-fleet`, and `ppc-lab-evidence`. These are dependency-free Python entry points around the stable execution/result contracts; the evidence tool uses Python's bundled `sqlite3` module and requires no database service. JSON schemas are installed under `share/ppc-lab/schemas`.
+

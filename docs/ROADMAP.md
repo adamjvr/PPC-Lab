@@ -22,7 +22,11 @@ The stable worker boundary can now be driven as server infrastructure without be
 
 The stable worker boundary now scales across multiple installed hosts without a service stack: capability/version negotiation, OpenSSH/local transports, content-addressed target staging, host slots/tags/backend eligibility, retries/failover for transient infrastructure faults, central cache/resume, and atomic fleet evidence are included.
 
-## Post-1.3 — only when justified
+## v1.4 — Evidence server & result index — COMPLETE
+
+Server/fleet output can now become durable research infrastructure instead of disposable result directories. A local content-addressed JSON object store plus SQLite index deduplicates evidence, preserves provenance, supports cross-run queries by target hash/execution metadata, verifies object integrity, and can be populated automatically by orchestration/fleet runs. Target binaries are deliberately not copied into the evidence store.
+
+## Post-1.4 — only when justified
 
 Potential future capability buckets:
 

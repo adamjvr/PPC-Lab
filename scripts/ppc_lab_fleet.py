@@ -449,6 +449,24 @@ def _eligible_hosts(spec: JobSpec, hosts: list[HostSpec], engine_version: str) -
     return eligible
 
 
+def _publish_evidence(store: Path, result_dir: Path) -> tuple[bool, str]:
+    source = Path(__file__).with_name("ppc_lab_evidence.py")
+    installed = Path(__file__).with_name("ppc-lab-evidence")
+    if source.is_file():
+        command = [sys.executable, str(source)]
+    elif installed.is_file():
+        command = [str(installed)]
+    else:
+        tool = shutil.which("ppc-lab-evidence")
+        if not tool:
+            return False, "cannot find ppc-lab-evidence"
+        command = [tool]
+    proc = subprocess.run(command + ["ingest", str(store), str(result_dir), "--strict"], text=True, capture_output=True, check=False)
+    if proc.returncode != 0:
+        return False, proc.stderr.strip() or proc.stdout.strip() or f"exit {proc.returncode}"
+    return True, proc.stdout.strip()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Distributed PPC Lab worker-fleet scheduler")
     parser.add_argument("manifest", type=Path, help=f"{FLEET_SCHEMA} JSON manifest")
@@ -463,6 +481,7 @@ def main() -> int:
     parser.add_argument("--scp", default=os.environ.get("PPC_LAB_SCP", "scp"), help="scp executable")
     parser.add_argument("--ssh-option", action="append", default=[], help="extra ssh -o option value (repeatable)")
     parser.add_argument("--no-resume", action="store_true", help="ignore valid records already present in --out")
+    parser.add_argument("--evidence-store", type=Path, help="ingest the completed fleet result directory into a PPC Lab evidence store")
     args = parser.parse_args()
 
     if args.retries is not None and args.retries < 0:
@@ -614,7 +633,14 @@ def main() -> int:
                           "error": host.error})
     summary = {"schema": SUMMARY_SCHEMA, "engine_version": engine_version, "jobs": len(jobs), **counters,
                "hosts": host_rows, "results": summary_rows}
+    if args.evidence_store is not None:
+        summary["evidence_store"] = str(args.evidence_store.expanduser().resolve())
     _atomic_json(out / "summary.json", summary)
+    if args.evidence_store is not None:
+        ok, detail = _publish_evidence(args.evidence_store.expanduser().resolve(), out)
+        if not ok:
+            print(f"ppc-lab-fleet: evidence ingestion failed: {detail}", file=sys.stderr)
+            return 2
     print(json.dumps(summary, sort_keys=True))
     return 1 if counters["failed"] else 0
 

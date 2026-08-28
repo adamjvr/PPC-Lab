@@ -187,3 +187,8 @@ or hang as a regression.
 ## v1 release/install check
 
 A release is not complete merely because the in-tree library tests pass. `ctest` must also pass `ppc_lab_install_contract`, which installs PPC Lab to a clean prefix and builds an external consumer with `find_package(PPCLab CONFIG)`. Keep the project version in `project(PPCLab VERSION ...)`; the CLI receives that value from CMake and should not gain a second hand-maintained version string.
+
+## Evidence-store changes
+
+Run `ppc_lab_evidence_store` for any index/storage/query change. Tests must cover semantic JSON deduplication, provenance, input-hash lookup, integrity verification, and at least one real worker/orchestration publication path. Do not add a target-binary archival side effect to evidence ingestion.
+

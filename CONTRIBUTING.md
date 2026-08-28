@@ -58,3 +58,8 @@ See `docs/DEVELOPMENT.md` for implementation rules and `docs/ADDING_A_TARGET.md`
 ## Server/fleet changes
 
 Worker, orchestration, or fleet changes must preserve the stable v1 job/response boundary unless a new schema is deliberately introduced. Network-independent CI tests should simulate multiple local hosts and failures; do not make the normal repository suite depend on public network access or developer SSH credentials. Transport code must keep root-containment checks before reading/hashing/staging source inputs.
+
+## Evidence-store changes
+
+Evidence-store changes must remain migration-conscious and dependency-light. `ppc-lab-evidence` may index PPC Lab JSON and target-input hashes, but it must not silently copy target executables/firmware into the store. Schema/query changes need deterministic temporary-directory regressions; integrity checks must hash the actual stored bytes, and an existing store must never be mutated by a read-only query/report/verify command.
+

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-evidence-verify-v1.schema.json",
+  "title": "PPC Lab evidence verification v1",
+  "type": "object",
+  "required": ["schema", "store", "ok", "artifacts", "missing", "corrupt", "orphans"],
+  "properties": {
+    "schema": {"const": "ppc-lab-evidence-verify-v1"},
+    "store": {"type": "string"},
+    "ok": {"type": "boolean"},
+    "artifacts": {"type": "integer", "minimum": 0},
+    "missing": {"type": "array"},
+    "corrupt": {"type": "array"},
+    "orphans": {"type": "array"}
+  },
+  "additionalProperties": true
+}

@@ -98,3 +98,8 @@ fingerprints, loaded symbols, and requested dumps. The snapshot schema is
 Normalized loader metadata and decompiler evidence intentionally use separate
 schemas (`ppc-lab-metadata-v1` and `ppc-lab-evidence-v1`) so execution-result
 compatibility is not coupled to external-tool integration.
+
+## Long-lived evidence indexing (v1.4)
+
+Execution/result schemas remain independent of the v1.4 evidence index. `ppc-lab-evidence` stores canonical copies of existing `ppc-lab-*` JSON documents and extracts query fields without changing the original document semantics. See [`EVIDENCE_STORE.md`](EVIDENCE_STORE.md).
+

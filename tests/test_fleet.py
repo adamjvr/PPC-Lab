@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI = Path(sys.argv[1]).resolve()
 FLEET = ROOT / "scripts" / "ppc_lab_fleet.py"
 WORKER = ROOT / "scripts" / "ppc_lab_worker.py"
+EVIDENCE = ROOT / "scripts" / "ppc_lab_evidence.py"
 
 
 def invoke(manifest: Path, out: Path, cache: Path, local_root: Path, *extra: str) -> subprocess.CompletedProcess[str]:
@@ -67,10 +68,15 @@ with tempfile.TemporaryDirectory(prefix="ppclab-fleet-test-") as td_text:
 
     out = td / "out"
     cache = td / "cache"
-    first = invoke(manifest, out, cache, td)
+    evidence_store = td / "evidence-store"
+    first = invoke(manifest, out, cache, td, "--evidence-store", str(evidence_store))
     assert first.returncode == 0, (first.stdout, first.stderr)
     summary = json.loads((out / "summary.json").read_text())
     assert summary["schema"] == "ppc-lab-fleet-summary-v1"
+    assert summary["evidence_store"] == str(evidence_store.resolve())
+    evidence_query = subprocess.run([sys.executable, str(EVIDENCE), "query", str(evidence_store), "--schema", "ppc-lab-fleet-job-result-v1", "--json"], text=True, capture_output=True, check=False)
+    assert evidence_query.returncode == 0, (evidence_query.stdout, evidence_query.stderr)
+    assert json.loads(evidence_query.stdout)["count"] == 4
     assert summary["executed"] == 4 and summary["failed"] == 0
     assert summary["resumed"] == 0 and summary["cache_hits"] == 0
     health = {row["name"]: row for row in summary["hosts"]}

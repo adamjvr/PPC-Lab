@@ -54,3 +54,10 @@ The content-cache key algorithm is an implementation detail of the v1.2 orchestr
 Within PPC Lab 1.x, the fleet v1 schema names are compatibility contracts under the same additive-field rule as worker/orchestration v1. Host placement strategy, content-store layout, and the exact cache-key algorithm remain implementation details; clients should consume the recorded schemas/cache key instead of reproducing those internals.
 
 A single fleet run intentionally requires one PPC Lab engine version across participating hosts. This is a reproducibility rule, not a promise that mixed-version execution is semantically safe.
+
+## v1.4 evidence-store compatibility
+
+`ppc-lab-evidence-query-v1`, `ppc-lab-evidence-report-v1`, and `ppc-lab-evidence-verify-v1` are machine-readable v1 contracts under the same additive-field rule. The local evidence database has its own integer store-schema version; breaking database changes require an explicit migration path rather than reinterpretation in place.
+
+Content-addressed object identity is SHA-256 of PPC Lab's canonical JSON encoding. Callers may persist the reported object SHA as stable semantic evidence identity, but should treat SQL table/layout details as implementation details. Evidence ingestion does not imply ownership, redistribution permission, or archival of target binaries; v1.4 records input hashes/provenance only.
+

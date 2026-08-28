@@ -163,3 +163,16 @@ ppc-lab-worker --root /srv/ppc-work stream
 ```
 
 See [`WORKER_PROTOCOL.md`](WORKER_PROTOCOL.md).
+
+## 10. Index useful server/fleet evidence
+
+For long-lived research, put completed PPC Lab JSON output into a central evidence store instead of relying on remembered result-directory names:
+
+```bash
+ppc-lab-evidence init /srv/ppc-evidence
+ppc-lab-evidence ingest /srv/ppc-evidence /srv/results/run-001
+ppc-lab-evidence query /srv/ppc-evidence --input-sha256 <target-sha-prefix> --ok yes
+```
+
+Or add `--evidence-store /srv/ppc-evidence` to `ppc-lab-orchestrate`/`ppc-lab-fleet`. The store indexes JSON evidence and input hashes; it does not copy target binaries. See [`EVIDENCE_STORE.md`](EVIDENCE_STORE.md).
+

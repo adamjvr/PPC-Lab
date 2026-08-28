@@ -134,3 +134,14 @@ Use the old batch tool when generating a small ad-hoc sweep is faster. Use orche
 ## When one host is no longer enough
 
 Keep using v1.2 orchestration when one machine can execute the run. It is the smaller failure surface. When the same stable jobs need multiple hosts, `ppc-lab-fleet` v1.3 adds capability negotiation, content-addressed staging, slots/tags, and OpenSSH failover without changing `ppc-lab-job-v1`. See `docs/FLEET.md`.
+
+## Publish completed runs to the evidence index
+
+Add `--evidence-store STORE` to ingest the completed result directory after `summary.json` is written:
+
+```bash
+ppc-lab-orchestrate manifest.json --out results/run-001 --evidence-store /srv/ppc-evidence
+```
+
+Publication is explicit. A requested evidence-ingestion failure is reported as an infrastructure error. See [`EVIDENCE_STORE.md`](EVIDENCE_STORE.md).
+
