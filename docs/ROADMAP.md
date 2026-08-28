@@ -46,7 +46,11 @@ Backend/engine disagreements can now be converted automatically into reviewable 
 
 Explicit PPC call-input domains can now be explored deterministically rather than by blind fuzzing. Guided BFS expands only coverage- or behavior-novel cases, small domains can use bounded Cartesian enumeration, target inputs are SHA-256-pinned under the existing root-safety model, and successful novel executions can be promoted directly into the behavioral corpus without copying private binaries.
 
-## Post-1.9 — only when justified
+## v2.0 — Autonomous research campaigns — COMPLETE
+
+The individual v1.x research primitives now compose into a bounded checkpointed lifecycle. A campaign can validate target/root/tool capability conditions, run deterministic guided exploration, promote successful novel cases into the behavioral corpus, replay/verify those durable expectations, automatically triage selected findings across engine/backend configurations, publish the resulting JSON evidence, and resume an interrupted run only when the exact campaign manifest and engine version still match. This remains a standard-library orchestration layer rather than a second execution engine or a permanent service requirement.
+
+## Post-2.0 — only when justified
 
 Potential future capability buckets:
 

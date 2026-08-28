@@ -299,6 +299,8 @@ The C++ `ppc-lab` CLI remains the execution/intake interface. Installed deployme
 - `ppc-lab-fleet` — local/OpenSSH distributed scheduling;
 - `ppc-lab-evidence` — content-addressed evidence storage/index/query/verification.
 - `ppc-lab-triage` — automated trace/snapshot divergence isolation and reduced repro bundles.
+- `ppc-lab-explore` — deterministic bounded input-domain exploration and direct corpus promotion.
+- `ppc-lab-campaign` — checkpointed autonomous exploration → corpus → triage → evidence lifecycle.
 
 Their full contracts live in `WORKER_PROTOCOL.md`, `ORCHESTRATION.md`, `FLEET.md`, `EVIDENCE_STORE.md`, and `DIFFERENTIAL_TRIAGE.md` respectively rather than expanding the core execution CLI parser.
 

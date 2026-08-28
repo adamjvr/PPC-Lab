@@ -12,6 +12,18 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.0.0 — Autonomous Research Campaigns
+
+v2.0 composes the stable v1.x execution, guided-exploration, behavioral-corpus, differential-triage, and evidence-store layers into one bounded checkpointed research lifecycle. `ppc-lab-campaign` can validate a plan without guest execution, explore explicit input domains, promote successful novel behavior, replay durable cases, triage selected discoveries across two engine/backend configurations, publish evidence, and resume interrupted runs without an external queue or database. Target binaries remain outside campaign artifacts by default.
+
+```bash
+ppc-lab-campaign campaign.json --out /srv/ppc-runs/campaign-001
+ppc-lab-campaign campaign.json --out /srv/ppc-runs/campaign-001 --resume
+ppc-lab-campaign campaign.json --out /srv/ppc-runs/dry-run --dry-run
+```
+
+See [`docs/CAMPAIGNS.md`](docs/CAMPAIGNS.md).
+
 ## v1.9.0 — Guided Exploration & Corpus Synthesis
 
 v1.9 turns known PPC call inputs into a deterministic discovery frontier. `ppc-lab-explore` varies explicit register/write/binding/syscall domains, keeps only executions that add dynamic PC coverage or a new stable architectural outcome, and can promote successful novel cases directly into the behavioral corpus without copying private target binaries.
@@ -290,7 +302,7 @@ PPC-Lab/
 ├── include/ppclab/ppc/   reusable public C++ API
 ├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              worker/orchestration/fleet/evidence, experiments, trace/diff tooling
+├── scripts/              worker/campaign/orchestration/fleet/evidence and research tooling
 ├── runtimes/             reusable runtime personality maps
 ├── integrations/         Ghidra / IDA / Binary Ninja evidence adapters
 ├── tests/                synthetic deterministic regressions
@@ -308,6 +320,7 @@ PPC-Lab/
 | Document | What it answers |
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
+| [`docs/CAMPAIGNS.md`](docs/CAMPAIGNS.md) | How do I run a bounded autonomous exploration → corpus → triage → evidence campaign? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
 | [`docs/BEHAVIORAL_CORPUS.md`](docs/BEHAVIORAL_CORPUS.md) | How do I promote experiments into replayable long-lived regressions? |
 | [`docs/DIFFERENTIAL_TRIAGE.md`](docs/DIFFERENTIAL_TRIAGE.md) | How do I isolate and bundle the first backend/version behavioral divergence? |

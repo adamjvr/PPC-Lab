@@ -176,3 +176,14 @@ ppc-lab-evidence query /srv/ppc-evidence --input-sha256 <target-sha-prefix> --ok
 
 Or add `--evidence-store /srv/ppc-evidence` to `ppc-lab-orchestrate`/`ppc-lab-fleet`. The store indexes JSON evidence and input hashes; it does not copy target binaries. See [`EVIDENCE_STORE.md`](EVIDENCE_STORE.md).
 
+
+## Run a bounded autonomous campaign
+
+Once a reverse-engineering question has explicit input domains, use `ppc-lab-campaign` instead of hand-running the explorer/corpus/triage/evidence loop:
+
+```bash
+ppc-lab-campaign campaign.json --out ./runs/campaign-001 --dry-run
+ppc-lab-campaign campaign.json --out ./runs/campaign-001
+```
+
+If the server process is interrupted, rerun the exact same manifest/engine with `--resume`. See `CAMPAIGNS.md` for the manifest and checkpoint contract.

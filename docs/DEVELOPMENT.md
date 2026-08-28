@@ -167,6 +167,7 @@ The v0.4 automation formats are deliberately versioned:
 - `ppc-lab-evidence-v1` — decompiler-neutral symbols/comments;
 - `ppc-lab-corpus-v1` / `ppc-lab-corpus-case-v1` — durable behavioral regression corpora/cases;
 - `ppc-lab-corpus-replay-summary-v1` — machine-readable replay outcome;
+- `ppc-lab-campaign-v1` / `ppc-lab-campaign-state-v1` / `ppc-lab-campaign-summary-v1` — autonomous campaign composition/checkpoint/result contracts;
 - `ppc-lab-experiment-v1` / `ppc-lab-differential-v1` — input manifests.
 
 Breaking semantics require a new schema name. Additive fields are preferred.
@@ -200,3 +201,7 @@ Run `ppc_lab_evidence_store` for any index/storage/query change. Tests must cove
 ## Behavioral-corpus changes
 
 Run `ppc_lab_behavioral_corpus` for any corpus format, expectation-extraction, input-resolution, bless, or minimization change. A regression should cover at least one promotion and replay, deliberate behavioral drift, explicit blessing, minimization, and embedded-object corruption detection. Keep proprietary-input copying opt-in.
+
+## Campaign-layer development
+
+Campaign changes should be tested as composition behavior, not by mocking away every subsystem. The synthetic `test_autonomous_campaign.py` regression exercises real explorer, worker, corpus, triage, evidence, resume, dry-run, and root-safety paths against a tiny PPC program. Preserve that end-to-end property whenever campaign policy changes.

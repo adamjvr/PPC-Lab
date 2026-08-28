@@ -80,3 +80,7 @@ v1.9 adds three stable JSON contracts:
 - `ppc-lab-exploration-summary-v1`
 
 These are installed with the rest of PPC Lab's schemas and advertised by `ppc-lab capabilities --json`.
+
+## Campaign integration
+
+For one exploration frontier, use `ppc-lab-explore` directly. When exploration should automatically flow into corpus replay, differential triage, and evidence publication, embed the unchanged `ppc-lab-exploration-v1` object inside a `ppc-lab-campaign-v1` manifest and run `ppc-lab-campaign`. The campaign layer resolves/contains structural target paths first and can tighten `max_cases`; it does not redefine exploration novelty semantics.

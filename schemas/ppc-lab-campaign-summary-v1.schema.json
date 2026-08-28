@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-campaign-summary-v1.schema.json",
+  "title": "PPC Lab autonomous campaign summary v1",
+  "type": "object",
+  "required": ["schema", "status", "name", "engine_version", "manifest_sha256", "out"],
+  "properties": {
+    "schema": {"const": "ppc-lab-campaign-summary-v1"},
+    "status": {"type": "string"},
+    "name": {"type": "string"},
+    "engine_version": {"type": "string"},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "out": {"type": "string"},
+    "findings": {"type": "array", "items": {"type": "string"}},
+    "exploration": {"type": "object"},
+    "corpus": {"type": "object"},
+    "triage": {"type": "object"},
+    "evidence": {"type": "object"},
+    "stages": {"type": "object"},
+    "plan": {"type": "object"}
+  },
+  "additionalProperties": true
+}

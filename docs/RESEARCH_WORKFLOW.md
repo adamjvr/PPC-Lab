@@ -178,3 +178,13 @@ ppc-lab-triage run job.json \
 ```
 
 Start from the reported first divergence and architectural-state delta. If the traces later resynchronize, treat the bounded divergent window as the immediate research surface. Promote a fixed case into the behavioral corpus after the discrepancy is understood, so the bug cannot silently return.
+## 11. Promote repeated discovery work into a campaign
+
+When the workflow has become “run the explorer, preserve novel cases, replay the corpus, triage interesting disagreements, then ingest evidence,” stop hand-running those commands and describe the bounded lifecycle in `ppc-lab-campaign-v1`.
+
+```bash
+ppc-lab-campaign campaign.json --out /srv/ppc-runs/current
+```
+
+Use `--dry-run` first when targeting a new server/root layout. Use `--resume` only for the exact same manifest and PPC Lab engine version. Treat `complete-with-findings` as useful research output; treat `complete-with-regressions` as a durable behavioral expectation that changed and needs review. See `CAMPAIGNS.md`.
+

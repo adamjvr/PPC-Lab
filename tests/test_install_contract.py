@@ -56,6 +56,8 @@ def main() -> int:
         assert triage.is_file(), triage
         explorer = prefix / "bin" / "ppc-lab-explore"
         assert explorer.is_file(), explorer
+        campaign = prefix / "bin" / "ppc-lab-campaign"
+        assert campaign.is_file(), campaign
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -81,11 +83,15 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-case-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-summary-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-state-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-summary-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-triage-summary-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 1.9.0"
+        assert version.stdout.strip() == "PPC Lab 2.0.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -101,13 +107,17 @@ def main() -> int:
         assert '"exploration": "ppc-lab-exploration-v1"' in caps.stdout
         assert '"exploration_case": "ppc-lab-exploration-case-v1"' in caps.stdout
         assert '"exploration_summary": "ppc-lab-exploration-summary-v1"' in caps.stdout
+        assert '"campaign": "ppc-lab-campaign-v1"' in caps.stdout
+        assert '"campaign_state": "ppc-lab-campaign-state-v1"' in caps.stdout
+        assert '"campaign_summary": "ppc-lab-campaign-summary-v1"' in caps.stdout
+        assert '"campaign_triage_summary": "ppc-lab-campaign-triage-summary-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()
         (consumer / "CMakeLists.txt").write_text(
             "cmake_minimum_required(VERSION 3.20)\n"
             "project(PPCLabConsumer LANGUAGES CXX)\n"
-            "find_package(PPCLab 1.0 CONFIG REQUIRED)\n"
+            "find_package(PPCLab 2.0 CONFIG REQUIRED)\n"
             "add_executable(consumer main.cpp)\n"
             "target_link_libraries(consumer PRIVATE PPCLab::core)\n",
             encoding="utf-8",

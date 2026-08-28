@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0 — 2026-08-28 — Autonomous Research Campaigns
+
+- Add `ppc-lab-campaign`, a standard-library composition layer that drives guided exploration, behavioral-corpus promotion/verification/replay, differential triage, and evidence publication as one bounded research lifecycle.
+- Add manifest-hash + engine-version checkpoint state and exact `--resume` semantics so interrupted campaigns can continue without silently changing their research conditions.
+- Add `--dry-run` planning/root validation that resolves target inputs and engine capabilities without executing guest code.
+- Add campaign budgets for exploration cases, triage cases, per-case wall time, and optional overall wall time while preserving each guest job's independent instruction limit.
+- Add automatic triage selection for novel, failed, novel-or-failed, or all exploration cases and support a second installed engine/worker for cross-version differential campaigns.
+- Add automatic evidence-store publication and verification after campaign artifacts are finalized; campaign/corpus/triage/evidence outputs preserve target hashes rather than copying target binaries.
+- Add stable campaign manifest/state/summary/triage-summary v1 schemas, installed `ppc-lab-campaign`, capability advertising, comprehensive campaign documentation, and end-to-end resume/dry-run/root-safety regression coverage.
+- Mark the v2 boundary as workflow autonomy above the stable execution primitives; the target-neutral C++ engine remains focused on PPC execution/intake rather than campaign policy.
+
 ## 1.9.0 — 2026-08-28 — Guided Exploration & Corpus Synthesis
 
 - Add installed `ppc-lab-explore`, a deterministic exploration engine above the stable worker protocol.

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-campaign-state-v1.schema.json",
+  "title": "PPC Lab autonomous campaign checkpoint state v1",
+  "type": "object",
+  "required": ["schema", "manifest_sha256", "engine_version", "completed", "stages"],
+  "properties": {
+    "schema": {"const": "ppc-lab-campaign-state-v1"},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "engine_version": {"type": "string"},
+    "completed": {"type": "array", "items": {"type": "string"}},
+    "stages": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -96,3 +96,7 @@ v1.7 converted deterministic experiments into a first-class long-lived regressio
 ## v1.9.0 — Guided Exploration & Corpus Synthesis — 2026-08-28
 
 v1.9 added a deterministic exploration layer above the stable worker protocol. Explicit register, write, binding, and syscall-return domains can be explored either exhaustively for small spaces or through a novelty-guided breadth-first frontier. Dynamic PC coverage and backend-neutral architectural outcome fingerprints decide which cases remain interesting, and successful novel cases can be promoted directly into the behavioral corpus while target binaries remain external and SHA-256-pinned.
+## v2.0.0 — Autonomous Research Campaigns — 2026-08-28
+
+v2.0 closed the loop between the v1.x research primitives without bloating the C++ execution core. `ppc-lab-campaign` now treats exploration, corpus replay, differential triage, and evidence publication as checkpointed stages under one manifest/hash/root/budget contract. Successful novel cases can flow directly into durable regressions; selected findings can flow into standard triage bundles; all resulting PPC Lab JSON can flow into the evidence index. Resume is deliberately exact—changing the campaign manifest or PPC Lab engine version requires a new run directory—and private target bytes remain external by default.
+

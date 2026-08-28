@@ -85,3 +85,11 @@ A triage bundle is evidence, not a binary archive. Input SHA-256/size provenance
 `ppc-lab-exploration-v1`, `ppc-lab-exploration-case-v1`, and `ppc-lab-exploration-summary-v1` are additive v1 contracts above `ppc-lab-job-v1`. Existing mutation-path meanings and novelty fields will not be silently repurposed within PPC Lab 1.x. New optional novelty measurements or mutation roots may be added only when they preserve the worker/root safety boundary.
 
 Exploration is deterministic for a given manifest, engine version, target bytes, and backend. The exact internal frontier ordering is an implementation detail; consumers should use the emitted case/summary records rather than reconstructing the scheduler. Target-input identity is SHA-256 plus size, and corpus promotion does not imply permission to redistribute target bytes.
+## v2 campaign compatibility
+
+PPC Lab 2.0 adds workflow autonomy without redefining the stable v1 execution schemas. `ppc-lab-job-v1`, worker responses, trace/corpus/triage/evidence contracts, and the target-neutral C++ execution boundaries keep their existing schema identities. v2.0 adds `ppc-lab-campaign-v1`, `ppc-lab-campaign-state-v1`, `ppc-lab-campaign-summary-v1`, and `ppc-lab-campaign-triage-summary-v1` as additive composition contracts.
+
+Campaign resume intentionally pins both the exact manifest SHA-256 and PPC Lab engine version. That strictness is part of the reproducibility contract rather than a compatibility defect: a modified manifest or changed engine must begin a new campaign output directory. Additive optional campaign fields may appear in 2.x; incompatible meanings require a new schema identifier.
+
+The v2 CMake package version is a new major-version boundary for package discovery. The public C++ engine remains source-oriented and target-neutral; consumers should rebuild and request the v2 package explicitly even though v2.0 does not intentionally remove the core v1 intake/execution concepts.
+

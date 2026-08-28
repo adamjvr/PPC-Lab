@@ -72,3 +72,7 @@ Changes to `ppc-lab-api` must preserve `ppc-lab-job-v1` as the execution payload
 ## Exploration manifests
 
 Keep guided-exploration domains deterministic and bounded. Prefer values justified by the target ABI/data model over enormous random domains. New mutation-axis families must preserve the worker/root safety boundary and arrive with a regression test. Do not commit proprietary target binaries merely to make an exploration manifest self-contained.
+## Campaign-layer changes
+
+Changes to `ppc-lab-campaign` should compose existing stable tools/protocols rather than duplicate execution, corpus, triage, or evidence semantics. New campaign policy must remain bounded, checkpointable, root-safe, and covered by a synthetic end-to-end regression. Do not make campaign convenience a reason to archive proprietary target binaries.
+

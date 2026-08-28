@@ -21,7 +21,7 @@ cmake --install build/release --prefix "$HOME/.local"
 The install tree contains:
 
 - `bin/ppc-lab`;
-- `bin/ppc-lab-worker`, `bin/ppc-lab-orchestrate`, and `bin/ppc-lab-fleet`;
+- `bin/ppc-lab-worker`, `bin/ppc-lab-orchestrate`, `bin/ppc-lab-fleet`, and `bin/ppc-lab-campaign`;
 - the static PPC Lab core library;
 - `include/ppclab/ppc/*.hpp`;
 - `PPCLabConfig.cmake`, `PPCLabConfigVersion.cmake`, and exported targets;
@@ -51,9 +51,21 @@ The worker locates `ppc-lab` through `--ppc-lab`, `PPC_LAB_BIN`, or `PATH`. A no
 
 ## Installed operational tools
 
-The install tree also provides `ppc-lab-worker`, `ppc-lab-orchestrate`, `ppc-lab-fleet`, `ppc-lab-evidence`, and `ppc-lab-corpus`. These are dependency-free Python entry points around the stable execution/result contracts; the evidence tool uses Python's bundled `sqlite3` module and requires no database service. JSON schemas are installed under `share/ppc-lab/schemas`.
+The install tree also provides `ppc-lab-worker`, `ppc-lab-orchestrate`, `ppc-lab-fleet`, `ppc-lab-evidence`, `ppc-lab-corpus`, `ppc-lab-triage`, `ppc-lab-explore`, and `ppc-lab-campaign`. These are dependency-free Python entry points around the stable execution/result contracts; the evidence tool uses Python's bundled `sqlite3` module and requires no database service. JSON schemas are installed under `share/ppc-lab/schemas`.
 
 
 ## Behavioral corpus tool
 
 `cmake --install` also installs `ppc-lab-corpus` and the v1 corpus schemas. The corpus command uses only Python's standard library and invokes the installed worker/CLI by default, so a normal PPC Lab install is sufficient for promote/replay/verify workflows. Private target binaries are not installed or copied by this tool unless embedding is explicitly requested.
+
+### Autonomous campaign tool
+
+`cmake --install` installs `ppc-lab-campaign` plus its v1 manifest/state/summary schemas. The campaign driver uses only Python's standard library and composes the installed PPC Lab worker/explorer/corpus/triage/evidence tools. No queue server, database service, or web framework is required.
+
+A server install can therefore run:
+
+```bash
+ppc-lab-campaign /srv/research/campaign.json --out /srv/research/runs/001
+```
+
+Long-lived corpus/evidence directories may be outside the run directory. Target binary input paths remain subject to the campaign/worker root boundary.
