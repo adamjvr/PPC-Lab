@@ -165,6 +165,8 @@ The v0.4 automation formats are deliberately versioned:
 - `ppc-lab-trace-analysis-v1` — dynamic coverage/CFG/hotness analysis;
 - `ppc-lab-trace-diff-v1` — behavioral trace comparison;
 - `ppc-lab-evidence-v1` — decompiler-neutral symbols/comments;
+- `ppc-lab-corpus-v1` / `ppc-lab-corpus-case-v1` — durable behavioral regression corpora/cases;
+- `ppc-lab-corpus-replay-summary-v1` — machine-readable replay outcome;
 - `ppc-lab-experiment-v1` / `ppc-lab-differential-v1` — input manifests.
 
 Breaking semantics require a new schema name. Additive fields are preferred.
@@ -194,3 +196,7 @@ A release is not complete merely because the in-tree library tests pass. `ctest`
 
 Run `ppc_lab_evidence_store` for any index/storage/query change. Tests must cover semantic JSON deduplication, provenance, input-hash lookup, integrity verification, and at least one real worker/orchestration publication path. Do not add a target-binary archival side effect to evidence ingestion.
 
+
+## Behavioral-corpus changes
+
+Run `ppc_lab_behavioral_corpus` for any corpus format, expectation-extraction, input-resolution, bless, or minimization change. A regression should cover at least one promotion and replay, deliberate behavioral drift, explicit blessing, minimization, and embedded-object corruption detection. Keep proprietary-input copying opt-in.

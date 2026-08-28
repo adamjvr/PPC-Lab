@@ -34,7 +34,11 @@ The persistent network/service transport became justified for easier cross-proje
 
 Instruction traces can now be promoted into durable behavioral evidence: dynamic coverage, hot functions/instructions, observed blocks/control flow/calls, Graphviz export, trace diffing, evidence-store ingestion, and decompiler-evidence enrichment.
 
-## Post-1.6 — only when justified
+## v1.7 — Behavioral corpus & replay — COMPLETE
+
+Successful experiments can now become durable engine regressions instead of disappearing into result folders. Corpus cases pin every input by SHA-256, preserve stable behavioral expectations independently of backend labels/transport noise, replay against current PPC Lab builds, support external private inputs or explicit redistributable embedding, and provide deliberate bless/minimize workflows.
+
+## Post-1.7 — only when justified
 
 Potential future capability buckets:
 

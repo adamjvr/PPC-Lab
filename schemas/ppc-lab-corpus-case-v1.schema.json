@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-corpus-case-v1.schema.json",
+  "title": "PPC Lab behavioral corpus case v1",
+  "type": "object",
+  "required": ["schema", "id", "inputs", "job", "expectation"],
+  "properties": {
+    "schema": {"const": "ppc-lab-corpus-case-v1"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "description": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "created_with": {"type": "object"},
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "sha256", "size", "path_hint"],
+        "properties": {
+          "field": {"enum": ["image.path", "image.data_path"]},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "size": {"type": "integer", "minimum": 0},
+          "path_hint": {"type": "string"},
+          "embedded": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "job": {"type": "object"},
+    "expectation": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-corpus-v1.schema.json",
+  "title": "PPC Lab behavioral corpus manifest v1",
+  "type": "object",
+  "required": ["schema", "format_version"],
+  "properties": {
+    "schema": {"const": "ppc-lab-corpus-v1"},
+    "format_version": {"const": 1}
+  },
+  "additionalProperties": true
+}

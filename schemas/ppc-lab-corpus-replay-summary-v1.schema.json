@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-corpus-replay-summary-v1.schema.json",
+  "title": "PPC Lab behavioral corpus replay summary v1",
+  "type": "object",
+  "required": ["schema", "engine_version", "cases", "passed", "failed", "results"],
+  "properties": {
+    "schema": {"const": "ppc-lab-corpus-replay-summary-v1"},
+    "engine_version": {"type": "string"},
+    "cases": {"type": "integer", "minimum": 0},
+    "passed": {"type": "integer", "minimum": 0},
+    "failed": {"type": "integer", "minimum": 0},
+    "results": {"type": "array"}
+  },
+  "additionalProperties": true
+}

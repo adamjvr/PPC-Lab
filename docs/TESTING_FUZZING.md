@@ -21,7 +21,8 @@ Important v0.5 suites:
 - `ppc_lab_malformed_intake` — deterministic malformed ELF/Mach-O/PEF/fat-image
   corpus ensuring inspection rejects bad data without crashes or hangs;
 - `ppc_lab_repository_invariants` — GPLv3/SPDX, version synchronization, and
-  target-neutral core enforcement.
+  target-neutral core enforcement;
+- `ppc_lab_behavioral_corpus` — promote/replay/bless/minimize and embedded-input integrity for long-lived behavioral fixtures.
 
 Randomized tests use fixed seeds. A failing case must therefore be reproducible.
 

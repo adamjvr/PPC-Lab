@@ -84,3 +84,7 @@ v1.5 added an optional dependency-free HTTP transport after the server/fleet/evi
 ## v1.6.0 — Trace Intelligence & Coverage Analytics — 2026-08-28
 
 v1.6 promoted instruction traces into reusable behavioral-analysis artifacts: dynamic coverage/hotness, observed CFG/calls, A/B trace comparison, Graphviz export, evidence-store persistence, and decompiler-evidence enrichment while keeping `ppc-lab-trace-v1` compatible.
+
+## v1.7.0 — Behavioral Corpus & Replay — 2026-08-28
+
+v1.7 converted deterministic experiments into a first-class long-lived regression corpus, with SHA-256-pinned external inputs, backend-neutral behavioral expectations, replay/bless/minimize workflows, and explicit-only fixture embedding.

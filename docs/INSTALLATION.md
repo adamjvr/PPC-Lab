@@ -51,5 +51,9 @@ The worker locates `ppc-lab` through `--ppc-lab`, `PPC_LAB_BIN`, or `PATH`. A no
 
 ## Installed operational tools
 
-The install tree also provides `ppc-lab-worker`, `ppc-lab-orchestrate`, `ppc-lab-fleet`, and `ppc-lab-evidence`. These are dependency-free Python entry points around the stable execution/result contracts; the evidence tool uses Python's bundled `sqlite3` module and requires no database service. JSON schemas are installed under `share/ppc-lab/schemas`.
+The install tree also provides `ppc-lab-worker`, `ppc-lab-orchestrate`, `ppc-lab-fleet`, `ppc-lab-evidence`, and `ppc-lab-corpus`. These are dependency-free Python entry points around the stable execution/result contracts; the evidence tool uses Python's bundled `sqlite3` module and requires no database service. JSON schemas are installed under `share/ppc-lab/schemas`.
 
+
+## Behavioral corpus tool
+
+`cmake --install` also installs `ppc-lab-corpus` and the v1 corpus schemas. The corpus command uses only Python's standard library and invokes the installed worker/CLI by default, so a normal PPC Lab install is sufficient for promote/replay/verify workflows. Private target binaries are not installed or copied by this tool unless embedding is explicitly requested.

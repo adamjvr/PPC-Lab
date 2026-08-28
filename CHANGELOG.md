@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.0 — 2026-08-28 — Behavioral Corpus & Replay
+
+- Add `ppc-lab-corpus`, a standard-library behavioral regression corpus manager above the stable worker job/response contracts.
+- Promote a job into a durable case by SHA-256 pinning every code/data input and recording backend-neutral stable result/snapshot expectations.
+- Keep target binaries external by default; `--embed-input` is explicit and intended only for redistributable/synthetic fixtures.
+- Replay selected cases/tags across current engine versions and builtin/Unicorn backends, emitting `ppc-lab-corpus-replay-summary-v1` machine-readable summaries.
+- Resolve private inputs by explicit SHA-256 mapping or bounded input roots, verify bytes before execution, and stage them into temporary contained worker roots.
+- Add corpus integrity verification, explicit `bless --yes` for intentional baseline changes, and failing-case setup minimization for initial register/write/binding state.
+- Add corpus/case/replay JSON Schemas, installed tooling, capability discovery, documentation, and end-to-end promotion/replay/bless/minimize/corruption regressions.
+
 ## 1.6.0 — 2026-08-28 — Trace Intelligence & Coverage Analytics
 
 - Add installed `ppc-lab-trace-capture`, `ppc-lab-trace-analyze`, and `ppc-lab-trace-diff` commands while preserving `ppc-lab-trace-v1`.

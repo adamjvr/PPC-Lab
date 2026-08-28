@@ -67,3 +67,9 @@ Content-addressed object identity is SHA-256 of PPC Lab's canonical JSON encodin
 
 HTTP status codes describe authentication/request/transport/server state, while deterministic guest execution status remains in the worker response. The built-in HTTP server intentionally does not promise TLS termination, public-internet hardening, multi-user authorization, or a persistent asynchronous job queue; those remain deployment or future demand-driven concerns.
 
+
+## v1.7 behavioral-corpus compatibility
+
+`ppc-lab-corpus-v1`, `ppc-lab-corpus-case-v1`, and `ppc-lab-corpus-replay-summary-v1` are v1 compatibility contracts. Additive fields are allowed; existing expectation meanings are not silently redefined. Corpus input identity is SHA-256 plus byte size, while `path_hint` is advisory only. Backend names and transport prose are deliberately excluded from the behavioral expectation contract.
+
+Embedding a target input never implies redistribution permission. Public corpora should normally contain only case metadata/hashes plus synthetic or otherwise redistributable embedded objects.

@@ -12,6 +12,18 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.7.0 — Behavioral Corpus & Replay
+
+v1.7 turns one-off successful experiments into portable long-lived behavioral regressions. `ppc-lab-corpus` fingerprints every binary input, records stable execution expectations, replays cases across engine versions/backends, verifies embedded redistributable fixtures, and can explicitly bless intentional behavior changes or minimize a failing setup. Proprietary target binaries remain external unless `--embed-input` is deliberately requested.
+
+```bash
+ppc-lab-corpus promote ./corpus --id constructor-001 --job job.json --tag constructor
+ppc-lab-corpus replay ./corpus --input-root /srv/private-targets --backend builtin
+ppc-lab-corpus verify ./corpus
+```
+
+See [`docs/BEHAVIORAL_CORPUS.md`](docs/BEHAVIORAL_CORPUS.md).
+
 ## v1.6.0 — Trace Intelligence & Coverage Analytics
 
 v1.6 turns portable instruction traces into hot-PC/function reports, observed basic blocks/control-flow/calls, dynamic coverage summaries, Graphviz CFGs, and A/B trace diffs. Existing trace archives remain valid and the new analytics can flow into the evidence store and decompiler evidence.
@@ -273,6 +285,7 @@ PPC-Lab/
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
+| [`docs/BEHAVIORAL_CORPUS.md`](docs/BEHAVIORAL_CORPUS.md) | How do I promote experiments into replayable long-lived regressions? |
 | [`docs/HTTP_API.md`](docs/HTTP_API.md) | How do I expose worker execution and evidence queries through the optional HTTP service? |
 | [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
 | [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |
