@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0 — 2026-08-28 — Campaign Scheduling & Resource Governance
+
+- Add installed `ppc-lab-schedule`, a dependency-free scheduler above the existing autonomous-campaign command.
+- Add deterministic weighted fair-share between projects, priority ordering within projects, global and per-project concurrency caps, project case-budget admission quotas, and process wall-time accounting.
+- Add exact manifest-hash resume semantics; terminal completed/failed/cancelled/quota-blocked admissions are not reconsidered, while interrupted running campaigns return to pending and reuse campaign-level `--resume` when state exists.
+- Add filesystem `DRAIN`, global `CANCEL`, and per-campaign cancel markers for supervisor-friendly graceful control without adding another daemon or service dependency.
+- Add stable scheduler manifest/state/summary v1 schemas, capability advertising, install-tree coverage, documentation, and a synthetic regression covering fair share, priority, quotas, cancellation, and the terminal-resume bug.
+
 ## 2.1.0 — 2026-08-28 — Campaign Intelligence & Prioritization
 
 - Add deterministic adaptive exploration that reorders mutation axes by observed novelty/coverage yield and can conserve unused case budget when a configured novelty plateau is reached.

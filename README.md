@@ -12,6 +12,17 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.2.0 — Campaign Scheduling & Resource Governance
+
+v2.2 adds `ppc-lab-schedule`, a deterministic outer scheduler for running many existing autonomous campaigns without letting one research project monopolize a server. It provides weighted project fair-share, per-project priority/concurrency/case quotas, process wall-time accounting, exact checkpoint/resume, and filesystem drain/cancel controls while leaving `ppc-lab-campaign` itself unchanged.
+
+```bash
+ppc-lab-schedule scheduler.json --out /srv/ppc-scheduler/nightly
+ppc-lab-schedule scheduler.json --out /srv/ppc-scheduler/nightly --resume
+```
+
+See [`docs/SCHEDULING.md`](docs/SCHEDULING.md).
+
 ## v2.1.0 — Campaign Intelligence & Prioritization
 
 v2.1 makes autonomous campaigns spend their bounded execution/triage budgets where the evidence yield is highest. `ppc-lab-explore` gains a deterministic `adaptive` strategy that prefers mutation axes with stronger observed coverage/behavior yield and can stop early when a configured novelty plateau is reached. The new `ppc-lab-prioritize` tool ranks completed exploration cases using transparent coverage, behavior, failure, and rare-PC components, summarizes axis/value yield, and emits `ppc-lab-priority-report-v1`. Campaigns consume that report before triage, so `max_triage_cases` is spent on the highest-value eligible findings rather than the first cases on disk.

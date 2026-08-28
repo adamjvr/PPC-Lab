@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-scheduler-v1",
+  "title": "PPC Lab campaign scheduler manifest v1",
+  "type": "object",
+  "required": ["schema", "projects", "campaigns"],
+  "properties": {
+    "schema": {"const": "ppc-lab-scheduler-v1"},
+    "resources": {"type": "object", "properties": {"max_concurrent": {"type": "integer", "minimum": 1}}, "additionalProperties": true},
+    "projects": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "weight": {"type": "integer", "minimum": 1}, "max_concurrent": {"type": "integer", "minimum": 1}, "case_budget": {"type": "integer", "minimum": 0}, "wall_seconds": {"type": "number", "exclusiveMinimum": 0}}, "additionalProperties": true}},
+    "campaigns": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "project", "manifest"], "properties": {"id": {"type": "string"}, "project": {"type": "string"}, "manifest": {"type": "string"}, "out": {"type": "string"}, "priority": {"type": "integer"}, "reserve_cases": {"type": "integer", "minimum": 0}, "wall_seconds": {"type": "number", "exclusiveMinimum": 0}}, "additionalProperties": true}}
+  },
+  "additionalProperties": true
+}

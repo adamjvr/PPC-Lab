@@ -94,3 +94,8 @@ Campaign resume intentionally pins both the exact manifest SHA-256 and PPC Lab e
 The v2 CMake package version is a new major-version boundary for package discovery. The public C++ engine remains source-oriented and target-neutral; consumers should rebuild and request the v2 package explicitly even though v2.0 does not intentionally remove the core v1 intake/execution concepts.
 
 PPC Lab 2.1 extends `ppc-lab-exploration-v1` additively with the deterministic `adaptive` strategy and adds `ppc-lab-priority-policy-v1` / `ppc-lab-priority-report-v1`. Existing guided/cartesian manifests and v2.0 campaign manifests retain their meaning. Campaign intelligence is additive and enabled with documented defaults.
+
+
+## v2.2 scheduler compatibility
+
+`ppc-lab-scheduler-v1`, `ppc-lab-scheduler-state-v1`, and `ppc-lab-scheduler-summary-v1` are additive 2.x contracts above the existing campaign layer. Project weights/priorities govern deterministic admission only; they do not redefine campaign or guest execution semantics. Terminal scheduler admission states remain terminal on exact resume. Additive optional resource/accounting fields may appear in 2.x; incompatible meanings require a new schema identifier.

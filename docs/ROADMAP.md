@@ -67,3 +67,8 @@ Potential future capability buckets:
 - additional ISA fidelity where a real workload exposes a missing/approximate instruction.
 
 None of these are standing obligations. A missing capability should arrive with a real target, a minimal reproduction, and a regression test.
+
+
+## v2.2 scheduling checkpoint
+
+Campaign scheduling/resource governance is complete: autonomous campaigns can share long-lived research hosts under deterministic fair-share, priority, quota, concurrency, resume, drain, and cancellation policy. Further scheduler complexity should remain demand-driven; PPC Lab does not need a mandatory distributed queue/database simply to be useful.

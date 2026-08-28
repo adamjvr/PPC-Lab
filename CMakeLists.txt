@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 2.1.0 LANGUAGES CXX)
+project(PPCLab VERSION 2.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -84,6 +84,7 @@ install(PROGRAMS scripts/ppc_lab_triage.py DESTINATION ${CMAKE_INSTALL_BINDIR} R
 install(PROGRAMS scripts/ppc_lab_explore.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-explore)
 install(PROGRAMS scripts/ppc_lab_prioritize.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-prioritize)
 install(PROGRAMS scripts/ppc_lab_campaign.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-campaign)
+install(PROGRAMS scripts/ppc_lab_schedule.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-schedule)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -167,4 +168,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_guided_exploration COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_guided_exploration.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_campaign_intelligence COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_campaign_intelligence.py)
     add_test(NAME ppc_lab_autonomous_campaign COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_autonomous_campaign.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_campaign_scheduler COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_campaign_scheduler.py)
 endif()

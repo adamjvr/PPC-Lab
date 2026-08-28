@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v2.2.0 — Campaign Scheduling & Resource Governance — 2026-08-28
+
+PPC Lab gained a deterministic scheduler above autonomous campaigns: weighted fair-share projects, priorities, concurrency/quota governance, resumable accounting, and drain/cancel markers. Campaigns remain the research unit; the scheduler only governs admission and process resources.
+
 ## v2.1.0 — Campaign Intelligence & Prioritization — 2026-08-28
 
 v2.1 made the autonomous campaign layer selective rather than merely automatic. `ppc-lab-explore` can now use deterministic adaptive axis ordering and novelty-plateau stopping, while `ppc-lab-prioritize` turns a completed exploration frontier into a reproducible ranking based on new coverage, behavior novelty, guest failures, and rare-PC observations. Campaign triage consumes that ranking before applying its hard case limit, and the intelligence report is preserved/published as normal PPC Lab evidence.

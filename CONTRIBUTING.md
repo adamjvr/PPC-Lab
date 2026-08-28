@@ -76,3 +76,7 @@ Keep guided-exploration domains deterministic and bounded. Prefer values justifi
 
 Changes to `ppc-lab-campaign` should compose existing stable tools/protocols rather than duplicate execution, corpus, triage, or evidence semantics. New campaign policy must remain bounded, checkpointable, root-safe, and covered by a synthetic end-to-end regression. Do not make campaign convenience a reason to archive proprietary target binaries.
 
+
+## Scheduler changes
+
+`ppc-lab-schedule` is an outer resource-governance layer; it should invoke stable campaign tooling rather than duplicate campaign research logic. Scheduler changes must keep ordering deterministic, preserve exact manifest-hash resume, treat terminal admission decisions as terminal, and include synthetic regressions for fairness/quota/cancellation semantics. Do not turn scheduler policy into a reason to copy target binaries or add a mandatory queue/database service.

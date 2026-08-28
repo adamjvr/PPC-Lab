@@ -60,6 +60,8 @@ def main() -> int:
         assert prioritizer.is_file(), prioritizer
         campaign = prefix / "bin" / "ppc-lab-campaign"
         assert campaign.is_file(), campaign
+        scheduler = prefix / "bin" / "ppc-lab-schedule"
+        assert scheduler.is_file(), scheduler
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -91,11 +93,14 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-state-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-summary-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-triage-summary-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-state-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-scheduler-summary-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 2.1.0"
+        assert version.stdout.strip() == "PPC Lab 2.2.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
