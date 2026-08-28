@@ -171,6 +171,29 @@ bzero
 A stub binding is an execution aid, not proof of bit-exact parity with the
 original runtime.
 
+### System calls and traps
+
+The PPC `sc` instruction is an architectural boundary, not an operating-system
+emulation promise. PPC Lab exposes it explicitly. The v0.5 deterministic syscall
+binding convention uses `r0` as the syscall selector and `r3` as the fixed return
+value:
+
+```bash
+--syscall-return 4=0
+--syscall-return 0x66=0xffffffff
+--default-syscall-return 0
+```
+
+Bindings may be repeated. If `sc` has no exact/default binding, execution stops
+with `stop=system_call`. `tw`/`twi` stop with `stop=trap` when their condition is
+true. `--ignore-traps` advances past matching trap instructions for experiments
+that intentionally do not model the exception path. It does **not** globally
+disable memory faults, imports, or system calls.
+
+The `r0`/`r3` convention is useful for common 32-bit Unix-style PPC research but
+is not an architectural definition of every operating system ABI. Target
+personality scripts should own ABI-specific policy.
+
 ### Tracing
 
 ```bash
@@ -208,9 +231,24 @@ message when available.
 
 Current execution stop categories include normal return, unsupported
 instruction, unmapped/protection memory fault, trapped unresolved import,
-instruction-limit stop, backend failure, and setup/load failure. Treat the
-printed stop reason as the stable research signal; scripts should not depend on
-undocumented prose.
+architectural trap, system call, instruction-limit stop, backend failure, and
+setup/load failure. Treat the printed stop reason as the stable research signal;
+scripts should not depend on undocumented prose.
+
+Current process exit codes are:
+
+```text
+0  normal return / successful non-execution command
+1  argument, setup, load, or generic command failure
+2  unsupported instruction
+3  memory fault
+4  unresolved import trap
+5  instruction limit
+6  backend failure
+7  other execution stop
+8  architectural trap (`tw`/`twi`)
+9  unbound system call (`sc`)
+```
 
 ## `metadata`
 

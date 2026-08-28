@@ -168,3 +168,18 @@ The v0.4 automation formats are deliberately versioned:
 Breaking semantics require a new schema name. Additive fields are preferred.
 Decompiler adapters should remain thin consumers of evidence rather than gaining
 execution or target-specific logic.
+
+
+## v0.5 execution-fidelity rule
+
+A newly supported opcode should normally ship with three things in the same
+change: execution semantics, readable disassembly, and a deterministic regression
+that checks the architectural state it changes. For CR/XER/FPSCR, reservation,
+or memory-order-sensitive instructions, test those side effects explicitly.
+
+`tests/test_interpreter_properties.cpp` is deterministic property-style coverage,
+not a replacement for instruction-specific reference vectors.
+`tests/test_backend_parity.cpp` compares builtin and Unicorn state when Unicorn
+is compiled in and otherwise records a clean skip. `tests/test_malformed_intake.py`
+stresses native loaders with deterministic malformed inputs and treats any crash
+or hang as a regression.

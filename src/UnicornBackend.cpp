@@ -33,6 +33,9 @@ struct HookContext {
     std::uint64_t instructions = 0;
     std::uint32_t stopPc = 0;
     bool stoppedByHook = false;
+    bool resumeRequested = false;
+    std::uint32_t resumePc = 0;
+    std::string stopMessage{};
 };
 
 std::string hex32(std::uint32_t value) {
@@ -54,6 +57,21 @@ std::string symbolize(std::uint32_t pc, const std::vector<ImageSymbol>* symbols)
     std::ostringstream out; out << best->name;
     if (delta) out << "+0x" << std::hex << delta;
     return out.str();
+}
+
+bool trapCondition(unsigned to, std::uint32_t a, std::uint32_t b) noexcept {
+    const auto sa = static_cast<std::int32_t>(a);
+    const auto sb = static_cast<std::int32_t>(b);
+    return ((to & 0x10U) && sa < sb) || ((to & 0x08U) && sa > sb) ||
+           ((to & 0x04U) && a == b) || ((to & 0x02U) && a < b) ||
+           ((to & 0x01U) && a > b);
+}
+
+const SystemCallStubBinding* findSystemCallStub(const ExecutionConfig& config,
+                                                 std::uint32_t number) noexcept {
+    for (const auto& binding : config.systemCallStubs)
+        if (binding.number == number) return &binding;
+    return nullptr;
 }
 
 void codeHook(uc_engine* uc, std::uint64_t address, std::uint32_t size, void* userData) {
@@ -86,6 +104,49 @@ void codeHook(uc_engine* uc, std::uint64_t address, std::uint32_t size, void* us
                                    wordBytes[3];
         const unsigned opcode = word >> 26U;
         const unsigned xo = (word >> 1U) & 0x3ffU;
+        if (opcode == 17U) { // sc
+            std::uint32_t number = 0;
+            (void)uc_reg_read(uc, UC_PPC_REG_0, &number);
+            std::optional<std::uint32_t> returnValue{};
+            if (const auto* binding = findSystemCallStub(*ctx.config, number)) returnValue = binding->returnValue;
+            else if (ctx.config->defaultSystemCallReturn) returnValue = *ctx.config->defaultSystemCallReturn;
+            if (returnValue) {
+                (void)uc_reg_write(uc, UC_PPC_REG_3, &*returnValue);
+                ctx.resumeRequested = true;
+                ctx.resumePc = pc + 4U;
+                uc_emu_stop(uc);
+                return;
+            }
+            ctx.reason = StopReason::SystemCall;
+            ctx.stopMessage = "system call r0=" + std::to_string(number);
+            ctx.stoppedByHook = true;
+            uc_emu_stop(uc);
+            return;
+        }
+        if (opcode == 3U || (opcode == 31U && xo == 4U)) { // twi / tw
+            const unsigned to = (word >> 21U) & 31U;
+            const unsigned ra = (word >> 16U) & 31U;
+            std::uint32_t a = 0, b = 0;
+            (void)uc_reg_read(uc, UC_PPC_REG_0 + static_cast<int>(ra), &a);
+            if (opcode == 3U) b = static_cast<std::uint32_t>(static_cast<std::int32_t>(static_cast<std::int16_t>(word & 0xffffU)));
+            else {
+                const unsigned rb = (word >> 11U) & 31U;
+                (void)uc_reg_read(uc, UC_PPC_REG_0 + static_cast<int>(rb), &b);
+            }
+            if (trapCondition(to, a, b)) {
+                if (ctx.config->ignoreTraps) {
+                    ctx.resumeRequested = true;
+                    ctx.resumePc = pc + 4U;
+                    uc_emu_stop(uc);
+                    return;
+                }
+                ctx.reason = StopReason::Trap;
+                ctx.stopMessage = std::string(opcode == 3U ? "twi" : "tw") + " trap TO=" + std::to_string(to);
+                ctx.stoppedByHook = true;
+                uc_emu_stop(uc);
+                return;
+            }
+        }
         if (opcode == 19U && xo == 528U) { // bcctr/bctr
             std::uint32_t r12 = 0;
             std::uint32_t ctr = 0;
@@ -279,8 +340,19 @@ ExecutionResult UnicornBackend::run(Memory& memory,
                 std::string("uc_hook_add failed: ") + uc_strerror(err)};
     }
 
-    err = uc_emu_start(uc, cpu.pc, 0xffffffffULL, 0,
-                       static_cast<std::size_t>(config.instructionLimit));
+    std::uint32_t startPc = cpu.pc;
+    do {
+        hookContext.resumeRequested = false;
+        const auto remaining = config.instructionLimit > hookContext.instructions
+            ? config.instructionLimit - hookContext.instructions : 0U;
+        if (remaining == 0U) { err = UC_ERR_OK; break; }
+        err = uc_emu_start(uc, startPc, 0xffffffffULL, 0, static_cast<std::size_t>(remaining));
+        if (hookContext.resumeRequested && err == UC_ERR_OK) {
+            startPc = hookContext.resumePc;
+            continue;
+        }
+        break;
+    } while (true);
 
     for (unsigned i = 0; i < 32; ++i) {
         const int reg = UC_PPC_REG_0 + static_cast<int>(i);
@@ -306,10 +378,13 @@ ExecutionResult UnicornBackend::run(Memory& memory,
     }
 
     if (hookContext.stoppedByHook) {
-        return {hookContext.reason, hookContext.instructions, hookContext.stopPc, 0,
-                hookContext.reason == StopReason::Returned
-                    ? "returned through harness trampoline"
-                    : "entered import trap range at " + hex32(hookContext.stopPc)};
+        std::string message = hookContext.stopMessage;
+        if (message.empty()) {
+            message = hookContext.reason == StopReason::Returned
+                ? "returned through harness trampoline"
+                : "entered import trap range at " + hex32(hookContext.stopPc);
+        }
+        return {hookContext.reason, hookContext.instructions, hookContext.stopPc, 0, std::move(message)};
     }
     if (err == UC_ERR_OK && hookContext.instructions >= config.instructionLimit) {
         return {StopReason::InstructionLimit, hookContext.instructions, cpu.pc, 0,

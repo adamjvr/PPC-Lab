@@ -11,6 +11,8 @@ const char* stopReasonName(StopReason reason) noexcept {
     case StopReason::UnsupportedInstruction: return "unsupported_instruction";
     case StopReason::MemoryFault: return "memory_fault";
     case StopReason::ImportTrap: return "import_trap";
+    case StopReason::Trap: return "trap";
+    case StopReason::SystemCall: return "system_call";
     case StopReason::InvalidConfiguration: return "invalid_configuration";
     case StopReason::BackendError: return "backend_error";
     }

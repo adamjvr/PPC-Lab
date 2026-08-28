@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — 2026-08-27 — PPC Coverage Monster
+
+- Expand builtin PPC32 execution across common integer, rotate, CR logical, update-indexed, byte-reversed, atomic reservation, cache/order, multiply/divide overflow, and floating-point instruction families.
+- Add structured `sc`, `tw`, and `twi` stop reasons plus deterministic `--syscall-return`, `--default-syscall-return`, and `--ignore-traps` controls.
+- Improve XER SO/OV/CA and selected FP record/FPSCR-to-CR behavior used by the new instruction coverage.
+- Expand lightweight disassembly for the newly executable instruction families.
+- Add execution-coverage, property/stress, malformed binary-intake, and optional builtin-vs-Unicorn backend-parity regressions.
+- Document the PPC32 coverage/fidelity boundary and explicit syscall/trap research contract.
+
 ## 0.4.0 — 2026-08-27 — Research Machine
 
 - Carry native image symbols into execution so `--trace` is symbol-aware without a separate post-processing step.

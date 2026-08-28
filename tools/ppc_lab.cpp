@@ -111,7 +111,7 @@ std::unique_ptr<ExecutionBackend> makeBackend(const std::string& requested, std:
 }
 
 void usage() {
-    std::cout << R"(PPC Lab 0.4.0 — PowerPC execution and behavioral-research machine
+    std::cout << R"(PPC Lab 0.5.0 — PowerPC execution and behavioral-research machine
 
 Usage:
   ppc-lab selftest [--backend auto|builtin|unicorn]
@@ -130,7 +130,8 @@ Usage:
       [--import-base HEX] [--import-size N] [--return HEX] [--toc HEX]
       [--max-instructions N] [--set rN=VALUE] [--set-f fN=VALUE]
       [--write-u32 ADDRESS=VALUE] [--write-f32 ADDRESS=VALUE]
-      [--stub KIND@ADDRESS] [--dump ADDRESS:SIZE]
+      [--stub KIND@ADDRESS] [--syscall-return NUMBER=VALUE]
+      [--default-syscall-return VALUE] [--ignore-traps] [--dump ADDRESS:SIZE]
       [--trace] [--trace-range START:END] [--json FILE] [--snapshot FILE]
 
 Native intake:
@@ -237,7 +238,8 @@ int stopExitCode(StopReason reason) {
     case StopReason::Returned: return 0; case StopReason::UnsupportedInstruction: return 2;
     case StopReason::MemoryFault: return 3; case StopReason::ImportTrap: return 4;
     case StopReason::InstructionLimit: return 5; case StopReason::InvalidConfiguration: return 6;
-    case StopReason::BackendError: return 7; } return 7;
+    case StopReason::BackendError: return 7; case StopReason::Trap: return 8;
+    case StopReason::SystemCall: return 9; } return 7;
 }
 
 void printSymbols(const std::vector<ImageSymbol>& symbols) {
@@ -385,7 +387,7 @@ int commandDisasm(int argc, char** argv) {
 int main(int argc, char** argv) {
     if (argc < 2) { usage(); return 1; }
     const std::string command = argv[1];
-    if (command == "--version" || command == "version") { std::cout << "PPC Lab 0.4.0\n"; return 0; }
+    if (command == "--version" || command == "version") { std::cout << "PPC Lab 0.5.0\n"; return 0; }
     if (command == "selftest") {
         std::string backendName="auto"; for(int i=2;i<argc;++i){std::string a=argv[i];if(a=="--backend"&&i+1<argc)backendName=argv[++i];else{std::cerr<<"unknown selftest option: "<<a<<'\n';return 1;}}
         std::string error; auto backend=makeBackend(backendName,error); if(!backend){std::cerr<<error<<'\n';return 7;} const auto r=runMicrotests(*backend); std::cout<<r.report; return r.passed?0:1;
@@ -403,11 +405,13 @@ int main(int argc, char** argv) {
     for(int i=2;i<argc;++i){const std::string arg=argv[i];auto need=[&](const char*o){if(i+1>=argc)throw std::runtime_error(std::string(o)+" requires a value");return std::string(argv[++i]);};
         try{
             if(arg=="--backend")backendName=need("--backend"); else if(arg=="--code")config.image.codePath=need("--code"); else if(arg=="--elf")config.image.elfPath=need("--elf"); else if(arg=="--macho")config.image.machoPath=need("--macho"); else if(arg=="--pef")config.image.pefPath=need("--pef"); else if(arg=="--data")config.image.dataPath=need("--data"); else if(arg=="--entry-symbol")config.entrySymbol=need("--entry-symbol"); else if(arg=="--bind"){SymbolBinding b{};auto t=need("--bind");if(!parseBinding(t,b))throw std::runtime_error("expected --bind NAME=ADDRESS");config.image.symbolBindings.push_back(std::move(b));}
-            else if(arg=="--trace")config.execution.trace=true; else if(arg=="--json")jsonPath=need("--json"); else if(arg=="--snapshot")snapshotPath=need("--snapshot");
+            else if(arg=="--trace")config.execution.trace=true; else if(arg=="--ignore-traps")config.execution.ignoreTraps=true; else if(arg=="--json")jsonPath=need("--json"); else if(arg=="--snapshot")snapshotPath=need("--snapshot");
             else if(arg=="--entry"||arg=="--transition-vector"||arg=="--toc"||arg=="--image-base"||arg=="--code-base"||arg=="--data-base"||arg=="--data-map-size"||arg=="--heap-base"||arg=="--heap-size"||arg=="--stack-base"||arg=="--stack-size"||arg=="--import-base"||arg=="--import-size"||arg=="--return"||arg=="--max-instructions"){
                 auto t=need(arg.c_str());auto v=parseUnsigned(t);if(!v)throw std::runtime_error("invalid numeric value: "+t);
                 if(arg=="--entry")config.entry=std::uint32_t(*v);else if(arg=="--transition-vector")config.transitionVector=std::uint32_t(*v);else if(arg=="--toc")config.toc=std::uint32_t(*v);else if(arg=="--image-base")config.image.imageBase=std::uint32_t(*v);else if(arg=="--code-base")config.image.codeBase=std::uint32_t(*v);else if(arg=="--data-base")config.image.dataBase=std::uint32_t(*v);else if(arg=="--data-map-size")config.image.dataMapSize=std::size_t(*v);else if(arg=="--heap-base")config.image.heapBase=std::uint32_t(*v);else if(arg=="--heap-size")config.image.heapSize=std::size_t(*v);else if(arg=="--stack-base")config.image.stackBase=std::uint32_t(*v);else if(arg=="--stack-size")config.image.stackSize=std::size_t(*v);else if(arg=="--import-base")config.execution.importBase=std::uint32_t(*v);else if(arg=="--import-size")config.execution.importSize=std::uint32_t(*v);else if(arg=="--return")config.execution.returnAddress=std::uint32_t(*v);else config.execution.instructionLimit=*v;
             } else if(arg=="--stub"){auto t=need("--stub");auto p=t.find('@');if(p==std::string::npos||p==0||p+1>=t.size())throw std::runtime_error("expected --stub KIND@ADDRESS");ImportStubKind k{};if(!parseImportStubKind(std::string_view(t).substr(0,p),k))throw std::runtime_error("unknown stub kind: "+t.substr(0,p));auto a=parseUnsigned(std::string_view(t).substr(p+1));if(!a||*a>0xffffffffULL)throw std::runtime_error("invalid stub address");config.execution.importStubs.push_back({std::uint32_t(*a),k,t.substr(0,p)});
+            } else if(arg=="--syscall-return"){auto t=need("--syscall-return");std::string_view l,r;if(!splitAssignment(t,l,r))throw std::runtime_error("expected --syscall-return NUMBER=VALUE");auto n=parseUnsigned(l),v=parseUnsigned(r);if(!n||!v||*n>0xffffffffULL||*v>0xffffffffULL)throw std::runtime_error("invalid --syscall-return");config.execution.systemCallStubs.push_back({std::uint32_t(*n),std::uint32_t(*v)});
+            } else if(arg=="--default-syscall-return"){auto t=need("--default-syscall-return");auto v=parseUnsigned(t);if(!v||*v>0xffffffffULL)throw std::runtime_error("invalid --default-syscall-return");config.execution.defaultSystemCallReturn=std::uint32_t(*v);
             } else if(arg=="--set"){auto t=need("--set");std::string_view l,r;if(!splitAssignment(t,l,r)||l.size()<2||l[0]!='r')throw std::runtime_error("expected --set rN=VALUE");auto reg=parseUnsigned(l.substr(1)),v=parseUnsigned(r);if(!reg||!v||*reg>=32)throw std::runtime_error("invalid GPR assignment");config.registers.push_back({unsigned(*reg),std::uint32_t(*v)});
             } else if(arg=="--set-f"){auto t=need("--set-f");std::string_view l,r;if(!splitAssignment(t,l,r)||l.size()<2||l[0]!='f')throw std::runtime_error("expected --set-f fN=VALUE");auto reg=parseUnsigned(l.substr(1));auto v=parseDouble(r);if(!reg||!v||*reg>=32)throw std::runtime_error("invalid FPR assignment");config.floatRegisters.push_back({unsigned(*reg),*v});
             } else if(arg=="--write-u32"){auto t=need("--write-u32");std::string_view l,r;if(!splitAssignment(t,l,r))throw std::runtime_error("expected ADDRESS=VALUE");auto a=parseUnsigned(l),v=parseUnsigned(r);if(!a||!v)throw std::runtime_error("invalid --write-u32");config.writes32.push_back({std::uint32_t(*a),std::uint32_t(*v)});

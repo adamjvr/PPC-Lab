@@ -16,6 +16,8 @@ struct CpuState {
     std::uint32_t cr = 0;
     std::uint32_t xer = 0;
     std::uint32_t fpscr = 0;
+    std::uint32_t reservationAddress = 0;
+    bool reservationValid = false;
 
     [[nodiscard]] bool crBit(unsigned bi) const noexcept {
         if (bi >= 32) return false;

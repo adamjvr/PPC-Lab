@@ -4,44 +4,24 @@ This is a **capability roadmap, not a schedule**. PPC Lab is infrastructure: shi
 large useful chunks, then leave it alone until a real PPC target exposes the
 next missing capability.
 
-## Current: v0.4 — Research Machine — COMPLETE
+## Current: v0.5 — PPC Coverage Monster — COMPLETE
 
-v0.4 turns the v0.3 binary-intake engine into a repeatable behavioral-research
-workflow:
+v0.5 concentrates on execution hardening rather than adding another container
+format:
 
-- reusable minimal runtime personalities for Classic Mac and libc/POSIX leaf
-  services;
-- automatic imported-symbol binding to deterministic runtime stubs;
-- symbol-aware execution traces;
-- `ppc-lab-metadata-v1` machine-readable normalized intake metadata;
-- `ppc-lab-snapshot-v1` deterministic CPU/memory/symbol snapshots;
-- snapshot comparison and first-class differential execution;
-- JSON batch experiment manifests and parameter sweeps;
-- machine-readable trace capture and decompiler-neutral evidence packages;
-- thin Ghidra, IDAPython, and Binary Ninja evidence import helpers.
+- materially broader PPC32 integer, CR, load/store, atomic, byte-reverse,
+  cache/order, arithmetic-overflow, and floating-point execution coverage;
+- structured `sc`, `tw`, and `twi` interception;
+- deterministic syscall-return bindings and explicit trap-ignore policy;
+- stronger CR/XER/FPSCR behavior around newly supported instructions;
+- builtin-vs-Unicorn parity regression when Unicorn is available;
+- deterministic interpreter/disassembler/memory property tests;
+- malformed ELF/Mach-O/PEF intake stress tests.
 
-**Exit condition achieved:** a researcher can choose a routine, define a
-repeatable experiment, execute it, preserve state/trace evidence, compare runs,
-and push normalized evidence back into a decompiler without rebuilding an ad
-hoc glue stack for every target.
-
-## v0.5 — PPC Coverage Monster
-
-One concentrated execution-hardening milestone:
-
-- aggressively fill PPC32 instruction gaps encountered by real workloads;
-- improve CR/XER/FPSCR/SPR edge-case fidelity where validation demands it;
-- structured exception, trap, and syscall interception;
-- stronger builtin-vs-Unicorn backend parity tests;
-- fuzz/property-style decoder/interpreter/memory/loader regressions;
-- stress malformed binary intake and relocation streams;
-- expand reusable ABI/runtime helpers only where actual workloads need them;
-- PPC64 and little-endian scaffolding only if cheap or demanded by a live
-  target.
-
-**Exit condition:** ordinary PPC32 user-space routines should fail because of a
-missing external environment far more often than because PPC Lab cannot execute
-the instructions themselves.
+**Exit condition achieved for the milestone:** PPC Lab now covers a substantially
+larger body of ordinary PPC32 compiler output while keeping unknown OS/runtime
+behavior visible rather than pretending to emulate it. New opcode work remains
+demand-driven: a real unsupported instruction should arrive with a regression.
 
 ## v1.0 — Useful general PPC research platform
 

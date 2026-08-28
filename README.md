@@ -12,22 +12,25 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
-## v0.4.0 — Research Machine
+## v0.5.0 — PPC Coverage Monster
 
-v0.3 made PPC Lab ingest real PPC containers. v0.4 makes those binaries useful
-as repeatable behavioral experiments:
+v0.5 hardens the dependency-free PPC32 big-endian execution engine so real
+user-space routines are more likely to stop on a missing environment service
+than on an ordinary compiler-generated instruction:
 
-- native ELF32/Mach-O/PEF intake plus normalized `metadata` JSON;
-- symbol-aware execution tracing;
-- deterministic full-state snapshots and state comparison;
-- reusable minimal Classic Mac and libc/POSIX runtime personalities;
-- automatic import binding/stubbing for supported runtime services;
-- batch parameter sweeps and differential execution;
-- machine-readable trace/evidence packaging;
-- Ghidra, IDAPython, and Binary Ninja evidence import helpers.
+- broad PPC32 integer, load/store, CR, arithmetic-overflow, byte-reverse,
+  atomic-reservation, cache/order, and floating-point coverage expansion;
+- structured `sc`, `tw`, and `twi` interception with deterministic syscall
+  return bindings and explicit trap policy;
+- stronger CR/XER/FPSCR behavior for newly covered instruction families;
+- builtin-vs-Unicorn backend parity regression when Unicorn is available;
+- deterministic property/stress tests for interpreter, disassembler, memory,
+  and malformed ELF/Mach-O/PEF intake;
+- expanded disassembly names for the same instruction families the builtin
+  backend can execute.
 
-PPC Lab remains deliberately headless and low-maintenance. The research engine
-produces portable evidence; decompilers consume it through thin adapters.
+PPC Lab is still intentionally PPC32-BE first. PPC64 and little-endian support
+remain post-1.0 work unless a live target demands them.
 
 ## Fast start
 
@@ -84,13 +87,13 @@ addresses, bindings, inputs, and expected results.
 - direct function calls and symbol-selected entry points;
 - Classic CFM transition-vector calls (`entry`, TOC/`r2`, `r12`);
 - GPR/FPR setup and deterministic memory writes;
-- import traps and explicit symbol bindings;
+- import traps, structured traps/syscalls, deterministic syscall-return bindings, and explicit symbol bindings;
 - reusable runtime stubs for libm, memory operations, and Classic Mac block moves;
 - instruction limits, symbol-aware trace output, and trace ranges;
 - memory dumps with FNV-1a64 fingerprints;
 - machine-readable results, normalized metadata, and deterministic full-state snapshots;
 - byte/float comparison, snapshot diffing, batch sweeps, and differential execution;
-- synthetic loader/relocation/execution regressions;
+- synthetic loader/relocation/execution regressions plus property/malformed-input stress coverage;
 - GPL/SPDX/version/target-neutrality repository invariants;
 - low-maintenance macOS/Linux/Windows CI.
 
@@ -187,6 +190,9 @@ PPC-Lab/
 | [`docs/SNAPSHOTS.md`](docs/SNAPSHOTS.md) | What is captured in deterministic behavioral state? |
 | [`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md) | How do batch sweeps and differential runs work? |
 | [`docs/DECOMPILER_INTEGRATION.md`](docs/DECOMPILER_INTEGRATION.md) | How do Ghidra, IDA, and Binary Ninja consume evidence? |
+| [`docs/ISA_COVERAGE.md`](docs/ISA_COVERAGE.md) | What PPC32 instruction behavior is covered and what is intentionally approximate? |
+| [`docs/EXCEPTIONS_SYSCALLS.md`](docs/EXCEPTIONS_SYSCALLS.md) | How are `sc`, `tw`, and `twi` surfaced or stubbed? |
+| [`docs/TESTING_FUZZING.md`](docs/TESTING_FUZZING.md) | What parity, property, malformed-input, and sanitizer tests protect the engine? |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | How do I add an opcode, relocation, loader feature, or backend? |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | What is left before v1.0? |
 | [`docs/HISTORY.md`](docs/HISTORY.md) | Where did PPC Lab come from? |
@@ -207,7 +213,7 @@ PPC-Lab/
 
 ## Scope
 
-PPC Lab v0.4 is a **PPC32 big-endian research execution platform**, not a full
+PPC Lab v0.5 is a **PPC32 big-endian research execution platform**, not a full
 Mac OS, Linux, console, or firmware emulator. Loader support does not imply that
 the target operating system/runtime has been emulated. Dynamic-linker-heavy,
 scattered/complex relocations, missing CPU instructions, syscalls, traps, or

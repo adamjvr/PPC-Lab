@@ -45,3 +45,14 @@ stubs; and dependency-free scripts provide batch sweeps, snapshot comparison,
 differential execution, trace capture, and evidence packaging. Thin adapters can
 apply that portable evidence to Ghidra, IDA, and Binary Ninja without coupling
 the PPC execution core to a decompiler API.
+
+
+## v0.5.0 — PPC Coverage Monster — 2026-08-27
+
+The builtin PPC32-BE engine received a concentrated execution-hardening pass:
+common atomic, byte-reversed, update-indexed, CR logical, overflow-aware integer,
+cache/order, and floating-point forms were added; traps and system calls became
+structured execution boundaries; and disassembly grew alongside execution. The
+regression suite added deterministic property/stress coverage, malformed native
+image intake, and optional builtin-vs-Unicorn state parity. PPC64/little-endian
+work was intentionally left out rather than diluting the stable PPC32-BE path.

@@ -21,6 +21,8 @@ enum class StopReason : std::uint8_t {
     UnsupportedInstruction,
     MemoryFault,
     ImportTrap,
+    Trap,
+    SystemCall,
     InvalidConfiguration,
     BackendError,
 };
@@ -34,13 +36,21 @@ struct TraceRange {
     }
 };
 
+struct SystemCallStubBinding {
+    std::uint32_t number = 0;
+    std::uint32_t returnValue = 0;
+};
+
 struct ExecutionConfig {
     std::uint64_t instructionLimit = 1'000'000;
     std::uint32_t returnAddress = 0x7fff0000U;
     std::uint32_t importBase = 0x30000000U;
     std::uint32_t importSize = 0x00010000U;
     bool trace = false;
+    bool ignoreTraps = false;
     std::vector<ImportStubBinding> importStubs{};
+    std::vector<SystemCallStubBinding> systemCallStubs{};
+    std::optional<std::uint32_t> defaultSystemCallReturn{};
     std::optional<TraceRange> traceRange{};
     const std::vector<ImageSymbol>* traceSymbols = nullptr;
 };
