@@ -12,6 +12,17 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.9.0 — Guided Exploration & Corpus Synthesis
+
+v1.9 turns known PPC call inputs into a deterministic discovery frontier. `ppc-lab-explore` varies explicit register/write/binding/syscall domains, keeps only executions that add dynamic PC coverage or a new stable architectural outcome, and can promote successful novel cases directly into the behavioral corpus without copying private target binaries.
+
+```bash
+ppc-lab-explore explore.json --out ./explore-run
+ppc-lab-explore explore.json --out ./explore-run --promote-corpus ./corpus
+```
+
+See [`docs/EXPLORATION.md`](docs/EXPLORATION.md).
+
 ## v1.8.0 — Automated Differential Triage
 
 v1.8 turns backend/version disagreements into compact research artifacts. `ppc-lab-triage` can compare existing `ppc-lab-trace-v1` files or execute the same stable worker job against two engine/backend configurations, then report the common prefix, first divergent instruction/control-flow point, resynchronization point, snapshot differences, and a reduced instruction-budget repro. Triage bundles contain evidence and input hashes, **not target binaries**.

@@ -92,3 +92,7 @@ PPC Lab gained an automated triage layer above the stable trace and worker proto
 ## v1.7.0 — Behavioral Corpus & Replay — 2026-08-28
 
 v1.7 converted deterministic experiments into a first-class long-lived regression corpus, with SHA-256-pinned external inputs, backend-neutral behavioral expectations, replay/bless/minimize workflows, and explicit-only fixture embedding.
+
+## v1.9.0 — Guided Exploration & Corpus Synthesis — 2026-08-28
+
+v1.9 added a deterministic exploration layer above the stable worker protocol. Explicit register, write, binding, and syscall-return domains can be explored either exhaustively for small spaces or through a novelty-guided breadth-first frontier. Dynamic PC coverage and backend-neutral architectural outcome fingerprints decide which cases remain interesting, and successful novel cases can be promoted directly into the behavioral corpus while target binaries remain external and SHA-256-pinned.

@@ -42,7 +42,11 @@ Successful experiments can now become durable engine regressions instead of disa
 
 Backend/engine disagreements can now be converted automatically into reviewable evidence: common-prefix detection, first divergence classification, trace resynchronization, snapshot-state comparison, dual-worker execution, input provenance hashing, and reduced instruction-budget repro bundles. Target binaries remain external.
 
-## Post-1.8 — only when justified
+## v1.9 — Guided exploration & corpus synthesis — COMPLETE
+
+Explicit PPC call-input domains can now be explored deterministically rather than by blind fuzzing. Guided BFS expands only coverage- or behavior-novel cases, small domains can use bounded Cartesian enumeration, target inputs are SHA-256-pinned under the existing root-safety model, and successful novel executions can be promoted directly into the behavioral corpus without copying private binaries.
+
+## Post-1.9 — only when justified
 
 Potential future capability buckets:
 

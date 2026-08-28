@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-exploration-summary-v1.schema.json",
+  "title": "PPC Lab exploration summary v1",
+  "type": "object",
+  "required": ["schema", "strategy", "evaluated_cases", "novel_cases", "unique_pcs", "unique_behaviors", "input_provenance", "cases"],
+  "properties": {
+    "schema": {"const": "ppc-lab-exploration-summary-v1"},
+    "strategy": {"enum": ["guided", "cartesian"]},
+    "evaluated_cases": {"type": "integer", "minimum": 0},
+    "novel_cases": {"type": "integer", "minimum": 0},
+    "successful_cases": {"type": "integer", "minimum": 0},
+    "unique_pcs": {"type": "integer", "minimum": 0},
+    "unique_behaviors": {"type": "integer", "minimum": 0},
+    "promoted_cases": {"type": "integer", "minimum": 0},
+    "input_provenance": {"type": "array"},
+    "cases": {"type": "array"}
+  },
+  "additionalProperties": true
+}

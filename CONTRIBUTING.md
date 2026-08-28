@@ -67,3 +67,8 @@ Evidence-store changes must remain migration-conscious and dependency-light. `pp
 
 Changes to `ppc-lab-api` must preserve `ppc-lab-job-v1` as the execution payload, retain loopback-first/default-safe binding, avoid shell command construction, and add regression coverage for authentication/request containment when the network surface changes. Do not add framework/cloud dependencies merely for convenience; the service layer is intentionally thin and optional.
 
+
+
+## Exploration manifests
+
+Keep guided-exploration domains deterministic and bounded. Prefer values justified by the target ABI/data model over enormous random domains. New mutation-axis families must preserve the worker/root safety boundary and arrive with a regression test. Do not commit proprietary target binaries merely to make an exploration manifest self-contained.

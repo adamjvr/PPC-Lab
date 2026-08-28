@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-exploration-case-v1.schema.json",
+  "title": "PPC Lab exploration case v1",
+  "type": "object",
+  "required": ["schema", "index", "assignment", "novel", "novelty", "behavior_sha256", "trace", "worker", "job"],
+  "properties": {
+    "schema": {"const": "ppc-lab-exploration-case-v1"},
+    "index": {"type": "integer", "minimum": 0},
+    "parent": {"type": ["integer", "null"]},
+    "assignment": {"type": "object"},
+    "novel": {"type": "boolean"},
+    "novelty": {"type": "object"},
+    "behavior_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "trace": {"type": "object"},
+    "worker": {"type": "object"},
+    "job": {"type": "object"},
+    "promoted_case": {"type": "string"}
+  },
+  "additionalProperties": true
+}

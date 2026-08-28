@@ -368,7 +368,7 @@ int commandCapabilities(int argc, char** argv) {
                   << "  \"guest\": {\"architecture\": \"ppc32\", \"endian\": \"big\"},\n"
                   << "  \"formats\": [\"ELF32-PPC-BE\", \"Mach-O-PPC32-BE\", \"PEF-CFM-PPC\", \"raw\"],\n"
                   << "  \"backends\": {\"builtin\": true, \"unicorn\": " << (unicorn ? "true" : "false") << "},\n"
-                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\", \"fleet\": \"ppc-lab-fleet-v1\", \"fleet_job_result\": \"ppc-lab-fleet-job-result-v1\", \"fleet_summary\": \"ppc-lab-fleet-summary-v1\", \"evidence_query\": \"ppc-lab-evidence-query-v1\", \"evidence_report\": \"ppc-lab-evidence-report-v1\", \"evidence_verify\": \"ppc-lab-evidence-verify-v1\", \"http_api\": \"ppc-lab-http-api-v1\", \"trace\": \"ppc-lab-trace-v1\", \"trace_analysis\": \"ppc-lab-trace-analysis-v1\", \"trace_diff\": \"ppc-lab-trace-diff-v1\", \"corpus_case\": \"ppc-lab-corpus-case-v1\", \"corpus_replay\": \"ppc-lab-corpus-replay-summary-v1\", \"differential_triage\": \"ppc-lab-differential-triage-v1\", \"triage_bundle\": \"ppc-lab-triage-bundle-v1\"}\n"
+                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\", \"fleet\": \"ppc-lab-fleet-v1\", \"fleet_job_result\": \"ppc-lab-fleet-job-result-v1\", \"fleet_summary\": \"ppc-lab-fleet-summary-v1\", \"evidence_query\": \"ppc-lab-evidence-query-v1\", \"evidence_report\": \"ppc-lab-evidence-report-v1\", \"evidence_verify\": \"ppc-lab-evidence-verify-v1\", \"http_api\": \"ppc-lab-http-api-v1\", \"trace\": \"ppc-lab-trace-v1\", \"trace_analysis\": \"ppc-lab-trace-analysis-v1\", \"trace_diff\": \"ppc-lab-trace-diff-v1\", \"corpus_case\": \"ppc-lab-corpus-case-v1\", \"corpus_replay\": \"ppc-lab-corpus-replay-summary-v1\", \"differential_triage\": \"ppc-lab-differential-triage-v1\", \"triage_bundle\": \"ppc-lab-triage-bundle-v1\", \"exploration\": \"ppc-lab-exploration-v1\", \"exploration_case\": \"ppc-lab-exploration-case-v1\", \"exploration_summary\": \"ppc-lab-exploration-summary-v1\"}\n"
                   << "}\n";
     } else {
         std::cout << "PPC Lab " << kVersion << '\n'
@@ -396,7 +396,10 @@ int commandCapabilities(int argc, char** argv) {
                   << "protocol.corpus-case=ppc-lab-corpus-case-v1\n"
                   << "protocol.corpus-replay=ppc-lab-corpus-replay-summary-v1\n"
                   << "protocol.differential-triage=ppc-lab-differential-triage-v1\n"
-                  << "protocol.triage-bundle=ppc-lab-triage-bundle-v1\n";
+                  << "protocol.triage-bundle=ppc-lab-triage-bundle-v1\n"
+                  << "protocol.exploration=ppc-lab-exploration-v1\n"
+                  << "protocol.exploration-case=ppc-lab-exploration-case-v1\n"
+                  << "protocol.exploration-summary=ppc-lab-exploration-summary-v1\n";
     }
     return 0;
 }

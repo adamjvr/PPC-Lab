@@ -79,3 +79,9 @@ Embedding a target input never implies redistribution permission. Public corpora
 `ppc-lab-differential-triage-v1` and `ppc-lab-triage-bundle-v1` are additive v1 contracts above the already-stable trace/job/worker formats. Trace execution identity is `(PC, instruction word)`; symbol/disassembly text remains annotation rather than behavioral identity. The report may gain optional fields, but existing classifications and required field meanings will not be silently redefined in 1.x.
 
 A triage bundle is evidence, not a binary archive. Input SHA-256/size provenance is stable research identity, while file paths and engine executable paths are environment-specific metadata. `repro.job.json` is a bounded instruction-budget aid and does not claim byte-level input minimization.
+
+## v1.9 guided-exploration compatibility
+
+`ppc-lab-exploration-v1`, `ppc-lab-exploration-case-v1`, and `ppc-lab-exploration-summary-v1` are additive v1 contracts above `ppc-lab-job-v1`. Existing mutation-path meanings and novelty fields will not be silently repurposed within PPC Lab 1.x. New optional novelty measurements or mutation roots may be added only when they preserve the worker/root safety boundary.
+
+Exploration is deterministic for a given manifest, engine version, target bytes, and backend. The exact internal frontier ordering is an implementation detail; consumers should use the emitted case/summary records rather than reconstructing the scheduler. Target-input identity is SHA-256 plus size, and corpus promotion does not imply permission to redistribute target bytes.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.9.0 — 2026-08-28 — Guided Exploration & Corpus Synthesis
+
+- Add installed `ppc-lab-explore`, a deterministic exploration engine above the stable worker protocol.
+- Add bounded guided BFS exploration where only coverage- or behavior-novel executions become parents for additional mutations.
+- Add deterministic Cartesian exploration for deliberately small exhaustive domains.
+- Restrict mutation axes to runtime register/write/binding/syscall inputs; structural image paths cannot be mutated through the explorer.
+- Add stable behavior fingerprints, dynamic-PC novelty tracking, per-case evidence records, target SHA-256 provenance, and hard case-count bounds.
+- Add optional direct promotion of successful novel cases into the behavioral corpus without copying target binaries.
+- Add exploration manifest/case/summary v1 schemas, install/capability discovery, dedicated documentation, and end-to-end novelty/corpus/safety regressions.
+
 ## 1.8.0 — 2026-08-28 — Automated Differential Triage
 
 - Add installed `ppc-lab-triage` for automated first-divergence analysis across PPC Lab traces, backends, and engine binaries.
