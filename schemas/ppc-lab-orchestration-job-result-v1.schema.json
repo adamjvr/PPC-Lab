@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-orchestration-job-result-v1.schema.json",
+  "title": "PPC Lab orchestration per-job result v1",
+  "type": "object",
+  "required": ["schema", "name", "index", "cache_key", "engine_version", "duration_seconds", "inputs", "reuse", "response"],
+  "properties": {
+    "schema": {"const": "ppc-lab-orchestration-job-result-v1"},
+    "name": {"type": "string"},
+    "index": {"type": "integer", "minimum": 0},
+    "source": {"type": "string"},
+    "cache_key": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "engine_version": {"type": "string"},
+    "duration_seconds": {"type": "number", "minimum": 0},
+    "inputs": {"type": "object"},
+    "reuse": {"enum": ["executed", "resume", "cache"]},
+    "response": {"type": "object"}
+  },
+  "additionalProperties": false
+}

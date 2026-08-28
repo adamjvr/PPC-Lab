@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 1.1.0 LANGUAGES CXX)
+project(PPCLab VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -70,6 +70,7 @@ install(FILES LICENSE README.md CHANGELOG.md DESTINATION ${CMAKE_INSTALL_DOCDIR}
 install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DOCDIR}/docs)
 install(DIRECTORY schemas/ DESTINATION ${CMAKE_INSTALL_DATADIR}/ppc-lab/schemas)
 install(PROGRAMS scripts/ppc_lab_worker.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-worker)
+install(PROGRAMS scripts/ppc_lab_orchestrate.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-orchestrate)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -143,4 +144,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_repository_invariants COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/check_repository_invariants.py)
     add_test(NAME ppc_lab_install_contract COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_install_contract.py ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR})
     add_test(NAME ppc_lab_worker_protocol COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_worker_protocol.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_orchestration COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_orchestration.py $<TARGET_FILE:ppc_lab_cli>)
 endif()

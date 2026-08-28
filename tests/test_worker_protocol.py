@@ -36,6 +36,11 @@ with tempfile.TemporaryDirectory(prefix="ppclab-worker-test-") as td_text:
     assert one.returncode == 0, (one.stdout, one.stderr)
     response = json.loads(one.stdout)
     assert response["schema"] == "ppc-lab-worker-response-v1"
+
+    # stdin jobs can use an explicit base directory without weakening root containment.
+    stdin_one = invoke(["--root", str(td), "--base-dir", str(td), "run", "-"], stdin=json.dumps(job))
+    assert stdin_one.returncode == 0, (stdin_one.stdout, stdin_one.stderr)
+    assert json.loads(stdin_one.stdout)["result"]["registers"]["r3"] == "0x0000002a"
     assert response["id"] == "single" and response["ok"] is True
     assert response["result"]["registers"]["r3"] == "0x0000002a"
     assert response["snapshot"]["cpu"]["gpr"][3] == "0x0000002a"
@@ -53,15 +58,20 @@ with tempfile.TemporaryDirectory(prefix="ppclab-worker-test-") as td_text:
     assert limited_response["result"]["stop_reason"] == "instruction_limit"
 
     # Root containment follows symlinks/real paths and rejects escape attempts.
-    escape = dict(job)
-    escape["id"] = "escape"
-    escape["image"] = {"path": "/etc/passwd", "kind": "raw"}
-    escape_path = td / "escape.json"
-    escape_path.write_text(json.dumps(escape), encoding="utf-8")
-    escaped = invoke(["--root", str(td), "run", str(escape_path)])
-    assert escaped.returncode == 1
-    escaped_response = json.loads(escaped.stdout)
-    assert escaped_response["ok"] is False and "outside worker root" in escaped_response["error"]
+    outside = td.parent / (td.name + "-outside.bin")
+    outside.write_bytes(b"outside")
+    try:
+        escape = dict(job)
+        escape["id"] = "escape"
+        escape["image"] = {"path": str(outside), "kind": "raw"}
+        escape_path = td / "escape.json"
+        escape_path.write_text(json.dumps(escape), encoding="utf-8")
+        escaped = invoke(["--root", str(td), "run", str(escape_path)])
+        assert escaped.returncode == 1
+        escaped_response = json.loads(escaped.stdout)
+        assert escaped_response["ok"] is False and "outside worker root" in escaped_response["error"]
+    finally:
+        outside.unlink(missing_ok=True)
 
     # Stream mode survives an ordinary failed job and keeps response ordering.
     stream_job = dict(job)

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-orchestration-summary-v1.schema.json",
+  "title": "PPC Lab orchestration summary v1",
+  "type": "object",
+  "required": ["schema", "manifest_schema", "engine", "parallelism", "jobs", "executed", "resumed", "cache_hits", "failed", "results"],
+  "properties": {
+    "schema": {"const": "ppc-lab-orchestration-summary-v1"},
+    "manifest_schema": {"const": "ppc-lab-orchestration-v1"},
+    "manifest": {"type": "string"},
+    "id": {},
+    "engine": {"type": "object"},
+    "parallelism": {"type": "integer", "minimum": 1},
+    "jobs": {"type": "integer", "minimum": 0},
+    "executed": {"type": "integer", "minimum": 0},
+    "resumed": {"type": "integer", "minimum": 0},
+    "cache_hits": {"type": "integer", "minimum": 0},
+    "failed": {"type": "integer", "minimum": 0},
+    "duration_seconds": {"type": "number", "minimum": 0},
+    "results": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}

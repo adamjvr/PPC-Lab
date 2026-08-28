@@ -12,6 +12,20 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.2.0 — Parallel Server Orchestration
+
+v1.2 makes the server-side platform practical for large experiment sets without turning PPC Lab into a daemon project. `ppc-lab-orchestrate` consumes a `ppc-lab-orchestration-v1` manifest of stable v1 worker jobs, executes them concurrently, writes atomic per-job evidence, resumes matching prior results, and optionally reuses successful work through deterministic content-addressed cache keys.
+
+```bash
+ppc-lab-orchestrate manifest.json \
+  --out results/run-001 \
+  --cache /srv/ppc-cache \
+  --root /srv/ppc-work \
+  --parallel 16
+```
+
+Cache identity includes the canonical job, PPC Lab engine identity, and SHA-256 of target inputs; changing the binary bytes invalidates cached work automatically. See [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md).
+
 ## v1.1.0 — Server Worker Protocol
 
 v1.1 promotes PPC Lab's original server-side use case to a stable transport boundary. `ppc-lab-worker` accepts `ppc-lab-job-v1` JSON, executes it through the installed PPC Lab engine, and returns `ppc-lab-worker-response-v1` with deterministic result and snapshot evidence inline. Streaming mode uses NDJSON and is designed to survive individual guest failures without restarting the worker.
@@ -100,6 +114,7 @@ addresses, bindings, inputs, and expected results.
 - synthetic loader/relocation/execution regressions plus property/malformed-input stress coverage;
 - GPL/SPDX/version/target-neutrality repository invariants;
 - stable JSON/NDJSON server-worker protocol for remote/headless execution;
+- parallel/resumable server orchestration with deterministic content-addressed execution caching;
 - low-maintenance macOS/Linux/Windows CI.
 
 The original external Classic Mac regression remains preserved as a target
@@ -181,13 +196,13 @@ PPC-Lab/
 ├── include/ppclab/ppc/   reusable public C++ API
 ├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              experiments, runtime, trace, diff/result tooling
+├── scripts/              worker/orchestration, experiments, trace/diff tooling
 ├── runtimes/             reusable runtime personality maps
 ├── integrations/         Ghidra / IDA / Binary Ninja evidence adapters
 ├── tests/                synthetic deterministic regressions
 ├── profiles/             target-specific metadata/scripts/expectations
 ├── docs/                 usage, format, architecture, development docs
-├── schemas/              stable server-worker JSON contracts
+├── schemas/              stable worker/orchestration JSON contracts
 ├── Tools/                convenient shell entry points
 ├── .github/workflows/    CI
 ├── CONTRIBUTING.md
@@ -200,6 +215,7 @@ PPC-Lab/
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
+| [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |

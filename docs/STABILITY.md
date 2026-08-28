@@ -40,3 +40,11 @@ When a real target exposes a missing capability, add the smallest correct implem
 Starting with v1.1, `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` are compatibility contracts. Fields may be added compatibly, but existing field meanings are not silently repurposed within the v1 major line. A breaking job/response change requires a new schema name rather than changing `*-v1` in place.
 
 The worker transport is intentionally not fixed to HTTP or any network stack. NDJSON framing is stable for stream mode; authentication, encryption, queues, scheduling, and network exposure remain deployment concerns.
+
+## v1.1/v1.2 automation protocol stability
+
+Server automation is versioned independently from CLI spelling. `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` remain the stable single-job boundary. v1.2 adds `ppc-lab-orchestration-v1` and `ppc-lab-orchestration-summary-v1` above that boundary rather than replacing it.
+
+Within PPC Lab 1.x, existing required meanings in these `*-v1` contracts will not be silently redefined. Additive optional fields may appear. A future incompatible contract will use a new schema identifier.
+
+The content-cache key algorithm is an implementation detail of the v1.2 orchestrator, but the cache key is always treated as opaque SHA-256 identity. Consumers should compare/cache it as a string rather than reproduce the algorithm independently.

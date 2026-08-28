@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0 — 2026-08-27 — Parallel Server Orchestration
+
+- Added `ppc-lab-orchestrate`, a dependency-free parallel scheduler above the stable `ppc-lab-job-v1`/worker boundary.
+- Added `ppc-lab-orchestration-v1` manifests supporting inline jobs and referenced standalone job files with stable per-file relative-path semantics.
+- Added bounded concurrent execution, atomic per-job evidence records, deterministic summaries, and continuation after individual guest failures.
+- Added `--resume` for interrupted result directories; reuse requires an exact current cache key rather than trusting filenames.
+- Added optional shared content-addressed caching keyed by canonical job JSON, PPC Lab engine identity, and SHA-256/size of every input binary/data file.
+- Added cache bypass controls and successful-result-only cache writes so failed research cases are not silently treated as completed infrastructure.
+- Added orchestration-root checks before input hashing, while retaining the worker's independent symlink-safe execution containment.
+- Added worker `--base-dir` for stdin/NDJSON relative-path resolution without conflating path resolution with filesystem containment.
+- Added orchestration/summary JSON Schemas, installed orchestrator tooling, machine-readable capability advertising, documentation, examples, and end-to-end parallel/resume/cache invalidation regressions.
+
 ## 1.1.0 — 2026-08-27 — Server Worker Protocol
 
 - Added `ppc-lab-worker`, a standard-library JSON/NDJSON execution adapter for server, SSH, CI, container, and subprocess deployments.

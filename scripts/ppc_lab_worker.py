@@ -286,6 +286,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="PPC Lab JSON/NDJSON execution worker")
     parser.add_argument("--ppc-lab", help="path to ppc-lab (default: PPC_LAB_BIN or PATH)")
     parser.add_argument("--root", help="restrict job input files to this directory tree")
+    parser.add_argument("--base-dir", help="base directory for relative paths in stdin jobs (default: root or cwd)")
     parser.add_argument("--timeout", type=float, default=60.0, help="wall-clock timeout per job in seconds (default: 60)")
     parser.add_argument("--expose-command", action="store_true", help="include the local ppc-lab argv in responses (debugging only)")
     sub = parser.add_subparsers(dest="mode", required=True)
@@ -297,10 +298,13 @@ def main() -> int:
         parser.error("--timeout must be greater than zero")
     ppc_lab = _find_ppc_lab(args.ppc_lab)
     root = _root(args.root)
+    stdin_base = Path(args.base_dir).expanduser().resolve() if args.base_dir else (root or Path.cwd().resolve())
+    if args.base_dir and not stdin_base.is_dir():
+        parser.error("--base-dir must be an existing directory")
 
     if args.mode == "run":
         if args.job == "-":
-            base_dir = root or Path.cwd().resolve()
+            base_dir = stdin_base
             try:
                 job = json.load(sys.stdin)
             except Exception as exc:
@@ -319,7 +323,7 @@ def main() -> int:
         print(json.dumps(response, sort_keys=True))
         return 0 if response.get("ok") else 1
 
-    base_dir = root or Path.cwd().resolve()
+    base_dir = stdin_base
     had_transport_error = False
     for raw in sys.stdin:
         raw = raw.strip()

@@ -1,0 +1,9 @@
+{
+  "schema": "ppc-lab-orchestration-v1",
+  "id": "example",
+  "parallelism": 4,
+  "jobs": [
+    {"name": "probe-a", "path": "jobs/probe-a.json"},
+    {"name": "probe-b", "path": "jobs/probe-b.json"}
+  ]
+}

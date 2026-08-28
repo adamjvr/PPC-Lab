@@ -42,15 +42,20 @@ def main() -> int:
         assert (prefix / "include" / "ppclab" / "ppc" / "UniversalImage.hpp").is_file()
         worker = prefix / "bin" / "ppc-lab-worker"
         assert worker.is_file(), worker
+        orchestrator = prefix / "bin" / "ppc-lab-orchestrate"
+        assert orchestrator.is_file(), orchestrator
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
         assert schema_candidates, "worker job schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-orchestration-v1.schema.json")), "orchestration schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-orchestration-job-result-v1.schema.json")), "orchestration job-result schema was not installed"
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 1.1.0"
+        assert version.stdout.strip() == "PPC Lab 1.2.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
+        assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()

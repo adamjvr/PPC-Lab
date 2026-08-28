@@ -64,3 +64,7 @@ v1.0 unified native intake behind `UniversalImageLoader`, added the `--image`/`r
 ## v1.1.0 — Server Worker Protocol — 2026-08-27
 
 v1.1 returned to PPC Lab's original server-side motivation without turning the repository into a service-maintenance burden. A small standard-library worker now translates stable JSON/NDJSON jobs into the v1 execution platform, returns deterministic results/snapshots, and adds filesystem/time containment suitable for subprocess, SSH, CI, and container deployments.
+
+## v1.2.0 — Parallel Server Orchestration — 2026-08-27
+
+v1.2 moved PPC Lab's server use from individual transport-neutral jobs to durable large-run orchestration while deliberately avoiding a permanent service stack. A standard-library scheduler now runs stable worker jobs concurrently, fingerprints inputs by content, caches successful deterministic evidence, resumes interrupted result directories, and preserves filesystem containment before both hashing and execution. The worker protocol remains the execution boundary; orchestration is a replaceable layer above it.

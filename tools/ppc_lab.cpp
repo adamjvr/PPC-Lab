@@ -368,7 +368,7 @@ int commandCapabilities(int argc, char** argv) {
                   << "  \"guest\": {\"architecture\": \"ppc32\", \"endian\": \"big\"},\n"
                   << "  \"formats\": [\"ELF32-PPC-BE\", \"Mach-O-PPC32-BE\", \"PEF-CFM-PPC\", \"raw\"],\n"
                   << "  \"backends\": {\"builtin\": true, \"unicorn\": " << (unicorn ? "true" : "false") << "},\n"
-                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\"}\n"
+                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\"}\n"
                   << "}\n";
     } else {
         std::cout << "PPC Lab " << kVersion << '\n'
@@ -379,7 +379,10 @@ int commandCapabilities(int argc, char** argv) {
                   << "backend.unicorn=" << (unicorn ? "yes" : "no") << '\n'
                   << "protocol.job=ppc-lab-job-v1\n"
                   << "protocol.worker-response=ppc-lab-worker-response-v1\n"
-                  << "protocol.stream=ndjson\n";
+                  << "protocol.stream=ndjson\n"
+                  << "protocol.orchestration=ppc-lab-orchestration-v1\n"
+                  << "protocol.orchestration-job-result=ppc-lab-orchestration-job-result-v1\n"
+                  << "protocol.orchestration-summary=ppc-lab-orchestration-summary-v1\n";
     }
     return 0;
 }
@@ -408,7 +411,8 @@ int commandDoctor(int argc, char**) {
         std::cout << "unicorn=not-built\n";
     }
     std::cout << "intake=ELF32-PPC-BE,Mach-O-PPC32-BE,PEF-CFM-PPC,raw\n"
-              << "worker-protocol=ppc-lab-job-v1/ndjson\nstatus=PASS\n";
+              << "worker-protocol=ppc-lab-job-v1/ndjson\n"
+              << "orchestration=ppc-lab-orchestration-v1\nstatus=PASS\n";
     return 0;
 }
 

@@ -14,7 +14,11 @@ v1.0 includes native ELF32 PPC, Mach-O PPC32, and PEF/CFM intake; auto-detected 
 
 The original "server-side harness" intent now has a stable, transport-neutral boundary: `ppc-lab-job-v1` jobs, `ppc-lab-worker-response-v1` responses, one-shot execution, resilient NDJSON streaming, filesystem containment, and wall-clock containment. This deliberately avoids turning PPC Lab into a web-service project.
 
-## Post-1.1 — only when justified
+## v1.2 — Parallel server orchestration — COMPLETE
+
+The stable worker boundary can now be driven as server infrastructure without bespoke client glue: orchestration manifests, bounded parallel execution, atomic result directories, exact resume semantics, and deterministic content-addressed caching are provided without adding a daemon/database/cloud stack.
+
+## Post-1.2 — only when justified
 
 Potential future capability buckets:
 

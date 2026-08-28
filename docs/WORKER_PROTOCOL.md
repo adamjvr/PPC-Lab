@@ -111,3 +111,9 @@ For server use, pass `--root DIRECTORY`. Every job input (`image.path` and optio
 `--expose-command` includes the local `ppc-lab` argv in responses. It is off by default because filesystem paths and target-specific bindings may be sensitive in shared infrastructure.
 
 The stable API is the JSON job/response contract, not the generated argv.
+
+## v1.2 stdin base-directory control
+
+`--base-dir DIRECTORY` sets the path-resolution base for jobs arriving through stdin or NDJSON. It is separate from `--root`: `--base-dir` answers "what does this relative path mean?", while `--root` answers "is the resolved file allowed?".
+
+The parallel orchestrator uses this separation to preserve manifest/job-relative paths while retaining strict root containment. See `ORCHESTRATION.md`.
