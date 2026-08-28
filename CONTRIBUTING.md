@@ -54,3 +54,7 @@ git diff --check
 For source changes, add or update a regression test. For a target-specific discovery, update that target's profile documentation/validation where appropriate.
 
 See `docs/DEVELOPMENT.md` for implementation rules and `docs/ADDING_A_TARGET.md` for profile rules.
+
+## Server/fleet changes
+
+Worker, orchestration, or fleet changes must preserve the stable v1 job/response boundary unless a new schema is deliberately introduced. Network-independent CI tests should simulate multiple local hosts and failures; do not make the normal repository suite depend on public network access or developer SSH credentials. Transport code must keep root-containment checks before reading/hashing/staging source inputs.

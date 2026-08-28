@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 — 2026-08-27 — Distributed Worker Fleet
+
+- Add `ppc-lab-fleet`, a dependency-free scheduler for local and OpenSSH worker fleets.
+- Add capability/version negotiation, per-host slots and tags, deterministic job placement, and backend eligibility.
+- Add SHA-256 content-addressed input staging for local/remote workers, central result caching, exact resume, and transient retry/failover.
+- Add fleet manifest/result/summary v1 schemas and local multi-host regression coverage.
+- Preserve `ppc-lab-job-v1` / `ppc-lab-worker-response-v1` as the execution boundary; the fleet layer does not introduce a daemon or web service.
+
 ## 1.2.0 — 2026-08-27 — Parallel Server Orchestration
 
 - Added `ppc-lab-orchestrate`, a dependency-free parallel scheduler above the stable `ppc-lab-job-v1`/worker boundary.

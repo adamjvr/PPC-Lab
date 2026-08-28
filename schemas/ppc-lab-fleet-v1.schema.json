@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-fleet-v1.schema.json",
+  "title": "PPC Lab distributed fleet manifest v1",
+  "type": "object",
+  "required": ["schema", "hosts", "jobs"],
+  "properties": {
+    "schema": {"const": "ppc-lab-fleet-v1"},
+    "timeout": {"type": "number", "exclusiveMinimum": 0},
+    "retries": {"type": "integer", "minimum": 0},
+    "hosts": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["name", "root"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "transport": {"enum": ["local", "ssh"]},
+          "endpoint": {"type": "string"},
+          "slots": {"type": "integer", "minimum": 1},
+          "root": {"type": "string", "minLength": 1},
+          "ppc_lab": {"type": "string", "minLength": 1},
+          "worker": {"type": "string", "minLength": 1},
+          "python": {"type": "string", "minLength": 1},
+          "tags": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+        }, "additionalProperties": false
+      }
+    },
+    "jobs": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "job": {"type": "object"},
+          "path": {"type": "string", "minLength": 1},
+          "requires_tags": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+        },
+        "oneOf": [{"required": ["job"]}, {"required": ["path"]}],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

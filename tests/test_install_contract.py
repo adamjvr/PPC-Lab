@@ -44,18 +44,24 @@ def main() -> int:
         assert worker.is_file(), worker
         orchestrator = prefix / "bin" / "ppc-lab-orchestrate"
         assert orchestrator.is_file(), orchestrator
+        fleet = prefix / "bin" / "ppc-lab-fleet"
+        assert fleet.is_file(), fleet
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
         assert schema_candidates, "worker job schema was not installed"
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-orchestration-v1.schema.json")), "orchestration schema was not installed"
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-orchestration-job-result-v1.schema.json")), "orchestration job-result schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-fleet-v1.schema.json")), "fleet manifest schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-fleet-job-result-v1.schema.json")), "fleet job-result schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-fleet-summary-v1.schema.json")), "fleet summary schema was not installed"
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 1.2.0"
+        assert version.stdout.strip() == "PPC Lab 1.3.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
+        assert '"fleet": "ppc-lab-fleet-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()

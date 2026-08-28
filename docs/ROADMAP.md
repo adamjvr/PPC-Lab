@@ -18,14 +18,18 @@ The original "server-side harness" intent now has a stable, transport-neutral bo
 
 The stable worker boundary can now be driven as server infrastructure without bespoke client glue: orchestration manifests, bounded parallel execution, atomic result directories, exact resume semantics, and deterministic content-addressed caching are provided without adding a daemon/database/cloud stack.
 
-## Post-1.2 — only when justified
+## v1.3 — Distributed worker fleet — COMPLETE
+
+The stable worker boundary now scales across multiple installed hosts without a service stack: capability/version negotiation, OpenSSH/local transports, content-addressed target staging, host slots/tags/backend eligibility, retries/failover for transient infrastructure faults, central cache/resume, and atomic fleet evidence are included.
+
+## Post-1.3 — only when justified
 
 Potential future capability buckets:
 
 - PPC64 and/or little-endian PowerPC when an actual target requires them;
 - deeper Classic Mac, POSIX, console, firmware, or other runtime personalities;
 - additional loader relocation families exposed by real binaries;
-- richer debugger protocols or a network/service transport **only if** a deployment cannot use the v1.1 JSON/NDJSON worker over subprocess/SSH/container infrastructure;
+- richer debugger protocols or a persistent network/service transport **only if** a deployment cannot use the v1.1 worker plus v1.3 OpenSSH fleet infrastructure;
 - JIT/alternate execution backends;
 - deeper Ghidra/IDA/Binary Ninja plugins;
 - additional ISA fidelity where a real workload exposes a missing/approximate instruction.

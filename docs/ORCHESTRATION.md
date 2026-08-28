@@ -130,3 +130,7 @@ This was added so orchestration can submit inline JSON through stdin while retai
 The older `ppc-lab-experiment-v1` batch script remains available for quick CLI-argument parameter sweeps. The v1.2 orchestrator is the preferred server-scale boundary because it operates on the stable `ppc-lab-job-v1` protocol, supports concurrency, caching, resumability, filesystem containment, and installed tooling.
 
 Use the old batch tool when generating a small ad-hoc sweep is faster. Use orchestration when results need to be durable infrastructure.
+
+## When one host is no longer enough
+
+Keep using v1.2 orchestration when one machine can execute the run. It is the smaller failure surface. When the same stable jobs need multiple hosts, `ppc-lab-fleet` v1.3 adds capability negotiation, content-addressed staging, slots/tags, and OpenSSH failover without changing `ppc-lab-job-v1`. See `docs/FLEET.md`.

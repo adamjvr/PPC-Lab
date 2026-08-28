@@ -368,7 +368,7 @@ int commandCapabilities(int argc, char** argv) {
                   << "  \"guest\": {\"architecture\": \"ppc32\", \"endian\": \"big\"},\n"
                   << "  \"formats\": [\"ELF32-PPC-BE\", \"Mach-O-PPC32-BE\", \"PEF-CFM-PPC\", \"raw\"],\n"
                   << "  \"backends\": {\"builtin\": true, \"unicorn\": " << (unicorn ? "true" : "false") << "},\n"
-                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\"}\n"
+                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\", \"fleet\": \"ppc-lab-fleet-v1\", \"fleet_job_result\": \"ppc-lab-fleet-job-result-v1\", \"fleet_summary\": \"ppc-lab-fleet-summary-v1\"}\n"
                   << "}\n";
     } else {
         std::cout << "PPC Lab " << kVersion << '\n'
@@ -382,7 +382,10 @@ int commandCapabilities(int argc, char** argv) {
                   << "protocol.stream=ndjson\n"
                   << "protocol.orchestration=ppc-lab-orchestration-v1\n"
                   << "protocol.orchestration-job-result=ppc-lab-orchestration-job-result-v1\n"
-                  << "protocol.orchestration-summary=ppc-lab-orchestration-summary-v1\n";
+                  << "protocol.orchestration-summary=ppc-lab-orchestration-summary-v1\n"
+                  << "protocol.fleet=ppc-lab-fleet-v1\n"
+                  << "protocol.fleet-job-result=ppc-lab-fleet-job-result-v1\n"
+                  << "protocol.fleet-summary=ppc-lab-fleet-summary-v1\n";
     }
     return 0;
 }
@@ -412,7 +415,8 @@ int commandDoctor(int argc, char**) {
     }
     std::cout << "intake=ELF32-PPC-BE,Mach-O-PPC32-BE,PEF-CFM-PPC,raw\n"
               << "worker-protocol=ppc-lab-job-v1/ndjson\n"
-              << "orchestration=ppc-lab-orchestration-v1\nstatus=PASS\n";
+              << "orchestration=ppc-lab-orchestration-v1\n"
+              << "fleet=ppc-lab-fleet-v1\nstatus=PASS\n";
     return 0;
 }
 

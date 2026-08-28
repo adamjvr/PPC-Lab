@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.3.0 — Distributed Worker Fleet
+
+v1.3 takes the stable server worker/orchestration stack across multiple machines without adding a daemon, database, cloud SDK, or bespoke network protocol. `ppc-lab-fleet` capability-probes local/OpenSSH workers, enforces one engine version, stages binary inputs by SHA-256, respects per-host slots/tags/backend availability, retries transient transport/time-out failures on another compatible host, and preserves deterministic result/cache identity.
+
+```bash
+ppc-lab-fleet fleet.json \
+  --local-root /srv/research \
+  --out /srv/results/run-001 \
+  --cache /srv/cache/ppc-lab
+```
+
+See [`docs/FLEET.md`](docs/FLEET.md) for the manifest, SSH deployment, staging, retry, cache, and security contracts.
+
 ## v1.2.0 — Parallel Server Orchestration
 
 v1.2 makes the server-side platform practical for large experiment sets without turning PPC Lab into a daemon project. `ppc-lab-orchestrate` consumes a `ppc-lab-orchestration-v1` manifest of stable v1 worker jobs, executes them concurrently, writes atomic per-job evidence, resumes matching prior results, and optionally reuses successful work through deterministic content-addressed cache keys.
@@ -115,6 +128,7 @@ addresses, bindings, inputs, and expected results.
 - GPL/SPDX/version/target-neutrality repository invariants;
 - stable JSON/NDJSON server-worker protocol for remote/headless execution;
 - parallel/resumable server orchestration with deterministic content-addressed execution caching;
+- multi-host local/OpenSSH fleet execution with capability negotiation, SHA-256 staging, host slots/tags, and failover;
 - low-maintenance macOS/Linux/Windows CI.
 
 The original external Classic Mac regression remains preserved as a target
@@ -196,13 +210,13 @@ PPC-Lab/
 ├── include/ppclab/ppc/   reusable public C++ API
 ├── src/                  CPU, memory, loaders, execution, runtime stubs
 ├── tools/                ppc-lab CLI
-├── scripts/              worker/orchestration, experiments, trace/diff tooling
+├── scripts/              worker/orchestration/fleet, experiments, trace/diff tooling
 ├── runtimes/             reusable runtime personality maps
 ├── integrations/         Ghidra / IDA / Binary Ninja evidence adapters
 ├── tests/                synthetic deterministic regressions
 ├── profiles/             target-specific metadata/scripts/expectations
 ├── docs/                 usage, format, architecture, development docs
-├── schemas/              stable worker/orchestration JSON contracts
+├── schemas/              stable worker/orchestration/fleet JSON contracts
 ├── Tools/                convenient shell entry points
 ├── .github/workflows/    CI
 ├── CONTRIBUTING.md
@@ -216,6 +230,7 @@ PPC-Lab/
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
 | [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
+| [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |

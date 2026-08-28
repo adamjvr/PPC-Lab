@@ -41,10 +41,16 @@ Starting with v1.1, `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` are compat
 
 The worker transport is intentionally not fixed to HTTP or any network stack. NDJSON framing is stable for stream mode; authentication, encryption, queues, scheduling, and network exposure remain deployment concerns.
 
-## v1.1/v1.2 automation protocol stability
+## v1.1–v1.3 automation protocol stability
 
-Server automation is versioned independently from CLI spelling. `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` remain the stable single-job boundary. v1.2 adds `ppc-lab-orchestration-v1` and `ppc-lab-orchestration-summary-v1` above that boundary rather than replacing it.
+Server automation is versioned independently from CLI spelling. `ppc-lab-job-v1` and `ppc-lab-worker-response-v1` remain the stable single-job boundary. v1.2 adds `ppc-lab-orchestration-v1` and `ppc-lab-orchestration-summary-v1` above that boundary rather than replacing it. v1.3 similarly adds `ppc-lab-fleet-v1`, `ppc-lab-fleet-job-result-v1`, and `ppc-lab-fleet-summary-v1`; fleet placement/staging remains an outer transport concern and does not redefine a job.
 
 Within PPC Lab 1.x, existing required meanings in these `*-v1` contracts will not be silently redefined. Additive optional fields may appear. A future incompatible contract will use a new schema identifier.
 
 The content-cache key algorithm is an implementation detail of the v1.2 orchestrator, but the cache key is always treated as opaque SHA-256 identity. Consumers should compare/cache it as a string rather than reproduce the algorithm independently.
+
+## Fleet compatibility
+
+Within PPC Lab 1.x, the fleet v1 schema names are compatibility contracts under the same additive-field rule as worker/orchestration v1. Host placement strategy, content-store layout, and the exact cache-key algorithm remain implementation details; clients should consume the recorded schemas/cache key instead of reproducing those internals.
+
+A single fleet run intentionally requires one PPC Lab engine version across participating hosts. This is a reproducibility rule, not a promise that mixed-version execution is semantically safe.

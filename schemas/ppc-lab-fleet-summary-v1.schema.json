@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-fleet-summary-v1.schema.json",
+  "title": "PPC Lab fleet summary v1",
+  "type": "object",
+  "required": ["schema", "engine_version", "jobs", "executed", "resumed", "cache_hits", "failed", "hosts", "results"],
+  "properties": {
+    "schema": {"const": "ppc-lab-fleet-summary-v1"},
+    "engine_version": {"type": "string"}, "jobs": {"type": "integer"},
+    "executed": {"type": "integer"}, "resumed": {"type": "integer"},
+    "cache_hits": {"type": "integer"}, "failed": {"type": "integer"},
+    "hosts": {"type": "array"}, "results": {"type": "array"}
+  }, "additionalProperties": true
+}

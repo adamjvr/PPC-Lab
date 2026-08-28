@@ -21,6 +21,7 @@ cmake --install build/release --prefix "$HOME/.local"
 The install tree contains:
 
 - `bin/ppc-lab`;
+- `bin/ppc-lab-worker`, `bin/ppc-lab-orchestrate`, and `bin/ppc-lab-fleet`;
 - the static PPC Lab core library;
 - `include/ppclab/ppc/*.hpp`;
 - `PPCLabConfig.cmake`, `PPCLabConfigVersion.cmake`, and exported targets;
@@ -42,6 +43,8 @@ The exported core target propagates the required C++20 language feature and inst
 
 `tests/test_install_contract.py` installs the current build into a temporary prefix, executes the installed CLI, discovers the package through `find_package(PPCLab CONFIG)`, and compiles a separate downstream consumer. This test exists specifically to catch packaging/export mistakes that ordinary in-tree tests cannot see.
 
-## Worker installation
+## Server-tool installation
 
-The same install step also places `ppc-lab-worker` in the install `bin` directory and the v1 JSON schemas under `share/ppc-lab/schemas/`. The worker uses only Python's standard library and locates `ppc-lab` through `--ppc-lab`, `PPC_LAB_BIN`, or `PATH`.
+The same install step places `ppc-lab-worker`, `ppc-lab-orchestrate`, and `ppc-lab-fleet` in the install `bin` directory and the v1 JSON schemas under `share/ppc-lab/schemas/`. These tools use only Python's standard library. Fleet SSH transport additionally expects ordinary OpenSSH `ssh`/`scp` commands on the controller.
+
+The worker locates `ppc-lab` through `--ppc-lab`, `PPC_LAB_BIN`, or `PATH`. A normal fleet host therefore needs the installed `bin` directory on the noninteractive SSH `PATH`; see `docs/FLEET.md`.

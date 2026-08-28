@@ -68,3 +68,7 @@ v1.1 returned to PPC Lab's original server-side motivation without turning the r
 ## v1.2.0 — Parallel Server Orchestration — 2026-08-27
 
 v1.2 moved PPC Lab's server use from individual transport-neutral jobs to durable large-run orchestration while deliberately avoiding a permanent service stack. A standard-library scheduler now runs stable worker jobs concurrently, fingerprints inputs by content, caches successful deterministic evidence, resumes interrupted result directories, and preserves filesystem containment before both hashing and execution. The worker protocol remains the execution boundary; orchestration is a replaceable layer above it.
+## v1.3.0 — Distributed Worker Fleet — 2026-08-27
+
+v1.3 extended the stable server-side stack across multiple machines while preserving the low-maintenance design. A standard-library controller now negotiates installed host capabilities, stages target bytes by SHA-256 over local/OpenSSH transports, bounds concurrency per host, filters placement by tags/backend support, and retries transient infrastructure failures without retrying ordinary deterministic guest failures. The job/worker protocol remains unchanged; the fleet is an outer deployment layer rather than a new execution API.
+
