@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-hypothesis-report-v1.schema.json",
+  "title": "PPC Lab hypothesis report v1",
+  "type": "object",
+  "required": ["schema", "input_provenance", "cases", "hypotheses", "method"],
+  "properties": {
+    "schema": {"const": "ppc-lab-hypothesis-report-v1"},
+    "input_provenance": {"type": "array"},
+    "cases": {"type": "array"},
+    "hypotheses": {"type": "array"},
+    "method": {"type": "object"}
+  },
+  "additionalProperties": true
+}

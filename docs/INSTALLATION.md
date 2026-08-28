@@ -32,7 +32,7 @@ The install tree contains:
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(MyResearchTool LANGUAGES CXX)
-find_package(PPCLab 1.0 CONFIG REQUIRED)
+find_package(PPCLab 2.0 CONFIG REQUIRED)
 add_executable(my-tool main.cpp)
 target_link_libraries(my-tool PRIVATE PPCLab::core)
 ```
@@ -79,3 +79,8 @@ A normal v2.3 install also installs `ppc-lab-control` beside `ppc-lab-schedule`.
 ## Research knowledge graph
 
 A normal v2.4 install adds `ppc-lab-knowledge` and the five v2.4 knowledge query/report/traversal/verification schemas. The tool uses Python's bundled `sqlite3` module; no graph database, broker, or service is required. The graph can index installed-server evidence directories or synchronize an existing `ppc-lab-evidence` store while leaving target binaries in their original private storage.
+
+
+## Automated hypothesis engine
+
+A normal v2.5 install adds `ppc-lab-hypothesize` plus the hypothesis report/experiment/promoted-record schemas. It uses only Python's standard library and consumes normal exploration JSON. Follow-up experiments are ordinary `ppc-lab-exploration-v1` manifests, so no additional execution daemon or dependency is required.

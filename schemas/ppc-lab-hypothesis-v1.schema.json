@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-hypothesis-v1.schema.json",
+  "title": "PPC Lab promoted hypothesis v1",
+  "type": "object",
+  "required": ["schema", "id", "status", "subject", "role", "claim", "confidence", "verified_support", "source_report_sha256"],
+  "properties": {
+    "schema": {"const": "ppc-lab-hypothesis-v1"},
+    "status": {"enum": ["supported", "rejected", "inconclusive"]},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "verified_support": {"type": "array"},
+    "input_provenance": {"type": "array"}
+  },
+  "additionalProperties": true
+}

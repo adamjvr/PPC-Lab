@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-hypothesis-experiment-v1.schema.json",
+  "title": "PPC Lab hypothesis experiment v1",
+  "type": "object",
+  "required": ["schema", "hypothesis_id", "claim", "confidence", "exploration"],
+  "properties": {
+    "schema": {"const": "ppc-lab-hypothesis-experiment-v1"},
+    "hypothesis_id": {"type": "string"},
+    "claim": {"type": "string"},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "exploration": {"type": "object"}
+  },
+  "additionalProperties": true
+}

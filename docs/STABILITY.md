@@ -107,3 +107,8 @@ PPC Lab 2.1 extends `ppc-lab-exploration-v1` additively with the deterministic `
 ## v2.4 knowledge-graph compatibility
 
 `ppc-lab-knowledge-query-v1`, `ppc-lab-knowledge-report-v1`, `ppc-lab-knowledge-related-v1`, `ppc-lab-knowledge-path-v1`, and `ppc-lab-knowledge-verify-v1` are additive 2.x research-index contracts. Graph node/edge types may grow additively, but existing relation meanings and target SHA-256 identity semantics must not change incompatibly under the same schema identifiers. Decompiler export intentionally remains `ppc-lab-evidence-v1`.
+
+
+## v2.5 hypothesis compatibility
+
+`ppc-lab-hypothesis-report-v1`, `ppc-lab-hypothesis-experiment-v1`, and `ppc-lab-hypothesis-v1` are additive 2.x research contracts. Candidate confidence is a recorded deterministic heuristic result, not a source-level type guarantee. Existing role names and evidence/promotion meanings will not be silently repurposed under the same schema identifiers. Promotion remains an explicit operation over verified PPC Lab execution evidence; future releases may add optional metrics/role families without automatically upgrading old candidates.

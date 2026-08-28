@@ -246,6 +246,10 @@ def function_key(scope: str, name: str) -> str:
 def address_key(scope: str, address: str) -> str:
     return f"address:{scope}:{address}"
 
+def hypothesis_key(scope: str, item: dict[str, Any]) -> str:
+    material = "|".join(str(item.get(k) or "") for k in ("subject", "role", "claim"))
+    return f"hypothesis:{scope}:{hashlib.sha256(material.encode()).hexdigest()[:20]}"
+
 
 def document_relations(conn: sqlite3.Connection, doc: dict[str, Any], doc_sha: str,
                        source_label: str, forced_target: str | None = None) -> dict[str, int]:
@@ -267,7 +271,7 @@ def document_relations(conn: sqlite3.Connection, doc: dict[str, Any], doc_sha: s
         add_edge(conn, doc_key, key, "targets", doc_sha)
 
     scope = scope_for(targets)
-    counts = {"targets": len(targets), "symbols": 0, "addresses": 0, "functions": 0, "behaviors": 0, "coverage": 0, "calls": 0}
+    counts = {"targets": len(targets), "symbols": 0, "addresses": 0, "functions": 0, "behaviors": 0, "coverage": 0, "calls": 0, "hypotheses": 0}
 
     symbols = doc.get("symbols")
     if isinstance(symbols, list):
@@ -376,6 +380,33 @@ def document_relations(conn: sqlite3.Connection, doc: dict[str, Any], doc_sha: s
         add_edge(conn, doc_key, ckey, "describes-campaign", doc_sha)
         for target in sorted(targets):
             add_edge(conn, ckey, f"target:{target}", "researched-target", doc_sha)
+
+    if schema in {"ppc-lab-hypothesis-report-v1", "ppc-lab-hypothesis-v1"}:
+        items = doc.get("hypotheses") if schema == "ppc-lab-hypothesis-report-v1" else [doc]
+        if isinstance(items, list):
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                hkey = hypothesis_key(scope, item)
+                status = str(item.get("status") or "candidate")
+                metadata = {k: item.get(k) for k in ("id", "subject", "role", "claim", "confidence", "status", "metrics") if item.get(k) is not None}
+                add_node(conn, hkey, "hypothesis", str(item.get("claim") or item.get("subject") or "hypothesis"), target_sha=None if scope == "global" else scope, metadata=metadata)
+                add_edge(conn, doc_key, hkey, "supports-hypothesis" if status == "supported" else "proposes-hypothesis", doc_sha, {"confidence": item.get("confidence"), "status": status})
+                for target in sorted(targets):
+                    add_edge(conn, hkey, f"target:{target}", "hypothesizes-target", doc_sha)
+                for digest in item.get("supporting_behaviors", []) if isinstance(item.get("supporting_behaviors"), list) else []:
+                    if valid_sha(digest):
+                        bkey = f"behavior:{str(digest).lower()}"
+                        add_node(conn, bkey, "behavior", str(digest)[:16], metadata={"fingerprint": str(digest).lower()})
+                        add_edge(conn, hkey, bkey, "supported-by-behavior", doc_sha)
+                subject = str(item.get("subject") or "")
+                if subject.startswith("writes_u32.") or subject.startswith("writes_f32."):
+                    addr = parse_address(subject.split(".", 1)[1])
+                    if addr:
+                        akey = address_key(scope, addr)
+                        add_node(conn, akey, "address", addr, target_sha=None if scope == "global" else scope, address=addr)
+                        add_edge(conn, hkey, akey, "hypothesizes-state-at", doc_sha, {"role": item.get("role")})
+                counts["hypotheses"] += 1
 
     annotations = doc.get("annotations")
     if isinstance(annotations, list):
@@ -598,6 +629,14 @@ def export_decompiler(root: Path, target_prefix: str) -> dict[str, Any]:
                             if addr:
                                 ann=(addr,"differential-divergence",f"PPC Lab graph: {doc.get('classification')} first divergence ({side})")
                                 if ann not in seen_ann: seen_ann.add(ann); annotations.append({"address":ann[0],"kind":ann[1],"comment":ann[2]})
+            if schema == "ppc-lab-hypothesis-v1" and doc.get("status") == "supported":
+                subject = str(doc.get("subject") or "")
+                if subject.startswith("writes_u32.") or subject.startswith("writes_f32."):
+                    addr = parse_address(subject.split(".", 1)[1])
+                    if addr:
+                        comment = f"PPC Lab hypothesis ({doc.get('confidence',0):.3f}): {doc.get('claim','')}"
+                        ann=(addr,"supported-hypothesis",comment)
+                        if ann not in seen_ann: seen_ann.add(ann); annotations.append({"address":ann[0],"kind":ann[1],"comment":ann[2]})
             if isinstance(doc.get("annotations"),list):
                 for item in doc["annotations"]:
                     if not isinstance(item,dict): continue

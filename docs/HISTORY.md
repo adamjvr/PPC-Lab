@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v2.5.0 — Automated Hypothesis Engine — 2026-08-28
+
+PPC Lab added a deterministic hypothesis layer over exploration and knowledge evidence. Candidate argument/state roles now carry transparent confidence/support metrics and bounded follow-up exploration plans; promotion revalidates content-pinned PPC executions before a claim becomes supported knowledge. Hypotheses can be connected to target/behavior/address nodes and supported state-field findings can flow into decompiler evidence without copying target binaries.
+
 ## v2.4.0 — Research Knowledge Graph — 2026-08-28
 
 Accumulated PPC Lab JSON evidence became queryable relationship memory. Targets are keyed by SHA-256, target-scoped symbols/functions/addresses connect to traces, coverage, corpus cases, triage and campaigns, shared behavior fingerprints can reveal cross-project observations, existing evidence stores can be synchronized, and accumulated findings can be exported back into the neutral decompiler-evidence format without archiving target binaries.

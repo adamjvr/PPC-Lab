@@ -80,3 +80,7 @@ Changes to `ppc-lab-campaign` should compose existing stable tools/protocols rat
 ## Scheduler changes
 
 `ppc-lab-schedule` is an outer resource-governance layer; it should invoke stable campaign tooling rather than duplicate campaign research logic. Scheduler changes must keep ordering deterministic, preserve exact manifest-hash resume, treat terminal admission decisions as terminal, and include synthetic regressions for fairness/quota/cancellation semantics. Do not turn scheduler policy into a reason to copy target binaries or add a mandatory queue/database service.
+
+## Hypothesis contributions
+
+Hypothesis-engine changes must remain deterministic and evidence-first. New role families or scoring terms need a regression that shows both supporting and contradicting evidence, must expose their scoring inputs in machine-readable output, and must not auto-promote a candidate. Follow-up experiments must use existing PPC Lab execution/exploration contracts and preserve the target-binary/root-safety boundaries.

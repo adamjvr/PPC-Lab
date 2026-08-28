@@ -193,3 +193,8 @@ Use `--dry-run` first when targeting a new server/root layout. Use `--resume` on
 ## 12. Index durable findings in the knowledge graph
 
 Once evidence is worth keeping across projects, ingest or synchronize it into `ppc-lab-knowledge`. Query target/function/behavior relationships before designing another experiment: an apparently new routine may already share a behavior fingerprint, call relationship, corpus protection, or divergence signature with prior work. Treat graph matches as experiment-selection evidence, not proof of semantic equivalence. Export target-scoped aggregate annotations back to the decompiler when the graph has stronger accumulated context than any single run.
+
+
+## Hypothesis-driven follow-up
+
+After a bounded exploration produces several distinct behaviors, use `ppc-lab-hypothesize analyze` to convert the frontier into explicit candidate roles. Generate follow-up manifests with `experiments`, run them through the normal explorer/worker, then use `promote` only when verified case evidence supports the claim. Ingest both the report and promoted record into `ppc-lab-knowledge` so future projects can discover the relationship.

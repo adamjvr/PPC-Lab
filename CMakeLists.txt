@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 2.4.0 LANGUAGES CXX)
+project(PPCLab VERSION 2.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,6 +87,7 @@ install(PROGRAMS scripts/ppc_lab_campaign.py DESTINATION ${CMAKE_INSTALL_BINDIR}
 install(PROGRAMS scripts/ppc_lab_schedule.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-schedule)
 install(PROGRAMS scripts/ppc_lab_control.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-control)
 install(PROGRAMS scripts/ppc_lab_knowledge.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-knowledge)
+install(PROGRAMS scripts/ppc_lab_hypothesize.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-hypothesize)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -173,4 +174,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_campaign_scheduler COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_campaign_scheduler.py)
     add_test(NAME ppc_lab_campaign_control_plane COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_campaign_control_plane.py)
     add_test(NAME ppc_lab_knowledge_graph COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_knowledge_graph.py)
+    add_test(NAME ppc_lab_hypothesis_engine COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_hypothesis_engine.py)
 endif()

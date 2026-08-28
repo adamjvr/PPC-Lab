@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.5.0 — Automated Hypothesis Engine
+
+v2.5 turns accumulated execution evidence into bounded, reviewable follow-up ideas. `ppc-lab-hypothesize` analyzes exploration cases, proposes likely argument/state roles with transparent confidence/support metrics, emits ordinary follow-up exploration manifests, and requires content-pinned PPC Lab execution evidence before a candidate can be promoted. Candidate and promoted hypotheses can be ingested into the v2.4 knowledge graph; supported state-field hypotheses can flow back into decompiler annotations. No opaque AI service or target-binary archival is introduced.
+
+```bash
+ppc-lab-hypothesize analyze ./exploration --manifest ./explore.json --json ./hypotheses.json
+ppc-lab-hypothesize experiments ./hypotheses.json --out ./followups
+ppc-lab-hypothesize promote ./hypotheses.json hyp-001 --evidence ./exploration --json ./hyp-001.supported.json
+ppc-lab-knowledge ingest /srv/ppc-knowledge ./hypotheses.json ./hyp-001.supported.json --json
+```
+
+See [`docs/HYPOTHESIS_ENGINE.md`](docs/HYPOTHESIS_ENGINE.md).
+
 ## v2.4.0 — Research Knowledge Graph
 
 v2.4 turns accumulated PPC Lab evidence into cross-project research memory. `ppc-lab-knowledge` indexes target hashes, documents, symbols/functions, addresses, dynamic coverage, stable behavior fingerprints, corpus cases, triage findings, campaigns, and decompiler annotations in a local SQLite relationship graph. It can synchronize an existing evidence store, explain relationship paths, find the same observed behavior across different target hashes, and export accumulated target-scoped findings back into the existing decompiler-neutral evidence format. Target binaries remain external.

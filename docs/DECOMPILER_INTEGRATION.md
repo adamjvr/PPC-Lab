@@ -75,3 +75,7 @@ ppc-lab-knowledge export-decompiler /srv/ppc-knowledge \
 ```
 
 The output is still `ppc-lab-evidence-v1`, so the existing Ghidra, IDA, and Binary Ninja adapters need no graph-specific code.
+
+## Supported hypotheses
+
+Starting with v2.5, target-scoped knowledge export can include `supported-hypothesis` annotations for evidence-promoted state-field hypotheses. Candidate reports are deliberately not exported as established facts. Inspect the original hypothesis report/promoted record when deciding whether to rename or retype a field in a decompiler database.

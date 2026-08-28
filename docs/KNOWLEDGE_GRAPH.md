@@ -137,3 +137,7 @@ The additive v2.4 schemas are:
 - `ppc-lab-knowledge-verify-v1`
 
 Decompiler export intentionally reuses `ppc-lab-evidence-v1` rather than introducing a decompiler-specific graph format.
+
+## Hypotheses (v2.5)
+
+The graph ingests both `ppc-lab-hypothesis-report-v1` candidate reports and explicitly promoted `ppc-lab-hypothesis-v1` records. Candidates create `proposes-hypothesis` relationships; supported records create `supports-hypothesis` relationships. Hypotheses can link to target SHA-256 identities, supporting behavior fingerprints, and probed state addresses. Supported `writes_u32`/`writes_f32` state-field hypotheses are included in decompiler export as `supported-hypothesis` annotations.

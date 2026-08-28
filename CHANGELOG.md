@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.5.0 — 2026-08-28 — Automated Hypothesis Engine
+
+- Added installed `ppc-lab-hypothesize`, a deterministic evidence-first hypothesis engine over PPC Lab exploration results.
+- Added transparent role inference for boolean/selector/count/pointer/scalar call inputs, floating arguments, probed state fields, import bindings, and environment/syscall results.
+- Added explicit confidence, supporting/contradicting case IDs, behavior fingerprints, coverage/behavior partitions, failure evidence, and instruction-count correlation metrics.
+- Added bounded follow-up experiment generation as ordinary `ppc-lab-exploration-v1` manifests rather than a separate execution path.
+- Added evidence-gated promotion with content-pinned exploration cases, configurable confidence/support thresholds, and tamper detection; candidates are never auto-promoted.
+- Added knowledge-graph hypothesis nodes, target/behavior/address relationships, and supported state-field annotations for decompiler export.
+- Added stable hypothesis report/experiment/promoted-record schemas, capability/install contracts, documentation, and end-to-end regression coverage.
+- Preserved the no-target-binary rule: hypothesis artifacts contain target hashes/provenance and research evidence, never private input bytes.
+
 ## 2.4.0 — 2026-08-28 — Research Knowledge Graph
 
 - Added dependency-free `ppc-lab-knowledge` SQLite relationship graph over accumulated PPC Lab JSON research artifacts.

@@ -66,9 +66,13 @@ Scheduler runs can now live in a persistent priority queue with foreground super
 
 Accumulated research is now relationship memory rather than disconnected result directories. A dependency-free SQLite graph connects target SHA-256 identities, JSON evidence, symbols/functions/addresses, dynamic coverage, stable behavior fingerprints, corpus cases, triage findings, campaigns, and decompiler annotations. Existing evidence stores can be synchronized, graph neighborhoods/paths can explain cross-project relationships, and target-scoped knowledge exports back into the neutral decompiler-evidence format without copying private binaries.
 
-## v2.5 — Automated hypothesis engine — NEXT WHEN CONTINUING
+## v2.5 — Automated hypothesis engine — COMPLETE
 
-Use accumulated graph relationships plus execution evidence to propose bounded, reviewable follow-up experiments: infer likely argument/state roles, rank unexplained routines/fields, generate explicit candidate jobs, score hypotheses by supporting/contradicting evidence, and require normal PPC Lab execution/corpus/triage evidence before a hypothesis can be promoted. This should remain deterministic and evidence-first rather than becoming an opaque AI dependency.
+Accumulated execution evidence can now generate bounded, inspectable research hypotheses. PPC Lab infers candidate argument/state roles with transparent metrics, emits ordinary follow-up exploration manifests, content-pins supporting cases, requires verified execution evidence for explicit promotion, and connects candidate/supported hypotheses into the knowledge graph. The implementation is deterministic and standard-library-only; it does not introduce an opaque AI dependency.
+
+## v3.0 — Mature PPC research automation platform — NEXT / FINAL CONSOLIDATION
+
+Cut the mature-platform release: unify documentation/operational contracts, add release-level end-to-end acceptance scenarios spanning intake through hypothesis promotion, harden migrations/upgrade checks for persisted evidence/knowledge/control data, and freeze the long-term maintenance boundary. No new subsystem should be added merely to inflate v3.0; ISA/runtime/backend expansion remains demand-driven by real PPC targets.
 
 ## Post-2.0 — only when justified
 
