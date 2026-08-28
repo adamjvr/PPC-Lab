@@ -60,6 +60,22 @@ with tempfile.TemporaryDirectory(prefix="ppclab-explore-test-") as td_text:
     assert any(r["novelty"]["new_pc_count"] > 0 for r in rows)
     assert any(r["novelty"]["behavior_novel"] for r in rows)
 
+    # Adaptive mode prioritizes high-yield axes and can conserve its case budget on a novelty plateau.
+    adaptive = json.loads(json.dumps(manifest))
+    adaptive["strategy"] = "adaptive"
+    adaptive["max_cases"] = 12
+    adaptive["adaptive"] = {"plateau_window": 1, "plateau_novelty_rate": 0.0, "min_cases": 3}
+    apath = td / "adaptive.json"
+    apath.write_text(json.dumps(adaptive), encoding="utf-8")
+    aout = td / "adaptive-out"
+    arun = run(apath, aout)
+    assert arun.returncode == 0, (arun.stdout, arun.stderr)
+    asum = json.loads((aout / "summary.json").read_text())
+    assert asum["strategy"] == "adaptive"
+    assert "registers.r3" in asum["axis_yield"] and "registers.r5" in asum["axis_yield"]
+    assert asum["adaptive"]["stopped_early"] is True
+    assert asum["adaptive"]["unused_case_budget"] > 0
+
     # Direct promotion preserves private-input behavior: cases reference the target by hash.
     corpus = td / "corpus"
     out2 = td / "out-promote"

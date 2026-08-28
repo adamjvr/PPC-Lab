@@ -3,47 +3,154 @@
   "$id": "https://ppc-lab.invalid/schemas/ppc-lab-campaign-v1.schema.json",
   "title": "PPC Lab autonomous research campaign v1",
   "type": "object",
-  "required": ["schema", "exploration"],
+  "required": [
+    "schema",
+    "exploration"
+  ],
   "properties": {
-    "schema": {"const": "ppc-lab-campaign-v1"},
-    "name": {"type": "string", "minLength": 1},
-    "exploration": {"type": "object"},
+    "schema": {
+      "const": "ppc-lab-campaign-v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exploration": {
+      "type": "object"
+    },
     "budgets": {
       "type": "object",
       "properties": {
-        "max_cases": {"type": "integer", "minimum": 1, "maximum": 100000},
-        "max_triage_cases": {"type": "integer", "minimum": 0, "maximum": 100000},
-        "case_timeout_seconds": {"type": "number", "exclusiveMinimum": 0},
-        "wall_seconds": {"type": "number", "exclusiveMinimum": 0}
+        "max_cases": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "max_triage_cases": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "case_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "wall_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       },
       "additionalProperties": false
     },
     "corpus": {
       "type": "object",
       "properties": {
-        "path": {"type": "string", "minLength": 1},
-        "promote_novel": {"type": "boolean"},
-        "verify": {"type": "boolean"},
-        "replay": {"type": "boolean"}
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "promote_novel": {
+          "type": "boolean"
+        },
+        "verify": {
+          "type": "boolean"
+        },
+        "replay": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false
     },
     "triage": {
       "type": "object",
       "properties": {
-        "enabled": {"type": "boolean"},
-        "select": {"enum": ["novel", "failed", "novel-or-failed", "all"]},
-        "left_backend": {"enum": ["auto", "builtin", "unicorn"]},
-        "right_backend": {"enum": ["auto", "builtin", "unicorn"]}
+        "enabled": {
+          "type": "boolean"
+        },
+        "select": {
+          "enum": [
+            "novel",
+            "failed",
+            "novel-or-failed",
+            "all"
+          ]
+        },
+        "left_backend": {
+          "enum": [
+            "auto",
+            "builtin",
+            "unicorn"
+          ]
+        },
+        "right_backend": {
+          "enum": [
+            "auto",
+            "builtin",
+            "unicorn"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "evidence": {
       "type": "object",
       "properties": {
-        "publish": {"type": "boolean"},
-        "store": {"type": "string", "minLength": 1},
-        "verify": {"type": "boolean"}
+        "publish": {
+          "type": "boolean"
+        },
+        "store": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verify": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "intelligence": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "top": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "plateau_window": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "plateau_novelty_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "weights": {
+          "type": "object",
+          "properties": {
+            "new_pc": {
+              "type": "number",
+              "minimum": 0
+            },
+            "behavior": {
+              "type": "number",
+              "minimum": 0
+            },
+            "failure": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pc_rarity": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }

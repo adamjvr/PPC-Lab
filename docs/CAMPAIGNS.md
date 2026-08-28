@@ -74,7 +74,7 @@ ppc-lab-campaign campaign.json --out ./runs/dry-run --dry-run
 
 ## Stage model
 
-A campaign runs four durable stages.
+A v2.1 campaign runs five durable stages.
 
 ### 1. Exploration
 
@@ -82,7 +82,13 @@ The inline `ppc-lab-exploration-v1` manifest is passed to `ppc-lab-explore`. Str
 
 Successful coverage- or behavior-novel cases can be promoted immediately into the behavioral corpus. Private target binaries are referenced by SHA-256 through the corpus contract; they are not copied merely because a campaign promoted a case.
 
-### 2. Corpus verification and replay
+### 2. Campaign intelligence
+
+When enabled, `ppc-lab-prioritize` analyzes the completed exploration frontier before triage. It writes `intelligence.json`, ranks cases with explicit deterministic weights, summarizes axis/value yield, and reports whether the exploration tail appears saturated. This stage does not execute guest code and does not alter the hard case or triage budgets.
+
+The ranking is later applied only to cases that already satisfy `triage.select`; `budgets.max_triage_cases` is then enforced on the priority-ordered eligible set.
+
+### 3. Corpus verification and replay
 
 If a corpus was created or already exists, the campaign can run:
 
@@ -92,7 +98,7 @@ If a corpus was created or already exists, the campaign can run:
 
 A replay regression is considered stronger than an ordinary research finding: the final campaign status becomes `complete-with-regressions` and the campaign exits nonzero.
 
-### 3. Differential triage
+### 4. Differential triage
 
 Selected exploration cases are rerun through `ppc-lab-triage`. Selection policies are:
 
@@ -114,7 +120,7 @@ ppc-lab-campaign campaign.json \
 
 This makes the campaign layer usable for current-vs-old-engine regression hunting as well as builtin-vs-Unicorn checks.
 
-### 4. Evidence publication
+### 5. Evidence publication
 
 After generated evidence is final, the campaign can ingest:
 
@@ -134,6 +140,7 @@ run/
 ├── campaign.exploration.json
 ├── state.json
 ├── summary.json
+├── intelligence.json
 ├── exploration/
 │   ├── summary.json
 │   └── cases/
@@ -154,7 +161,7 @@ The corpus and evidence store may live inside or outside the run directory depen
 
 - the SHA-256 of the campaign manifest;
 - PPC Lab engine version;
-- completed stages;
+- completed stages, including the v2.1 `intelligence` checkpoint;
 - per-stage timing/result metadata.
 
 `--resume` requires the exact same manifest hash and PPC Lab version. PPC Lab intentionally refuses to “resume” a modified campaign or a run after silently changing engine versions. Start a new output directory when either changes.
@@ -213,3 +220,7 @@ They are installed under `share/ppc-lab/schemas` and advertised by `ppc-lab capa
 ## Why this is v2.0
 
 v1.x established the individual durable primitives: execution, worker transport, orchestration/fleet, evidence, trace analytics, corpus replay, differential triage, and guided exploration. v2.0 is the first layer that composes those primitives into an autonomous bounded research lifecycle. The C++ execution core remains focused and target-neutral; the autonomy lives in the standard-library tooling layer.
+
+## v2.1 intelligence stage
+
+Between exploration and corpus replay, v2.1 can run `ppc-lab-prioritize` and checkpoint `intelligence.json`. The optional `intelligence` manifest object controls the number of recommendations, plateau analysis, and transparent scoring weights. Triage eligibility is still controlled by `triage.select`; intelligence only orders the eligible set before the hard `max_triage_cases` limit is applied. See `CAMPAIGN_INTELLIGENCE.md`.

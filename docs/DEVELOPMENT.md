@@ -205,3 +205,5 @@ Run `ppc_lab_behavioral_corpus` for any corpus format, expectation-extraction, i
 ## Campaign-layer development
 
 Campaign changes should be tested as composition behavior, not by mocking away every subsystem. The synthetic `test_autonomous_campaign.py` regression exercises real explorer, worker, corpus, triage, evidence, resume, dry-run, and root-safety paths against a tiny PPC program. Preserve that end-to-end property whenever campaign policy changes.
+
+- `ppc-lab-priority-policy-v1` / `ppc-lab-priority-report-v1` — deterministic research-yield ranking and plateau-analysis contracts introduced in v2.1.

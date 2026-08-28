@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0 — 2026-08-28 — Campaign Intelligence & Prioritization
+
+- Add deterministic adaptive exploration that reorders mutation axes by observed novelty/coverage yield and can conserve unused case budget when a configured novelty plateau is reached.
+- Add `ppc-lab-prioritize` with transparent case scoring, rare-PC weighting, axis/value yield summaries, deterministic ranking, plateau analysis, and machine-readable `ppc-lab-priority-report-v1`.
+- Add an optional `intelligence` block to `ppc-lab-campaign-v1`; campaigns now checkpoint an intelligence stage and priority-order eligible differential-triage cases before applying `max_triage_cases`.
+- Publish intelligence JSON alongside exploration/triage/corpus evidence and report `exploration-saturated` as a normal research finding rather than an infrastructure failure.
+- Add stable priority-policy/report schemas, capability advertising, install-tree coverage, adaptive-exploration regression coverage, campaign-intelligence tests, and updated documentation.
+
 ## 2.0.0 — 2026-08-28 — Autonomous Research Campaigns
 
 - Add `ppc-lab-campaign`, a standard-library composition layer that drives guided exploration, behavioral-corpus promotion/verification/replay, differential triage, and evidence publication as one bounded research lifecycle.

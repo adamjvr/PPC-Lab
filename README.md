@@ -12,6 +12,18 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.1.0 — Campaign Intelligence & Prioritization
+
+v2.1 makes autonomous campaigns spend their bounded execution/triage budgets where the evidence yield is highest. `ppc-lab-explore` gains a deterministic `adaptive` strategy that prefers mutation axes with stronger observed coverage/behavior yield and can stop early when a configured novelty plateau is reached. The new `ppc-lab-prioritize` tool ranks completed exploration cases using transparent coverage, behavior, failure, and rare-PC components, summarizes axis/value yield, and emits `ppc-lab-priority-report-v1`. Campaigns consume that report before triage, so `max_triage_cases` is spent on the highest-value eligible findings rather than the first cases on disk.
+
+```bash
+ppc-lab-explore explore.json --out ./explore-run
+ppc-lab-prioritize ./explore-run --json ./priority.json --top 16
+ppc-lab-campaign campaign.json --out /srv/ppc-runs/campaign-001
+```
+
+See [`docs/CAMPAIGN_INTELLIGENCE.md`](docs/CAMPAIGN_INTELLIGENCE.md), [`docs/EXPLORATION.md`](docs/EXPLORATION.md), and [`docs/CAMPAIGNS.md`](docs/CAMPAIGNS.md).
+
 ## v2.0.0 — Autonomous Research Campaigns
 
 v2.0 composes the stable v1.x execution, guided-exploration, behavioral-corpus, differential-triage, and evidence-store layers into one bounded checkpointed research lifecycle. `ppc-lab-campaign` can validate a plan without guest execution, explore explicit input domains, promote successful novel behavior, replay durable cases, triage selected discoveries across two engine/backend configurations, publish evidence, and resume interrupted runs without an external queue or database. Target binaries remain outside campaign artifacts by default.

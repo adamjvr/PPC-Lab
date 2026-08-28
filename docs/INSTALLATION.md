@@ -69,3 +69,5 @@ ppc-lab-campaign /srv/research/campaign.json --out /srv/research/runs/001
 ```
 
 Long-lived corpus/evidence directories may be outside the run directory. Target binary input paths remain subject to the campaign/worker root boundary.
+
+PPC Lab v2.1 also installs `ppc-lab-prioritize` plus `ppc-lab-priority-policy-v1` and `ppc-lab-priority-report-v1` schemas. The tool uses only Python's standard library.

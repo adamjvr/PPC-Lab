@@ -84,3 +84,7 @@ These are installed with the rest of PPC Lab's schemas and advertised by `ppc-la
 ## Campaign integration
 
 For one exploration frontier, use `ppc-lab-explore` directly. When exploration should automatically flow into corpus replay, differential triage, and evidence publication, embed the unchanged `ppc-lab-exploration-v1` object inside a `ppc-lab-campaign-v1` manifest and run `ppc-lab-campaign`. The campaign layer resolves/contains structural target paths first and can tighten `max_cases`; it does not redefine exploration novelty semantics.
+
+## Adaptive strategy (v2.1)
+
+`strategy: "adaptive"` uses the same finite explicit axes as guided mode, but dynamically prefers mutation axes with stronger observed novelty/coverage yield. The optional `adaptive` object provides `plateau_window`, `plateau_novelty_rate`, and `min_cases`; after the minimum case count, a low-yield rolling window can end exploration before `max_cases`. The summary records per-axis yield plus the stop decision.

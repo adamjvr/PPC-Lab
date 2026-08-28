@@ -304,3 +304,12 @@ The C++ `ppc-lab` CLI remains the execution/intake interface. Installed deployme
 
 Their full contracts live in `WORKER_PROTOCOL.md`, `ORCHESTRATION.md`, `FLEET.md`, `EVIDENCE_STORE.md`, and `DIFFERENTIAL_TRIAGE.md` respectively rather than expanding the core execution CLI parser.
 
+### `ppc-lab-prioritize`
+
+Rank a completed exploration directory and emit deterministic campaign-intelligence evidence:
+
+```bash
+ppc-lab-prioritize ./explore-run --json priority.json --top 16
+```
+
+Key controls are `--plateau-window`, `--plateau-novelty-rate`, `--weight-new-pc`, `--weight-behavior`, `--weight-failure`, and `--weight-pc-rarity`.

@@ -117,7 +117,20 @@ def trace_pcs(stderr: str) -> list[str]:
     return pcs
 
 
-def stable_architecture(response: dict[str, Any]) -> dict[str, Any]:
+def _u32(value: Any) -> int | None:
+    try:
+        if isinstance(value, bool):
+            return int(value) & 0xFFFFFFFF
+        if isinstance(value, int):
+            return value & 0xFFFFFFFF
+        if isinstance(value, str):
+            return int(value, 0) & 0xFFFFFFFF
+    except (TypeError, ValueError):
+        pass
+    return None
+
+
+def stable_architecture(response: dict[str, Any], assignment: dict[str, Any] | None = None) -> dict[str, Any]:
     value: dict[str, Any] = {
         "ok": response.get("ok"),
         "exit_code": response.get("exit_code"),
@@ -135,6 +148,30 @@ def stable_architecture(response: dict[str, Any]) -> dict[str, Any]:
         value["snapshot"] = {k: copy.deepcopy(snapshot[k]) for k in (
             "stop_reason", "instructions", "pc", "instruction", "cpu", "regions", "dumps"
         ) if k in snapshot}
+
+    # Do not classify a case as behaviorally novel merely because an explored
+    # input register still contains the value PPC Lab placed there. Unchanged
+    # input GPRs are replaced with a stable sentinel in both result/snapshot
+    # views before hashing. If guest code changes the register, the changed
+    # output remains part of the behavioral fingerprint.
+    for path, input_value in (assignment or {}).items():
+        if not isinstance(path, str) or not path.startswith("registers.r"):
+            continue
+        name = path.split(".", 1)[1]
+        try:
+            index = int(name[1:])
+        except (ValueError, IndexError):
+            continue
+        expected = _u32(input_value)
+        if expected is None or not 0 <= index < 32:
+            continue
+        result_regs = value.get("result", {}).get("registers") if isinstance(value.get("result"), dict) else None
+        if isinstance(result_regs, dict) and _u32(result_regs.get(name)) == expected:
+            result_regs[name] = "<input>"
+        cpu = value.get("snapshot", {}).get("cpu") if isinstance(value.get("snapshot"), dict) else None
+        gpr = cpu.get("gpr") if isinstance(cpu, dict) else None
+        if isinstance(gpr, list) and index < len(gpr) and _u32(gpr[index]) == expected:
+            gpr[index] = "<input>"
     return value
 
 
@@ -233,8 +270,18 @@ def main() -> int:
         if len(set(paths)) != len(paths):
             raise ExploreError("axis paths must be unique")
         strategy = manifest.get("strategy", "guided")
-        if strategy not in ("guided", "cartesian"):
-            raise ExploreError("strategy must be guided or cartesian")
+        if strategy not in ("guided", "cartesian", "adaptive"):
+            raise ExploreError("strategy must be guided, adaptive, or cartesian")
+        adaptive_cfg = manifest.get("adaptive", {})
+        if adaptive_cfg is None:
+            adaptive_cfg = {}
+        if not isinstance(adaptive_cfg, dict):
+            raise ExploreError("adaptive must be an object")
+        plateau_window = int(adaptive_cfg.get("plateau_window", 8))
+        plateau_rate = float(adaptive_cfg.get("plateau_novelty_rate", 0.125))
+        min_cases = int(adaptive_cfg.get("min_cases", max(8, plateau_window)))
+        if plateau_window < 1 or min_cases < 1 or not 0.0 <= plateau_rate <= 1.0:
+            raise ExploreError("adaptive plateau_window/min_cases must be positive and novelty rate must be in 0..1")
         max_cases = manifest.get("max_cases", 64)
         if isinstance(max_cases, bool) or not isinstance(max_cases, int) or not 1 <= max_cases <= 100000:
             raise ExploreError("max_cases must be an integer in 1..100000")
@@ -265,8 +312,11 @@ def main() -> int:
         seen_behaviors: set[str] = set()
         case_rows: list[dict[str, Any]] = []
         promoted = 0
+        axis_stats: dict[str, dict[str, int]] = {path: {"attempts": 0, "novel": 0, "new_pcs": 0} for path in paths}
+        stopped_early = False
+        stop_reason: str | None = None
 
-        def evaluate(assignment: dict[str, Any], parent: int | None) -> tuple[bool, int]:
+        def evaluate(assignment: dict[str, Any], parent: int | None, mutated_axis: str | None = None) -> tuple[bool, int]:
             nonlocal promoted
             key = assignment_key(assignment)
             if key in evaluated:
@@ -277,7 +327,7 @@ def main() -> int:
             pcs = trace_pcs(str(response.get("stderr", "")))
             pc_set = set(pcs)
             new_pcs = sorted(pc_set - seen_pcs)
-            architecture = stable_architecture(response)
+            architecture = stable_architecture(response, assignment)
             behavior = canonical_hash(architecture)
             behavior_novel = behavior not in seen_behaviors
             novel = bool(new_pcs) or behavior_novel or not case_rows
@@ -296,6 +346,10 @@ def main() -> int:
             }
             write_json(out / "cases" / f"{index:05d}.json", row)
             case_rows.append(row)
+            if mutated_axis in axis_stats:
+                axis_stats[mutated_axis]["attempts"] += 1
+                axis_stats[mutated_axis]["novel"] += int(novel)
+                axis_stats[mutated_axis]["new_pcs"] += len(new_pcs)
             if novel:
                 seen_pcs.update(pc_set)
                 seen_behaviors.add(behavior)
@@ -315,12 +369,12 @@ def main() -> int:
                     break
                 assignment = dict(zip(paths, values))
                 evaluate(assignment, None)
-        else:
-            queue: deque[tuple[dict[str, Any], int | None]] = deque([(baseline, None)])
+        elif strategy == "guided":
+            queue: deque[tuple[dict[str, Any], int | None, str | None]] = deque([(baseline, None, None)])
             queued = {assignment_key(baseline)}
             while queue and len(case_rows) < max_cases:
-                assignment, parent = queue.popleft()
-                novel, idx = evaluate(assignment, parent)
+                assignment, parent, mutated_axis = queue.popleft()
+                novel, idx = evaluate(assignment, parent, mutated_axis)
                 if not novel:
                     continue
                 for path, values in axes:
@@ -333,7 +387,51 @@ def main() -> int:
                         if k in evaluated or k in queued:
                             continue
                         queued.add(k)
-                        queue.append((child, idx))
+                        queue.append((child, idx, path))
+        else:
+            # Adaptive guided search: expand novel parents but choose the next mutation
+            # from the axis with the best observed yield. Unknown axes retain an
+            # exploration prior so they are sampled before PPC Lab overcommits to
+            # an early winner. Candidate rescoring is deterministic at every pop.
+            candidates: list[tuple[dict[str, Any], int | None, str | None, int]] = [(baseline, None, None, 0)]
+            queued = {assignment_key(baseline)}
+            serial = 1
+
+            def axis_priority(path: str | None) -> float:
+                if path is None:
+                    return 1e9
+                st = axis_stats[path]
+                novelty_yield = (st["novel"] + 1.0) / (st["attempts"] + 2.0)
+                coverage_yield = st["new_pcs"] / (st["attempts"] + 1.0)
+                return novelty_yield + min(coverage_yield, 1000.0) * 0.01
+
+            while candidates and len(case_rows) < max_cases:
+                best_i = max(range(len(candidates)), key=lambda i: (axis_priority(candidates[i][2]), -candidates[i][3]))
+                assignment, parent, mutated_axis, _ = candidates.pop(best_i)
+                novel, idx = evaluate(assignment, parent, mutated_axis)
+
+                if len(case_rows) >= min_cases and len(case_rows) >= plateau_window:
+                    tail = case_rows[-plateau_window:]
+                    tail_rate = sum(1 for row in tail if row["novel"]) / len(tail)
+                    if tail_rate <= plateau_rate:
+                        stopped_early = True
+                        stop_reason = "novelty-plateau"
+                        break
+
+                if not novel:
+                    continue
+                for path, values in axes:
+                    for value in values:
+                        if assignment.get(path) == value:
+                            continue
+                        child = copy.deepcopy(assignment)
+                        child[path] = copy.deepcopy(value)
+                        k = assignment_key(child)
+                        if k in evaluated or k in queued:
+                            continue
+                        queued.add(k)
+                        candidates.append((child, idx, path, serial))
+                        serial += 1
 
         summary = {
             "schema": SUMMARY_SCHEMA,
@@ -353,7 +451,27 @@ def main() -> int:
                  **({"promoted_case": row["promoted_case"]} if "promoted_case" in row else {})}
                 for row in case_rows
             ],
+            "axis_yield": {
+                path: {
+                    **stats,
+                    "novelty_rate": round(stats["novel"] / stats["attempts"], 6) if stats["attempts"] else 0.0,
+                    "new_pcs_per_case": round(stats["new_pcs"] / stats["attempts"], 6) if stats["attempts"] else 0.0,
+                }
+                for path, stats in sorted(axis_stats.items())
+            },
         }
+        if strategy == "adaptive":
+            tail = case_rows[-min(plateau_window, len(case_rows)):]
+            tail_rate = (sum(1 for row in tail if row["novel"]) / len(tail)) if tail else 0.0
+            summary["adaptive"] = {
+                "plateau_window": plateau_window,
+                "plateau_novelty_rate": plateau_rate,
+                "min_cases": min_cases,
+                "stopped_early": stopped_early,
+                "stop_reason": stop_reason,
+                "tail_novelty_rate": round(tail_rate, 6),
+                "unused_case_budget": max_cases - len(case_rows),
+            }
         write_json(out / "summary.json", summary)
         print(f"evaluated={summary['evaluated_cases']} novel={summary['novel_cases']} unique_pcs={summary['unique_pcs']} promoted={promoted} out={out}")
         return 0

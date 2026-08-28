@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-priority-report-v1.schema.json",
+  "title": "PPC Lab exploration priority report v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "evaluated_cases",
+    "weights",
+    "recommended_cases",
+    "ranking",
+    "axes",
+    "plateau"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ppc-lab-priority-report-v1"
+    },
+    "exploration": {
+      "type": "string"
+    },
+    "strategy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evaluated_cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "weights": {
+      "type": "object"
+    },
+    "recommended_cases": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "ranking": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "axes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "plateau": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

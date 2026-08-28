@@ -208,6 +208,7 @@ def main() -> int:
     ap.add_argument("--ppc-lab")
     ap.add_argument("--worker")
     ap.add_argument("--explorer")
+    ap.add_argument("--prioritizer")
     ap.add_argument("--corpus-tool")
     ap.add_argument("--triage-tool")
     ap.add_argument("--evidence-tool")
@@ -232,6 +233,7 @@ def main() -> int:
         cli = resolve_tool(ns.ppc_lab, "ppc-lab")
         worker = resolve_tool(ns.worker, "ppc-lab-worker")
         explorer = resolve_tool(ns.explorer, "ppc-lab-explore")
+        prioritizer = resolve_tool(ns.prioritizer, "ppc-lab-prioritize")
         corpus_tool = resolve_tool(ns.corpus_tool, "ppc-lab-corpus")
         triage_tool = resolve_tool(ns.triage_tool, "ppc-lab-triage")
         evidence_tool = resolve_tool(ns.evidence_tool, "ppc-lab-evidence")
@@ -260,6 +262,27 @@ def main() -> int:
             if configured < 1:
                 raise CampaignError("budgets.max_cases must be at least 1")
             exploration["max_cases"] = min(int(exploration.get("max_cases", configured)), configured)
+
+        intelligence_cfg = manifest.get("intelligence", {})
+        if intelligence_cfg is None:
+            intelligence_cfg = {}
+        if not isinstance(intelligence_cfg, dict):
+            raise CampaignError("intelligence must be an object")
+        intelligence_enabled = bool(intelligence_cfg.get("enabled", True))
+        intelligence_top = int(intelligence_cfg.get("top", max_triage))
+        intelligence_window = int(intelligence_cfg.get("plateau_window", 8))
+        intelligence_rate = float(intelligence_cfg.get("plateau_novelty_rate", 0.125))
+        intelligence_weights = intelligence_cfg.get("weights", {})
+        if not isinstance(intelligence_weights, dict):
+            raise CampaignError("intelligence.weights must be an object")
+        if intelligence_top < 0 or intelligence_window < 1 or not 0.0 <= intelligence_rate <= 1.0:
+            raise CampaignError("intelligence top/window/rate are invalid")
+        allowed_weights = {"new_pc", "behavior", "failure", "pc_rarity"}
+        if any(k not in allowed_weights for k in intelligence_weights):
+            raise CampaignError("unknown intelligence weight")
+        for key, value in intelligence_weights.items():
+            if float(value) < 0:
+                raise CampaignError(f"intelligence weight {key} must be non-negative")
 
         corpus_cfg = manifest.get("corpus", {})
         if corpus_cfg is None:
@@ -305,6 +328,8 @@ def main() -> int:
             "capabilities": caps,
             "plan": {
                 "exploration_max_cases": exploration.get("max_cases", 64),
+                "intelligence": intelligence_enabled,
+                "intelligence_top": intelligence_top,
                 "promote_novel": promote,
                 "corpus": str(corpus_path),
                 "corpus_replay": replay,
@@ -338,6 +363,29 @@ def main() -> int:
             complete_stage(out, state, "exploration", record)
         exploration_summary = read_json(explore_out / "summary.json")
 
+        # Stage 1b: deterministic research-yield analysis and triage prioritization.
+        intelligence_path = out / "intelligence.json"
+        intelligence_report: dict[str, Any] = {"schema": "ppc-lab-priority-report-v1", "ranking": [], "recommended_cases": []}
+        if "intelligence" not in state["completed"]:
+            started = time.monotonic()
+            if intelligence_enabled:
+                cmd = tool_command(prioritizer, str(explore_out), "--json", str(intelligence_path), "--top", str(intelligence_top),
+                                   "--plateau-window", str(intelligence_window), "--plateau-novelty-rate", str(intelligence_rate))
+                weight_flags = {"new_pc": "--weight-new-pc", "behavior": "--weight-behavior", "failure": "--weight-failure", "pc_rarity": "--weight-pc-rarity"}
+                for key, value in intelligence_weights.items():
+                    cmd += [weight_flags[key], str(float(value))]
+                p = run_checked(cmd, timeout=campaign_timeout(deadline, 30.0))
+                intelligence_report = read_json(intelligence_path)
+                if intelligence_report.get("schema") != "ppc-lab-priority-report-v1":
+                    raise CampaignError("priority report schema mismatch")
+                record = stage_record("intelligence", "complete", started, stdout=p.stdout.strip(), report=intelligence_report)
+            else:
+                write_json(intelligence_path, intelligence_report)
+                record = stage_record("intelligence", "skipped", started, reason="disabled")
+            complete_stage(out, state, "intelligence", record)
+        elif intelligence_path.is_file():
+            intelligence_report = read_json(intelligence_path)
+
         # Stage 2: corpus structural verification and replay of promoted cases.
         corpus_stage: dict[str, Any] = {"verified": False, "replayed": False, "cases": 0, "failed": 0}
         if "corpus" not in state["completed"]:
@@ -367,7 +415,7 @@ def main() -> int:
             triage_dir.mkdir(parents=True, exist_ok=True)
             if triage_enabled:
                 case_files = sorted((explore_out / "cases").glob("*.json"))
-                selected: list[dict[str, Any]] = []
+                candidates: list[dict[str, Any]] = []
                 for case_file in case_files:
                     row = read_json(case_file)
                     worker_response = row.get("worker") if isinstance(row.get("worker"), dict) else {}
@@ -375,9 +423,11 @@ def main() -> int:
                     failed = not bool(worker_response.get("ok"))
                     take = triage_select == "all" or (triage_select == "novel" and novel) or (triage_select == "failed" and failed) or (triage_select == "novel-or-failed" and (novel or failed))
                     if take:
-                        selected.append(row)
-                    if len(selected) >= max_triage:
-                        break
+                        candidates.append(row)
+                priority_by_index = {int(item.get("index", -1)): float(item.get("score", 0.0)) for item in intelligence_report.get("ranking", []) if isinstance(item, dict)}
+                if intelligence_enabled and priority_by_index:
+                    candidates.sort(key=lambda row: (-priority_by_index.get(int(row.get("index", -1)), 0.0), int(row.get("index", 0))))
+                selected = candidates[:max_triage]
                 for row in selected:
                     campaign_timeout(deadline, case_timeout)
                     idx = int(row.get("index", len(triage_rows)))
@@ -403,6 +453,7 @@ def main() -> int:
                         "report": str(report_path),
                         "bundle": str(bundle_path),
                         "stdout": p.stdout.strip(),
+                        "priority_score": priority_by_index.get(idx, 0.0),
                     })
             write_json(triage_dir / "summary.json", {
                 "schema": "ppc-lab-campaign-triage-summary-v1",
@@ -422,6 +473,8 @@ def main() -> int:
             started = time.monotonic()
             if evidence_enabled:
                 sources = [str(explore_out), str(triage_dir)]
+                if intelligence_path.is_file():
+                    sources.append(str(intelligence_path))
                 replay_json = out / "corpus-replay.json"
                 if replay_json.is_file():
                     sources.append(str(replay_json))
@@ -452,6 +505,9 @@ def main() -> int:
         findings: list[str] = []
         if int(triage_summary.get("divergences", 0)):
             findings.append("differential-divergence")
+        plateau_doc = intelligence_report.get("plateau") if isinstance(intelligence_report.get("plateau"), dict) else {}
+        if plateau_doc.get("saturated"):
+            findings.append("exploration-saturated")
         if int(exploration_summary.get("successful_cases", 0)) < int(exploration_summary.get("evaluated_cases", 0)):
             findings.append("guest-failures")
         if replay_doc and int(replay_doc.get("failed", 0)):
@@ -471,6 +527,7 @@ def main() -> int:
             "out": str(out),
             "findings": findings,
             "exploration": exploration_summary,
+            "intelligence": intelligence_report,
             "corpus": {
                 "path": str(corpus_path),
                 "promoted_cases": exploration_summary.get("promoted_cases", 0),
@@ -481,7 +538,7 @@ def main() -> int:
             "stages": state["stages"],
         }
         write_json(out / "summary.json", final)
-        print(f"status={status} evaluated={exploration_summary.get('evaluated_cases',0)} novel={exploration_summary.get('novel_cases',0)} promoted={exploration_summary.get('promoted_cases',0)} triaged={triage_summary.get('selected',0)} divergences={triage_summary.get('divergences',0)} out={out}")
+        print(f"status={status} evaluated={exploration_summary.get('evaluated_cases',0)} novel={exploration_summary.get('novel_cases',0)} promoted={exploration_summary.get('promoted_cases',0)} triaged={triage_summary.get('selected',0)} divergences={triage_summary.get('divergences',0)} plateau={'yes' if (intelligence_report.get('plateau') or {}).get('saturated') else 'no'} out={out}")
         return 1 if status == "complete-with-regressions" else 0
 
     except (CampaignError, json.JSONDecodeError, OSError, ValueError) as exc:

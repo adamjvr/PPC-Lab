@@ -50,6 +50,10 @@ Explicit PPC call-input domains can now be explored deterministically rather tha
 
 The individual v1.x research primitives now compose into a bounded checkpointed lifecycle. A campaign can validate target/root/tool capability conditions, run deterministic guided exploration, promote successful novel cases into the behavioral corpus, replay/verify those durable expectations, automatically triage selected findings across engine/backend configurations, publish the resulting JSON evidence, and resume an interrupted run only when the exact campaign manifest and engine version still match. This remains a standard-library orchestration layer rather than a second execution engine or a permanent service requirement.
 
+## v2.1 — Campaign intelligence & prioritization — COMPLETE
+
+Campaign execution is now yield-aware without becoming nondeterministic. Adaptive exploration can favor high-yield mutation axes and stop on a configured novelty plateau; a separate deterministic priority report ranks completed cases, quantifies axis/value yield, and drives campaign triage ordering. The hard case/wall/triage budgets remain authoritative, and all ranking inputs/weights are recorded for replay.
+
 ## Post-2.0 — only when justified
 
 Potential future capability buckets:

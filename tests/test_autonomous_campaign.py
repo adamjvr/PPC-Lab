@@ -14,6 +14,7 @@ CLI = Path(sys.argv[1]).resolve()
 CAMPAIGN = ROOT / "scripts" / "ppc_lab_campaign.py"
 WORKER = ROOT / "scripts" / "ppc_lab_worker.py"
 EXPLORE = ROOT / "scripts" / "ppc_lab_explore.py"
+PRIORITIZE = ROOT / "scripts" / "ppc_lab_prioritize.py"
 CORPUS = ROOT / "scripts" / "ppc_lab_corpus.py"
 TRIAGE = ROOT / "scripts" / "ppc_lab_triage.py"
 EVIDENCE = ROOT / "scripts" / "ppc_lab_evidence.py"
@@ -23,7 +24,7 @@ def invoke(manifest: Path, out: Path, *extra: str) -> subprocess.CompletedProces
     return subprocess.run([
         sys.executable, str(CAMPAIGN), str(manifest), "--out", str(out),
         "--ppc-lab", str(CLI), "--worker", str(WORKER),
-        "--explorer", str(EXPLORE), "--corpus-tool", str(CORPUS),
+        "--explorer", str(EXPLORE), "--prioritizer", str(PRIORITIZE), "--corpus-tool", str(CORPUS),
         "--triage-tool", str(TRIAGE), "--evidence-tool", str(EVIDENCE),
         *extra,
     ], text=True, capture_output=True, check=False, timeout=120)
@@ -54,6 +55,7 @@ with tempfile.TemporaryDirectory(prefix="ppclab-campaign-test-") as td_text:
                 {"path": "registers.r5", "values": [0, 7]},
             ],
         },
+        "intelligence": {"enabled": True, "top": 2, "plateau_window": 2, "plateau_novelty_rate": 0.0},
         "corpus": {"path": "campaign-corpus", "promote_novel": True, "verify": True, "replay": True},
         "triage": {"enabled": True, "select": "novel", "left_backend": "builtin", "right_backend": "builtin"},
         "evidence": {"publish": True, "store": "campaign-evidence", "verify": True},
@@ -69,6 +71,9 @@ with tempfile.TemporaryDirectory(prefix="ppclab-campaign-test-") as td_text:
     assert summary["status"] in ("complete", "complete-with-findings")
     assert summary["exploration"]["evaluated_cases"] >= 3
     assert summary["exploration"]["novel_cases"] >= 2
+    assert summary["intelligence"]["schema"] == "ppc-lab-priority-report-v1"
+    assert summary["intelligence"]["ranking"]
+    assert (out / "intelligence.json").is_file()
     assert summary["corpus"]["promoted_cases"] >= 1
     assert summary["corpus"]["replay"]["failed"] == 0
     assert summary["triage"]["selected"] >= 1
@@ -84,7 +89,7 @@ with tempfile.TemporaryDirectory(prefix="ppclab-campaign-test-") as td_text:
     r = invoke(mp, out, "--resume")
     assert r.returncode == 0, (r.stdout, r.stderr)
     state_after = json.loads((out / "state.json").read_text())
-    assert state_after["completed"] == state_before["completed"] == ["exploration", "corpus", "triage", "evidence"]
+    assert state_after["completed"] == state_before["completed"] == ["exploration", "intelligence", "corpus", "triage", "evidence"]
 
     # Dry-run validates and resolves the campaign without executing target code.
     dry = td / "dry-run"

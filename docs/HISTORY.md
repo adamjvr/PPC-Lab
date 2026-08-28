@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v2.1.0 — Campaign Intelligence & Prioritization — 2026-08-28
+
+v2.1 made the autonomous campaign layer selective rather than merely automatic. `ppc-lab-explore` can now use deterministic adaptive axis ordering and novelty-plateau stopping, while `ppc-lab-prioritize` turns a completed exploration frontier into a reproducible ranking based on new coverage, behavior novelty, guest failures, and rare-PC observations. Campaign triage consumes that ranking before applying its hard case limit, and the intelligence report is preserved/published as normal PPC Lab evidence.
+
 ## 0.1.1 licensing/documentation hardening — 2026-08-26
 
 PPC Lab was explicitly published as free software under GNU GPL version 3.0 only (`GPL-3.0-only`). The repository gained the canonical GPLv3 license text, SPDX identifiers on source/build/script files, contributor guidance, and expanded quick-start, CLI, development, result-format, profile, architecture, and research-workflow documentation.

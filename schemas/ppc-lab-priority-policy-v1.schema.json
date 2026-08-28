@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-priority-policy-v1.schema.json",
+  "title": "PPC Lab campaign priority policy v1",
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean"
+    },
+    "top": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "plateau_window": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "plateau_novelty_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "weights": {
+      "type": "object",
+      "properties": {
+        "new_pc": {
+          "type": "number",
+          "minimum": 0
+        },
+        "behavior": {
+          "type": "number",
+          "minimum": 0
+        },
+        "failure": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pc_rarity": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

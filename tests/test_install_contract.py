@@ -56,6 +56,8 @@ def main() -> int:
         assert triage.is_file(), triage
         explorer = prefix / "bin" / "ppc-lab-explore"
         assert explorer.is_file(), explorer
+        prioritizer = prefix / "bin" / "ppc-lab-prioritize"
+        assert prioritizer.is_file(), prioritizer
         campaign = prefix / "bin" / "ppc-lab-campaign"
         assert campaign.is_file(), campaign
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
@@ -83,6 +85,8 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-case-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-exploration-summary-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-priority-policy-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-priority-report-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-state-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-campaign-summary-v1.schema.json"))
@@ -91,7 +95,7 @@ def main() -> int:
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 2.0.0"
+        assert version.stdout.strip() == "PPC Lab 2.1.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -111,6 +115,8 @@ def main() -> int:
         assert '"campaign_state": "ppc-lab-campaign-state-v1"' in caps.stdout
         assert '"campaign_summary": "ppc-lab-campaign-summary-v1"' in caps.stdout
         assert '"campaign_triage_summary": "ppc-lab-campaign-triage-summary-v1"' in caps.stdout
+        assert '"priority_policy": "ppc-lab-priority-policy-v1"' in caps.stdout
+        assert '"priority_report": "ppc-lab-priority-report-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()
