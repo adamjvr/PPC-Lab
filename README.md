@@ -12,6 +12,17 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.5.0 — Research API Service
+
+v1.5 adds a small standard-library HTTP transport for deployments that cannot conveniently use local pipes, persistent SSH streams, or the fleet controller. `ppc-lab-api` keeps the existing `ppc-lab-job-v1` / `ppc-lab-worker-response-v1` execution contract intact and exposes read-only evidence queries over the same server process. It binds to loopback by default and requires bearer authentication before non-loopback binding.
+
+```bash
+export PPC_LAB_API_TOKEN='replace-with-a-random-secret'
+ppc-lab-api --root /srv/ppc-work --evidence-store /srv/ppc-evidence
+```
+
+For remote use, keep the API on loopback behind an SSH tunnel or TLS reverse proxy. See [`docs/HTTP_API.md`](docs/HTTP_API.md).
+
 ## v1.4.0 — Evidence Server & Result Index
 
 v1.4 closes the loop between large server/fleet runs and long-lived reverse-engineering research. `ppc-lab-evidence` ingests PPC Lab JSON result directories into a content-addressed object store plus a local SQLite index, deduplicates semantic duplicates, preserves source/raw hashes, and makes old runs queryable by engine, backend, host, result status, cache key, or target-input SHA-256. It stores **evidence JSON, not proprietary target binaries**.
@@ -63,7 +74,7 @@ Cache identity includes the canonical job, PPC Lab engine identity, and SHA-256 
 
 v1.1 promotes PPC Lab's original server-side use case to a stable transport boundary. `ppc-lab-worker` accepts `ppc-lab-job-v1` JSON, executes it through the installed PPC Lab engine, and returns `ppc-lab-worker-response-v1` with deterministic result and snapshot evidence inline. Streaming mode uses NDJSON and is designed to survive individual guest failures without restarting the worker.
 
-The worker intentionally stays transport-neutral and dependency-light: pipe it locally, keep it open over SSH, run it in CI/container workers, or wrap it in infrastructure owned by the deployment. PPC Lab itself does not acquire an HTTP server, database, authentication stack, or cloud SDK.
+The worker intentionally stays transport-neutral and dependency-light: pipe it locally, keep it open over SSH, run it in CI/container workers, or wrap it in infrastructure owned by the deployment. PPC Lab v1.1 itself did not require a service transport; v1.5 later adds an optional standard-library HTTP adapter while preserving the worker protocol as the execution boundary.
 
 ```bash
 ppc-lab-worker --root /srv/ppc-work run /srv/ppc-work/jobs/probe.json
@@ -250,6 +261,7 @@ PPC-Lab/
 |---|---|
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
+| [`docs/HTTP_API.md`](docs/HTTP_API.md) | How do I expose worker execution and evidence queries through the optional HTTP service? |
 | [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
 | [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |
 | [`docs/EVIDENCE_STORE.md`](docs/EVIDENCE_STORE.md) | How do I index, query, deduplicate, and verify long-lived PPC Lab evidence? |

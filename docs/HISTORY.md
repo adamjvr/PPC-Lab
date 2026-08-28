@@ -76,3 +76,7 @@ v1.3 extended the stable server-side stack across multiple machines while preser
 
 v1.4 made fleet/orchestration output durable without adding a server daemon. PPC Lab now has a standard-library evidence tool that canonicalizes and content-addresses PPC Lab JSON, records every original source/raw hash, indexes execution/provenance fields in a local SQLite database, and verifies the object store by hash. Orchestration and fleet runs can publish directly into the store. The evidence boundary intentionally records target-input hashes rather than silently copying proprietary binary bytes.
 
+## v1.5.0 — Research API Service — 2026-08-28
+
+v1.5 added an optional dependency-free HTTP transport after the server/fleet/evidence stack made a persistent integration endpoint worthwhile. The API deliberately wraps rather than replaces the stable worker contract, defaults to loopback, requires bearer authentication for remote binds, preserves worker containment, and keeps the evidence network surface read-only. TLS and public-facing service concerns remain deployment infrastructure rather than PPC Lab core responsibilities.
+

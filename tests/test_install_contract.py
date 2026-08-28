@@ -48,6 +48,8 @@ def main() -> int:
         assert fleet.is_file(), fleet
         evidence = prefix / "bin" / "ppc-lab-evidence"
         assert evidence.is_file(), evidence
+        api = prefix / "bin" / "ppc-lab-api"
+        assert api.is_file(), api
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
         assert schema_candidates, "worker job schema was not installed"
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-orchestration-v1.schema.json")), "orchestration schema was not installed"
@@ -58,16 +60,20 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-evidence-query-v1.schema.json")), "evidence query schema was not installed"
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-evidence-report-v1.schema.json")), "evidence report schema was not installed"
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-evidence-verify-v1.schema.json")), "evidence verify schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-api-ready-v1.schema.json")), "API ready schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-api-health-v1.schema.json")), "API health schema was not installed"
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-api-discovery-v1.schema.json")), "API discovery schema was not installed"
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 1.4.0"
+        assert version.stdout.strip() == "PPC Lab 1.5.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
         assert '"fleet": "ppc-lab-fleet-v1"' in caps.stdout
         assert '"evidence_query": "ppc-lab-evidence-query-v1"' in caps.stdout
+        assert '"http_api": "ppc-lab-http-api-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()

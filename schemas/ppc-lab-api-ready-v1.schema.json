@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schema/ppc-lab-api-ready-v1.schema.json",
+  "title": "PPC Lab API ready record v1",
+  "type": "object",
+  "required": ["schema", "protocol", "host", "port", "url", "version"],
+  "properties": {
+    "schema": {"const": "ppc-lab-api-ready-v1"},
+    "protocol": {"const": "ppc-lab-http-api-v1"},
+    "host": {"type": "string"},
+    "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+    "url": {"type": "string"},
+    "version": {"type": "string"}
+  },
+  "additionalProperties": true
+}

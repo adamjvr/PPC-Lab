@@ -26,14 +26,18 @@ The stable worker boundary now scales across multiple installed hosts without a 
 
 Server/fleet output can now become durable research infrastructure instead of disposable result directories. A local content-addressed JSON object store plus SQLite index deduplicates evidence, preserves provenance, supports cross-run queries by target hash/execution metadata, verifies object integrity, and can be populated automatically by orchestration/fleet runs. Target binaries are deliberately not copied into the evidence store.
 
-## Post-1.4 — only when justified
+## v1.5 — Research API service — COMPLETE
+
+The persistent network/service transport became justified for easier cross-project/server integration. A dependency-free optional HTTP layer now exposes health/capabilities, the stable v1 worker execution contract, and read-only evidence queries while retaining loopback-first binding, bearer authentication for remote binds, worker root/time containment, bounded bodies, and no embedded TLS/cloud stack.
+
+## Post-1.5 — only when justified
 
 Potential future capability buckets:
 
 - PPC64 and/or little-endian PowerPC when an actual target requires them;
 - deeper Classic Mac, POSIX, console, firmware, or other runtime personalities;
 - additional loader relocation families exposed by real binaries;
-- richer debugger protocols or a persistent network/service transport **only if** a deployment cannot use the v1.1 worker plus v1.3 OpenSSH fleet infrastructure;
+- richer debugger protocols, asynchronous queues, or service transports beyond the intentionally small v1.5 HTTP boundary when a real deployment requires them;
 - JIT/alternate execution backends;
 - deeper Ghidra/IDA/Binary Ninja plugins;
 - additional ISA fidelity where a real workload exposes a missing/approximate instruction.

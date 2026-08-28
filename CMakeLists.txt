@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 1.4.0 LANGUAGES CXX)
+project(PPCLab VERSION 1.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -73,6 +73,7 @@ install(PROGRAMS scripts/ppc_lab_worker.py DESTINATION ${CMAKE_INSTALL_BINDIR} R
 install(PROGRAMS scripts/ppc_lab_orchestrate.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-orchestrate)
 install(PROGRAMS scripts/ppc_lab_fleet.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-fleet)
 install(PROGRAMS scripts/ppc_lab_evidence.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-evidence)
+install(PROGRAMS scripts/ppc_lab_api.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-api)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -149,4 +150,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_orchestration COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_orchestration.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_fleet COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_fleet.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_evidence_store COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_evidence_store.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_http_api COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_http_api.py $<TARGET_FILE:ppc_lab_cli>)
 endif()

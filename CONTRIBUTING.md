@@ -63,3 +63,7 @@ Worker, orchestration, or fleet changes must preserve the stable v1 job/response
 
 Evidence-store changes must remain migration-conscious and dependency-light. `ppc-lab-evidence` may index PPC Lab JSON and target-input hashes, but it must not silently copy target executables/firmware into the store. Schema/query changes need deterministic temporary-directory regressions; integrity checks must hash the actual stored bytes, and an existing store must never be mutated by a read-only query/report/verify command.
 
+## HTTP API changes
+
+Changes to `ppc-lab-api` must preserve `ppc-lab-job-v1` as the execution payload, retain loopback-first/default-safe binding, avoid shell command construction, and add regression coverage for authentication/request containment when the network surface changes. Do not add framework/cloud dependencies merely for convenience; the service layer is intentionally thin and optional.
+

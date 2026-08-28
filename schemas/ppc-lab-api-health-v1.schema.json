@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schema/ppc-lab-api-health-v1.schema.json",
+  "title": "PPC Lab API health response v1",
+  "type": "object",
+  "required": ["schema", "ok", "version"],
+  "properties": {
+    "schema": {"const": "ppc-lab-api-health-v1"},
+    "ok": {"const": true},
+    "version": {"type": "string"}
+  },
+  "additionalProperties": true
+}

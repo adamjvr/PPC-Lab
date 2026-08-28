@@ -368,7 +368,7 @@ int commandCapabilities(int argc, char** argv) {
                   << "  \"guest\": {\"architecture\": \"ppc32\", \"endian\": \"big\"},\n"
                   << "  \"formats\": [\"ELF32-PPC-BE\", \"Mach-O-PPC32-BE\", \"PEF-CFM-PPC\", \"raw\"],\n"
                   << "  \"backends\": {\"builtin\": true, \"unicorn\": " << (unicorn ? "true" : "false") << "},\n"
-                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\", \"fleet\": \"ppc-lab-fleet-v1\", \"fleet_job_result\": \"ppc-lab-fleet-job-result-v1\", \"fleet_summary\": \"ppc-lab-fleet-summary-v1\", \"evidence_query\": \"ppc-lab-evidence-query-v1\", \"evidence_report\": \"ppc-lab-evidence-report-v1\", \"evidence_verify\": \"ppc-lab-evidence-verify-v1\"}\n"
+                  << "  \"protocols\": {\"job\": \"ppc-lab-job-v1\", \"worker_response\": \"ppc-lab-worker-response-v1\", \"stream\": \"ndjson\", \"orchestration\": \"ppc-lab-orchestration-v1\", \"orchestration_job_result\": \"ppc-lab-orchestration-job-result-v1\", \"orchestration_summary\": \"ppc-lab-orchestration-summary-v1\", \"fleet\": \"ppc-lab-fleet-v1\", \"fleet_job_result\": \"ppc-lab-fleet-job-result-v1\", \"fleet_summary\": \"ppc-lab-fleet-summary-v1\", \"evidence_query\": \"ppc-lab-evidence-query-v1\", \"evidence_report\": \"ppc-lab-evidence-report-v1\", \"evidence_verify\": \"ppc-lab-evidence-verify-v1\", \"http_api\": \"ppc-lab-http-api-v1\"}\n"
                   << "}\n";
     } else {
         std::cout << "PPC Lab " << kVersion << '\n'
@@ -388,7 +388,8 @@ int commandCapabilities(int argc, char** argv) {
                   << "protocol.fleet-summary=ppc-lab-fleet-summary-v1\n"
                   << "protocol.evidence-query=ppc-lab-evidence-query-v1\n"
                   << "protocol.evidence-report=ppc-lab-evidence-report-v1\n"
-                  << "protocol.evidence-verify=ppc-lab-evidence-verify-v1\n";
+                  << "protocol.evidence-verify=ppc-lab-evidence-verify-v1\n"
+                  << "protocol.http-api=ppc-lab-http-api-v1\n";
     }
     return 0;
 }

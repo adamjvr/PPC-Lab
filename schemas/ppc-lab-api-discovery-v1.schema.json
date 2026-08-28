@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schema/ppc-lab-api-discovery-v1.schema.json",
+  "title": "PPC Lab API discovery response v1",
+  "type": "object",
+  "required": ["schema", "protocol", "version", "endpoints"],
+  "properties": {
+    "schema": {"const": "ppc-lab-api-discovery-v1"},
+    "protocol": {"const": "ppc-lab-http-api-v1"},
+    "version": {"type": "string"},
+    "endpoints": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

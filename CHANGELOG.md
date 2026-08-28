@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 — 2026-08-28 — Research API Service
+
+- Add `ppc-lab-api`, a dependency-free threaded HTTP transport over the stable v1 worker/evidence contracts.
+- Add authenticated `POST /v1/run`, health/discovery/capability endpoints, and read-only evidence query/report/artifact endpoints.
+- Bind to loopback by default; require bearer authentication for non-loopback binds unless a deliberately dangerous override is supplied.
+- Preserve worker filesystem and wall-clock containment, add bounded request bodies, and keep guest failures distinct from HTTP/transport failures.
+- Add atomic ready-file output for service supervisors/tests and advertise `ppc-lab-http-api-v1` through capability discovery.
+- Add API ready/health/discovery schemas, install-tree coverage, end-to-end HTTP/auth/execution/evidence regressions, and deployment/security documentation.
+- Keep TLS, public-internet exposure, and evidence ingestion outside the built-in service boundary; use SSH tunnels or a maintained TLS reverse proxy for remote deployment.
+
 ## 1.4.0 — 2026-08-28 — Evidence Server & Result Index
 
 - Add `ppc-lab-evidence`, a standard-library content-addressed JSON evidence store backed by local SQLite indexing.

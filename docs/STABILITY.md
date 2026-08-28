@@ -61,3 +61,9 @@ A single fleet run intentionally requires one PPC Lab engine version across part
 
 Content-addressed object identity is SHA-256 of PPC Lab's canonical JSON encoding. Callers may persist the reported object SHA as stable semantic evidence identity, but should treat SQL table/layout details as implementation details. Evidence ingestion does not imply ownership, redistribution permission, or archival of target binaries; v1.4 records input hashes/provenance only.
 
+## v1.5 HTTP API compatibility
+
+`ppc-lab-http-api-v1` is an optional transport over the existing stable worker/evidence contracts. `POST /v1/run` accepts `ppc-lab-job-v1` and returns `ppc-lab-worker-response-v1`; the HTTP layer does not define a competing execution payload. Existing v1.5 endpoint meanings will not be silently repurposed within PPC Lab 1.x, and additive endpoints/fields may appear. A breaking transport contract requires a new protocol identifier.
+
+HTTP status codes describe authentication/request/transport/server state, while deterministic guest execution status remains in the worker response. The built-in HTTP server intentionally does not promise TLS termination, public-internet hardening, multi-user authorization, or a persistent asynchronous job queue; those remain deployment or future demand-driven concerns.
+
