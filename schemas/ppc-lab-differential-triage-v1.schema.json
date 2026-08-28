@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-differential-triage-v1.schema.json",
+  "title": "PPC Lab differential triage result v1",
+  "type": "object",
+  "required": ["schema", "equal", "classification", "summary", "first_divergence", "resynchronization", "window", "alignment"],
+  "properties": {
+    "schema": {"const": "ppc-lab-differential-triage-v1"},
+    "equal": {"type": "boolean"},
+    "classification": {"enum": ["equal", "trace-length", "control-flow", "instruction-bytes", "dynamic-sequence", "state-only", "worker-outcome"]},
+    "summary": {"type": "object"},
+    "first_divergence": {"type": ["object", "null"]},
+    "resynchronization": {"type": ["object", "null"]},
+    "window": {"type": "object"},
+    "alignment": {"type": "array"},
+    "snapshot": {"type": "object"},
+    "run": {"type": "object"}
+  },
+  "additionalProperties": true
+}

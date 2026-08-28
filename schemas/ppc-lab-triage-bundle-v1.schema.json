@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-triage-bundle-v1.schema.json",
+  "title": "PPC Lab differential triage bundle manifest v1",
+  "type": "object",
+  "required": ["schema", "triage", "left_trace", "right_trace"],
+  "properties": {
+    "schema": {"const": "ppc-lab-triage-bundle-v1"},
+    "triage": {"type": "string"},
+    "left_trace": {"type": "string"},
+    "right_trace": {"type": "string"},
+    "repro_job": {"type": "string"},
+    "left_response": {"type": "string"},
+    "right_response": {"type": "string"}
+  },
+  "additionalProperties": false
+}

@@ -85,6 +85,10 @@ v1.5 added an optional dependency-free HTTP transport after the server/fleet/evi
 
 v1.6 promoted instruction traces into reusable behavioral-analysis artifacts: dynamic coverage/hotness, observed CFG/calls, A/B trace comparison, Graphviz export, evidence-store persistence, and decompiler-evidence enrichment while keeping `ppc-lab-trace-v1` compatible.
 
+## v1.8.0 — Automated Differential Triage — 2026-08-28
+
+PPC Lab gained an automated triage layer above the stable trace and worker protocols. Two existing traces or two live engine/backend runs can be aligned to locate the first behavioral divergence, later resynchronization, and architectural snapshot differences. The resulting bundle is intentionally evidence-only and can carry a bounded `repro.job.json` without copying proprietary target bytes.
+
 ## v1.7.0 — Behavioral Corpus & Replay — 2026-08-28
 
 v1.7 converted deterministic experiments into a first-class long-lived regression corpus, with SHA-256-pinned external inputs, backend-neutral behavioral expectations, replay/bless/minimize workflows, and explicit-only fixture embedding.

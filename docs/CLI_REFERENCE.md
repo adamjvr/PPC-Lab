@@ -298,6 +298,7 @@ The C++ `ppc-lab` CLI remains the execution/intake interface. Installed deployme
 - `ppc-lab-orchestrate` — local parallel/resumable execution;
 - `ppc-lab-fleet` — local/OpenSSH distributed scheduling;
 - `ppc-lab-evidence` — content-addressed evidence storage/index/query/verification.
+- `ppc-lab-triage` — automated trace/snapshot divergence isolation and reduced repro bundles.
 
-Their full contracts live in `WORKER_PROTOCOL.md`, `ORCHESTRATION.md`, `FLEET.md`, and `EVIDENCE_STORE.md` respectively rather than expanding the core execution CLI parser.
+Their full contracts live in `WORKER_PROTOCOL.md`, `ORCHESTRATION.md`, `FLEET.md`, `EVIDENCE_STORE.md`, and `DIFFERENTIAL_TRIAGE.md` respectively rather than expanding the core execution CLI parser.
 

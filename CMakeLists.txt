@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 1.7.0 LANGUAGES CXX)
+project(PPCLab VERSION 1.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -78,7 +78,9 @@ install(PROGRAMS scripts/ppc_trace_capture.py DESTINATION ${CMAKE_INSTALL_BINDIR
 install(PROGRAMS scripts/ppc_trace_analyze.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-trace-analyze)
 install(PROGRAMS scripts/ppc_trace_diff.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-trace-diff)
 install(PROGRAMS scripts/ppc_lab_api.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-api)
+# v1.8 differential triage stays a standard-library client of stable trace/worker protocols.
 install(PROGRAMS scripts/ppc_lab_corpus.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-corpus)
+install(PROGRAMS scripts/ppc_lab_triage.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-triage)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -158,4 +160,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_http_api COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_http_api.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_trace_intelligence COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_trace_intelligence.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_behavioral_corpus COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_behavioral_corpus.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_differential_triage COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_differential_triage.py $<TARGET_FILE:ppc_lab_cli>)
 endif()

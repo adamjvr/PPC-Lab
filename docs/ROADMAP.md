@@ -38,7 +38,11 @@ Instruction traces can now be promoted into durable behavioral evidence: dynamic
 
 Successful experiments can now become durable engine regressions instead of disappearing into result folders. Corpus cases pin every input by SHA-256, preserve stable behavioral expectations independently of backend labels/transport noise, replay against current PPC Lab builds, support external private inputs or explicit redistributable embedding, and provide deliberate bless/minimize workflows.
 
-## Post-1.7 — only when justified
+## v1.8 — Automated differential triage — COMPLETE
+
+Backend/engine disagreements can now be converted automatically into reviewable evidence: common-prefix detection, first divergence classification, trace resynchronization, snapshot-state comparison, dual-worker execution, input provenance hashing, and reduced instruction-budget repro bundles. Target binaries remain external.
+
+## Post-1.8 — only when justified
 
 Potential future capability buckets:
 

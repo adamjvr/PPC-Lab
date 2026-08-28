@@ -53,3 +53,7 @@ threat model rather than relying on these tests alone.
 `ppc_lab_install_contract` installs the current build into a temporary prefix, runs the installed CLI, discovers PPC Lab through `find_package(PPCLab CONFIG)`, and compiles a separate downstream C++ consumer against `PPCLab::core`. This catches exported-target, include-path, language-standard, config-selection, and install-tree regressions that in-tree unit tests cannot detect.
 
 The v1 CLI intake regressions also exercise the `--image` auto-detection path for synthetic ELF32 PPC, Mach-O PPC32, and PEF/CFM images so the format-neutral public path cannot silently diverge from the explicit loaders.
+
+## Differential-triage regression
+
+The v1.8 `ppc_lab_differential_triage` test protects first-divergence classification/resynchronization, live worker-vs-worker capture, architectural snapshot-only differences, target-input SHA-256 provenance, and evidence-only bundle generation. It deliberately uses synthetic PPC code so public CI never requires proprietary target bytes.

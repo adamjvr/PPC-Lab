@@ -50,3 +50,7 @@ This adds hot-block and observed-call annotations consumed by the existing Ghidr
 - Symbol hotness depends on symbols supplied by the loader/profile; unnamed code is `<unknown>`.
 - Indirect branches record only observed targets, not unseen possibilities.
 - Per-instruction register/memory deltas are intentionally not duplicated here; snapshots/results remain state evidence.
+
+## Differential triage
+
+`ppc-lab-trace-diff` answers aggregate coverage/frequency questions. When the question is *where did two executions first stop behaving the same?*, use `ppc-lab-triage`. It aligns ordered trace events, reports the first divergent PC/instruction and later resynchronization, and can include architectural snapshot differences and a reduced live-run repro bundle. See [`DIFFERENTIAL_TRIAGE.md`](DIFFERENTIAL_TRIAGE.md).

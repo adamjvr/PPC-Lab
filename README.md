@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.8.0 — Automated Differential Triage
+
+v1.8 turns backend/version disagreements into compact research artifacts. `ppc-lab-triage` can compare existing `ppc-lab-trace-v1` files or execute the same stable worker job against two engine/backend configurations, then report the common prefix, first divergent instruction/control-flow point, resynchronization point, snapshot differences, and a reduced instruction-budget repro. Triage bundles contain evidence and input hashes, **not target binaries**.
+
+```bash
+ppc-lab-triage run job.json \
+  --left-backend builtin --right-backend unicorn \
+  --bundle ./triage-case --json ./triage-case.json
+
+ppc-lab-triage compare old.trace.json new.trace.json \
+  --bundle ./trace-diff --fail-on-diff
+```
+
 ## v1.7.0 — Behavioral Corpus & Replay
 
 v1.7 turns one-off successful experiments into portable long-lived behavioral regressions. `ppc-lab-corpus` fingerprints every binary input, records stable execution expectations, replays cases across engine versions/backends, verifies embedded redistributable fixtures, and can explicitly bless intentional behavior changes or minimize a failing setup. Proprietary target binaries remain external unless `--embed-input` is deliberately requested.
@@ -286,6 +299,7 @@ PPC-Lab/
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | How do I get from clone to a useful execution quickly? |
 | [`docs/WORKER_PROTOCOL.md`](docs/WORKER_PROTOCOL.md) | How do I submit stable JSON jobs locally, over SSH, or from server infrastructure? |
 | [`docs/BEHAVIORAL_CORPUS.md`](docs/BEHAVIORAL_CORPUS.md) | How do I promote experiments into replayable long-lived regressions? |
+| [`docs/DIFFERENTIAL_TRIAGE.md`](docs/DIFFERENTIAL_TRIAGE.md) | How do I isolate and bundle the first backend/version behavioral divergence? |
 | [`docs/HTTP_API.md`](docs/HTTP_API.md) | How do I expose worker execution and evidence queries through the optional HTTP service? |
 | [`docs/ORCHESTRATION.md`](docs/ORCHESTRATION.md) | How do I run, resume, and cache large parallel server experiment sets? |
 | [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |

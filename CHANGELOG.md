@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.0 — 2026-08-28 — Automated Differential Triage
+
+- Add installed `ppc-lab-triage` for automated first-divergence analysis across PPC Lab traces, backends, and engine binaries.
+- Identify the common execution prefix, first divergent PC/instruction, dynamic classification, bounded context window, and later trace resynchronization.
+- Compare architectural snapshots while ignoring backend-label noise, surfacing CPU/memory-state differences separately from trace equality.
+- Run one stable `ppc-lab-job-v1` against two engine/backend configurations through the existing worker protocol and capture trace/snapshot evidence automatically.
+- Emit source-control-safe triage bundles containing traces, worker responses, report, provenance hashes, and a reduced instruction-budget `repro.job.json` without copying target binaries.
+- Add `ppc-lab-differential-triage-v1` and `ppc-lab-triage-bundle-v1` schemas, capability discovery, install-contract coverage, documentation, and end-to-end regressions.
+
 ## 1.7.0 — 2026-08-28 — Behavioral Corpus & Replay
 
 - Add `ppc-lab-corpus`, a standard-library behavioral regression corpus manager above the stable worker job/response contracts.

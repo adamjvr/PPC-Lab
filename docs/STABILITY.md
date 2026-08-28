@@ -73,3 +73,9 @@ HTTP status codes describe authentication/request/transport/server state, while 
 `ppc-lab-corpus-v1`, `ppc-lab-corpus-case-v1`, and `ppc-lab-corpus-replay-summary-v1` are v1 compatibility contracts. Additive fields are allowed; existing expectation meanings are not silently redefined. Corpus input identity is SHA-256 plus byte size, while `path_hint` is advisory only. Backend names and transport prose are deliberately excluded from the behavioral expectation contract.
 
 Embedding a target input never implies redistribution permission. Public corpora should normally contain only case metadata/hashes plus synthetic or otherwise redistributable embedded objects.
+
+## v1.8 differential-triage compatibility
+
+`ppc-lab-differential-triage-v1` and `ppc-lab-triage-bundle-v1` are additive v1 contracts above the already-stable trace/job/worker formats. Trace execution identity is `(PC, instruction word)`; symbol/disassembly text remains annotation rather than behavioral identity. The report may gain optional fields, but existing classifications and required field meanings will not be silently redefined in 1.x.
+
+A triage bundle is evidence, not a binary archive. Input SHA-256/size provenance is stable research identity, while file paths and engine executable paths are environment-specific metadata. `repro.job.json` is a bounded instruction-budget aid and does not claim byte-level input minimization.

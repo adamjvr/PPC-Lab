@@ -164,3 +164,17 @@ python3 scripts/ppc_evidence_pack.py --metadata /tmp/meta.json \
 Import the evidence package with the thin adapter for Ghidra, IDA, or Binary
 Ninja. For parameter questions, replace one-off calls with an experiment
 manifest; for implementation/backend parity, use differential execution.
+
+## 10. Triage a disagreement before hand-debugging it
+
+When builtin/Unicorn, old/new PPC Lab builds, or two experiment variants disagree, capture the disagreement through `ppc-lab-triage` before manually stepping through thousands of events:
+
+```bash
+ppc-lab-triage run job.json \
+  --left-ppc-lab /opt/ppclab-old/bin/ppc-lab \
+  --right-ppc-lab /opt/ppclab-new/bin/ppc-lab \
+  --left-backend builtin --right-backend builtin \
+  --bundle triage-001 --fail-on-diff
+```
+
+Start from the reported first divergence and architectural-state delta. If the traces later resynchronize, treat the bounded divergent window as the immediate research surface. Promote a fixed case into the behavioral corpus after the discrepancy is understood, so the bug cannot silently return.
