@@ -32,7 +32,7 @@ The install tree contains:
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(MyResearchTool LANGUAGES CXX)
-find_package(PPCLab 2.0 CONFIG REQUIRED)
+find_package(PPCLab 3.0 CONFIG REQUIRED)
 add_executable(my-tool main.cpp)
 target_link_libraries(my-tool PRIVATE PPCLab::core)
 ```

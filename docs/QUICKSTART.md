@@ -187,3 +187,23 @@ ppc-lab-campaign campaign.json --out ./runs/campaign-001
 ```
 
 If the server process is interrupted, rerun the exact same manifest/engine with `--resume`. See `CAMPAIGNS.md` for the manifest and checkpoint contract.
+
+## PPC Lab 3 platform check
+
+After installation, verify the entire tool stack rather than only the core executable:
+
+```bash
+ppc-lab-platform status
+ppc-lab-platform acceptance --workspace /tmp/ppc-lab-acceptance
+```
+
+Before attaching existing v1/v2 evidence, knowledge, or control state to a v3 installation:
+
+```bash
+ppc-lab-platform upgrade-check \
+  --evidence /srv/ppc-evidence \
+  --knowledge /srv/ppc-knowledge \
+  --control /srv/ppc-control
+```
+
+See `docs/UPGRADING.md` before applying `migrate`.

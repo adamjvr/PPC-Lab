@@ -70,6 +70,9 @@ def check_version_sync() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8", errors="replace")
     if f"## {version} " not in changelog:
         fail(f"CHANGELOG.md has no release heading for {version}")
+    platform = (ROOT / "scripts" / "ppc_lab_platform.py").read_text(encoding="utf-8", errors="replace")
+    if f'PLATFORM_VERSION = "{version}"' not in platform:
+        fail(f"ppc-lab-platform version is not synchronized to {version}")
 
 def check_target_neutral_core() -> None:
     roots = ["include", "src", "tools", "scripts", "tests", "cmake", "integrations"]

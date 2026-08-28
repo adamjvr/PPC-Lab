@@ -67,7 +67,9 @@ def main() -> int:
         knowledge = prefix / "bin" / "ppc-lab-knowledge"
         assert knowledge.is_file(), knowledge
         hypothesize = prefix / "bin" / "ppc-lab-hypothesize"
+        platform = prefix / "bin" / "ppc-lab-platform"
         assert hypothesize.is_file(), hypothesize
+        assert platform.is_file(), platform
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -115,11 +117,14 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-hypothesis-report-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-hypothesis-experiment-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-hypothesis-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-platform-status-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-upgrade-report-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-acceptance-report-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 2.5.0"
+        assert version.stdout.strip() == "PPC Lab 3.0.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -147,13 +152,16 @@ def main() -> int:
         assert '"hypothesis_report": "ppc-lab-hypothesis-report-v1"' in caps.stdout
         assert '"hypothesis_experiment": "ppc-lab-hypothesis-experiment-v1"' in caps.stdout
         assert '"hypothesis": "ppc-lab-hypothesis-v1"' in caps.stdout
+        assert '"platform_status": "ppc-lab-platform-status-v1"' in caps.stdout
+        assert '"upgrade_report": "ppc-lab-upgrade-report-v1"' in caps.stdout
+        assert '"acceptance_report": "ppc-lab-acceptance-report-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()
         (consumer / "CMakeLists.txt").write_text(
             "cmake_minimum_required(VERSION 3.20)\n"
             "project(PPCLabConsumer LANGUAGES CXX)\n"
-            "find_package(PPCLab 2.0 CONFIG REQUIRED)\n"
+            "find_package(PPCLab 3.0 CONFIG REQUIRED)\n"
             "add_executable(consumer main.cpp)\n"
             "target_link_libraries(consumer PRIVATE PPCLab::core)\n",
             encoding="utf-8",

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-platform-status-v1",
+  "title": "PPC Lab mature-platform status",
+  "type": "object",
+  "required": ["schema", "platform_version", "core", "companions", "ready"],
+  "properties": {
+    "schema": {"const": "ppc-lab-platform-status-v1"},
+    "platform_version": {"type": "string"},
+    "core": {"type": "object"},
+    "companions": {"type": "object"},
+    "ready": {"type": "boolean"}
+  }
+}

@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v3.0.0 — Mature Platform Consolidation — 2026-08-28
+
+The standing PPC Lab roadmap closed with an operational consolidation rather than another emulator subsystem. `ppc-lab-platform` now provides whole-platform health, persisted-state upgrade/migration checks with backups, and a synthetic end-to-end acceptance path from PPC binary intake through evidence-gated hypothesis promotion and knowledge ingestion. The 3.x line is explicitly target-driven maintenance infrastructure.
+
 ## v2.5.0 — Automated Hypothesis Engine — 2026-08-28
 
 PPC Lab added a deterministic hypothesis layer over exploration and knowledge evidence. Candidate argument/state roles now carry transparent confidence/support metrics and bounded follow-up exploration plans; promotion revalidates content-pinned PPC executions before a claim becomes supported knowledge. Hypotheses can be connected to target/behavior/address nodes and supported state-field findings can flow into decompiler evidence without copying target binaries.

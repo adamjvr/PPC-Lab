@@ -84,3 +84,7 @@ Changes to `ppc-lab-campaign` should compose existing stable tools/protocols rat
 ## Hypothesis contributions
 
 Hypothesis-engine changes must remain deterministic and evidence-first. New role families or scoring terms need a regression that shows both supporting and contradicting evidence, must expose their scoring inputs in machine-readable output, and must not auto-promote a candidate. Follow-up experiments must use existing PPC Lab execution/exploration contracts and preserve the target-binary/root-safety boundaries.
+
+## PPC Lab 3 maintenance boundary
+
+PPC Lab 3.0 closes the standing feature roadmap. Please do not add speculative PPC64, little-endian, JIT, OS-runtime, service-framework, or database work without a real target/deployment that demonstrates the requirement. Persisted-format changes need an explicit migration and rollback-safe backup path through `ppc-lab-platform`.

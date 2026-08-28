@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.0.0 — Mature PPC Research Automation Platform
+
+v3.0 closes the standing feature roadmap. The new `ppc-lab-platform` operator surface consolidates whole-install health, persisted-state compatibility/migration, and a synthetic end-to-end release acceptance path across intake, execution/exploration, evidence, hypothesis promotion, and knowledge ingestion. It deliberately adds **no new execution subsystem**. From v3 onward, PPC Lab returns to target-driven maintenance.
+
+```bash
+ppc-lab-platform status --json
+ppc-lab-platform upgrade-check --evidence /srv/ppc-evidence --knowledge /srv/ppc-knowledge --control /srv/ppc-control --json
+ppc-lab-platform migrate --evidence /srv/ppc-evidence --knowledge /srv/ppc-knowledge --control /srv/ppc-control --yes --json
+ppc-lab-platform acceptance --workspace /tmp/ppc-lab-acceptance --json
+```
+
+See [`docs/PLATFORM.md`](docs/PLATFORM.md), [`docs/UPGRADING.md`](docs/UPGRADING.md), [`docs/RELEASE_ACCEPTANCE.md`](docs/RELEASE_ACCEPTANCE.md), and [`docs/MAINTENANCE.md`](docs/MAINTENANCE.md).
+
 ## v2.5.0 — Automated Hypothesis Engine
 
 v2.5 turns accumulated execution evidence into bounded, reviewable follow-up ideas. `ppc-lab-hypothesize` analyzes exploration cases, proposes likely argument/state roles with transparent confidence/support metrics, emits ordinary follow-up exploration manifests, and requires content-pinned PPC Lab execution evidence before a candidate can be promoted. Candidate and promoted hypotheses can be ingested into the v2.4 knowledge graph; supported state-field hypotheses can flow back into decompiler annotations. No opaque AI service or target-binary archival is introduced.

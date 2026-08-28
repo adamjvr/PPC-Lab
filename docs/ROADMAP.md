@@ -70,9 +70,9 @@ Accumulated research is now relationship memory rather than disconnected result 
 
 Accumulated execution evidence can now generate bounded, inspectable research hypotheses. PPC Lab infers candidate argument/state roles with transparent metrics, emits ordinary follow-up exploration manifests, content-pins supporting cases, requires verified execution evidence for explicit promotion, and connects candidate/supported hypotheses into the knowledge graph. The implementation is deterministic and standard-library-only; it does not introduce an opaque AI dependency.
 
-## v3.0 — Mature PPC research automation platform — NEXT / FINAL CONSOLIDATION
+## v3.0 — Mature PPC research automation platform — COMPLETE
 
-Cut the mature-platform release: unify documentation/operational contracts, add release-level end-to-end acceptance scenarios spanning intake through hypothesis promotion, harden migrations/upgrade checks for persisted evidence/knowledge/control data, and freeze the long-term maintenance boundary. No new subsystem should be added merely to inflate v3.0; ISA/runtime/backend expansion remains demand-driven by real PPC targets.
+The mature-platform release consolidates documentation/operational contracts, adds a release-level end-to-end acceptance scenario spanning intake through hypothesis promotion, hardens migration/upgrade checks for persisted evidence/knowledge/control data, and freezes the long-term maintenance boundary. No new execution subsystem was added merely to inflate v3.0; ISA/runtime/backend expansion remains demand-driven by real PPC targets.
 
 ## Post-2.0 — only when justified
 

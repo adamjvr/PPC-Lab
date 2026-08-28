@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-acceptance-report-v1",
+  "title": "PPC Lab mature-platform acceptance report",
+  "type": "object",
+  "required": ["schema", "platform_version", "ok", "stages", "target"],
+  "properties": {
+    "schema": {"const": "ppc-lab-acceptance-report-v1"},
+    "platform_version": {"type": "string"},
+    "ok": {"type": "boolean"},
+    "stages": {"type": "array", "items": {"type": "object"}},
+    "target": {"type": "object"}
+  }
+}

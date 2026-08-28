@@ -207,3 +207,9 @@ Run `ppc_lab_behavioral_corpus` for any corpus format, expectation-extraction, i
 Campaign changes should be tested as composition behavior, not by mocking away every subsystem. The synthetic `test_autonomous_campaign.py` regression exercises real explorer, worker, corpus, triage, evidence, resume, dry-run, and root-safety paths against a tiny PPC program. Preserve that end-to-end property whenever campaign policy changes.
 
 - `ppc-lab-priority-policy-v1` / `ppc-lab-priority-report-v1` — deterministic research-yield ranking and plateau-analysis contracts introduced in v2.1.
+
+## v3 maintenance rule
+
+The standing feature roadmap is closed. New work must be justified by a concrete PPC target/deployment and include a minimal reproducible regression. Changes to persisted evidence/knowledge/control formats require an explicit `ppc-lab-platform` migration path, first-run backup behavior, upgrade documentation, and a migration regression. Stable schema meanings must not be changed in place.
+
+Before a major release, run the synthetic mature-platform acceptance described in `RELEASE_ACCEPTANCE.md` in addition to the ordinary unit/integration suite.

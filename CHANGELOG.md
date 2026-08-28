@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.0 — 2026-08-28 — Mature Platform Consolidation
+
+- Added installed `ppc-lab-platform` as the consolidated operator surface for whole-install status/doctor, persisted-state upgrade checks/migrations, and mature-platform acceptance.
+- Added structural compatibility auditing for evidence stores, knowledge graphs, and filesystem control-plane state; unknown/incompatible schemas are rejected instead of guessed.
+- Added idempotent v3 persisted-state migration metadata with first-run safety backups for evidence SQLite, knowledge SQLite, and control-plane JSON state.
+- Added stable `ppc-lab-platform-status-v1`, `ppc-lab-upgrade-report-v1`, and `ppc-lab-acceptance-report-v1` schemas and capability/install contracts.
+- Added a synthetic release acceptance scenario spanning ELF32 PPC intake, real builtin execution, deterministic exploration, evidence verification, evidence-gated hypothesis promotion, and knowledge-graph ingestion/query.
+- Added major-release documentation for platform operations, upgrades, archive certification, and the post-v3 target-driven maintenance boundary.
+- Bumped the installed CMake package to major version 3; downstream consumers should request `find_package(PPCLab 3.0 CONFIG REQUIRED)`.
+- Preserved all existing v1/v2 execution/research schema meanings and the no-private-binary archival rule.
+
 ## 2.5.0 — 2026-08-28 — Automated Hypothesis Engine
 
 - Added installed `ppc-lab-hypothesize`, a deterministic evidence-first hypothesis engine over PPC Lab exploration results.

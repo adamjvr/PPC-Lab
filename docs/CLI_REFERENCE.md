@@ -332,3 +332,21 @@ ppc-lab-control cancel ROOT --all
 ```
 
 See [`CONTROL_PLANE.md`](CONTROL_PLANE.md) for persistent state, telemetry, restart, and security semantics.
+
+## Mature-platform operator (`ppc-lab-platform`)
+
+PPC Lab 3.0 installs a companion operator command for whole-platform operations. It does not replace the core `ppc-lab` binary.
+
+```text
+ppc-lab-platform status [--core PATH] [--tool-dir DIR] [--json]
+ppc-lab-platform doctor [--core PATH] [--tool-dir DIR]
+    [--evidence DIR] [--knowledge DIR] [--control DIR] [--json]
+ppc-lab-platform upgrade-check
+    [--evidence DIR] [--knowledge DIR] [--control DIR] [--json]
+ppc-lab-platform migrate
+    [--evidence DIR] [--knowledge DIR] [--control DIR] --yes [--json]
+ppc-lab-platform acceptance
+    [--core PATH] [--tool-dir DIR] --workspace DIR [--json]
+```
+
+`upgrade-check` returns exit `2` for incompatible persisted state. `migrate` is deliberately explicit (`--yes`) and creates first-run pre-v3 backups. `acceptance` uses only a generated synthetic PPC ELF fixture.

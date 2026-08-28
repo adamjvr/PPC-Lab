@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-upgrade-report-v1",
+  "title": "PPC Lab persisted-state upgrade report",
+  "type": "object",
+  "required": ["schema", "platform_version", "components"],
+  "properties": {
+    "schema": {"const": "ppc-lab-upgrade-report-v1"},
+    "platform_version": {"type": "string"},
+    "components": {"type": "object"}
+  }
+}

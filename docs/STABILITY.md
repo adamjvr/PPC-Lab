@@ -112,3 +112,12 @@ PPC Lab 2.1 extends `ppc-lab-exploration-v1` additively with the deterministic `
 ## v2.5 hypothesis compatibility
 
 `ppc-lab-hypothesis-report-v1`, `ppc-lab-hypothesis-experiment-v1`, and `ppc-lab-hypothesis-v1` are additive 2.x research contracts. Candidate confidence is a recorded deterministic heuristic result, not a source-level type guarantee. Existing role names and evidence/promotion meanings will not be silently repurposed under the same schema identifiers. Promotion remains an explicit operation over verified PPC Lab execution evidence; future releases may add optional metrics/role families without automatically upgrading old candidates.
+
+
+## v3 mature-platform compatibility
+
+PPC Lab 3.0 is a CMake/package major-version boundary, but it intentionally preserves the meanings of the existing v1/v2 job, worker, trace, evidence, corpus, exploration, campaign, scheduler, control, knowledge, and hypothesis schema identifiers. Downstream C++ consumers should request `PPCLab 3.0`.
+
+`ppc-lab-platform-status-v1`, `ppc-lab-upgrade-report-v1`, and `ppc-lab-acceptance-report-v1` are additive operational contracts. Persisted evidence/knowledge/control formats have explicit integer/metadata migration anchors. An incompatible persisted change requires an explicit migration with safety backup and regression coverage; version fields must never be edited merely to bypass a compatibility check.
+
+The v3 standing feature roadmap is closed. Future ISA, runtime, loader, backend, protocol, or service work is justified by a real target/deployment and a reproducible regression, not by feature-list completeness.
