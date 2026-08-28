@@ -12,6 +12,18 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v1.6.0 — Trace Intelligence & Coverage Analytics
+
+v1.6 turns portable instruction traces into hot-PC/function reports, observed basic blocks/control-flow/calls, dynamic coverage summaries, Graphviz CFGs, and A/B trace diffs. Existing trace archives remain valid and the new analytics can flow into the evidence store and decompiler evidence.
+
+```bash
+ppc-lab-trace-capture --ppc-lab ppc-lab --json /tmp/run.trace.json -- --image target.bin --entry-symbol interesting --backend builtin
+ppc-lab-trace-analyze /tmp/run.trace.json --json /tmp/run.analysis.json --dot /tmp/run.dot
+ppc-lab-trace-diff baseline.trace.json /tmp/run.trace.json --json /tmp/run.diff.json
+```
+
+See [`docs/TRACE_ANALYTICS.md`](docs/TRACE_ANALYTICS.md).
+
 ## v1.5.0 — Research API Service
 
 v1.5 adds a small standard-library HTTP transport for deployments that cannot conveniently use local pipes, persistent SSH streams, or the fleet controller. `ppc-lab-api` keeps the existing `ppc-lab-job-v1` / `ppc-lab-worker-response-v1` execution contract intact and exposes read-only evidence queries over the same server process. It binds to loopback by default and requires bearer authentication before non-loopback binding.
@@ -151,7 +163,7 @@ addresses, bindings, inputs, and expected results.
 - GPR/FPR setup and deterministic memory writes;
 - import traps, structured traps/syscalls, deterministic syscall-return bindings, and explicit symbol bindings;
 - reusable runtime stubs for libm, memory operations, and Classic Mac block moves;
-- instruction limits, symbol-aware trace output, and trace ranges;
+- instruction limits, symbol-aware trace output, trace ranges, dynamic coverage/CFG analytics, and A/B trace diffing;
 - memory dumps with FNV-1a64 fingerprints;
 - machine-readable results, normalized metadata, and deterministic full-state snapshots;
 - byte/float comparison, snapshot diffing, batch sweeps, and differential execution;

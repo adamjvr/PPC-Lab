@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 1.5.0 LANGUAGES CXX)
+project(PPCLab VERSION 1.6.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -73,6 +73,10 @@ install(PROGRAMS scripts/ppc_lab_worker.py DESTINATION ${CMAKE_INSTALL_BINDIR} R
 install(PROGRAMS scripts/ppc_lab_orchestrate.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-orchestrate)
 install(PROGRAMS scripts/ppc_lab_fleet.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-fleet)
 install(PROGRAMS scripts/ppc_lab_evidence.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-evidence)
+install(FILES scripts/ppc_trace_intelligence.py DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS scripts/ppc_trace_capture.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-trace-capture)
+install(PROGRAMS scripts/ppc_trace_analyze.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-trace-analyze)
+install(PROGRAMS scripts/ppc_trace_diff.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-trace-diff)
 install(PROGRAMS scripts/ppc_lab_api.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-api)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
@@ -151,4 +155,5 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_fleet COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_fleet.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_evidence_store COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_evidence_store.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_http_api COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_http_api.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_trace_intelligence COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_trace_intelligence.py $<TARGET_FILE:ppc_lab_cli>)
 endif()

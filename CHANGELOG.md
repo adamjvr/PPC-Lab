@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0 — 2026-08-28 — Trace Intelligence & Coverage Analytics
+
+- Add installed `ppc-lab-trace-capture`, `ppc-lab-trace-analyze`, and `ppc-lab-trace-diff` commands while preserving `ppc-lab-trace-v1`.
+- Add dynamic PC coverage, instruction/mnemonic frequency, symbol/function hotness, observed basic blocks/control-flow edges, and inferred calls.
+- Add Graphviz DOT export and machine-readable `ppc-lab-trace-analysis-v1`.
+- Add `ppc-lab-trace-diff-v1` with coverage Jaccard and per-PC/function/call deltas plus optional CI failure mode.
+- Feed analyses/diffs into the evidence store and hot-block/call annotations into decompiler-neutral evidence.
+- Advertise/install the schemas and add end-to-end capture/analyze/diff/install regression coverage.
+
 ## 1.5.0 — 2026-08-28 — Research API Service
 
 - Add `ppc-lab-api`, a dependency-free threaded HTTP transport over the stable v1 worker/evidence contracts.

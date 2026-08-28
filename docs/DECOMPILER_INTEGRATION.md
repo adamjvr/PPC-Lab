@@ -32,6 +32,8 @@ python3 scripts/ppc_evidence_pack.py \
   --json /tmp/target.evidence.json
 ```
 
+Optionally run `ppc-lab-trace-analyze` and pass its output as `ppc_evidence_pack.py --analysis` to add hot-block and observed-call annotations. See `TRACE_ANALYTICS.md`.
+
 The result is `ppc-lab-evidence-v1`: normalized symbols plus address-based
 behavioral annotations. Trace annotations include execution counts and decoded
 instructions; snapshot annotations identify the stop point and run summary.

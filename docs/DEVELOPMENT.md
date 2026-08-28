@@ -162,6 +162,8 @@ The v0.4 automation formats are deliberately versioned:
 - `ppc-lab-metadata-v1` — loader-normalized image metadata;
 - `ppc-lab-snapshot-v1` — deterministic architectural/memory state;
 - `ppc-lab-trace-v1` — captured instruction trace events;
+- `ppc-lab-trace-analysis-v1` — dynamic coverage/CFG/hotness analysis;
+- `ppc-lab-trace-diff-v1` — behavioral trace comparison;
 - `ppc-lab-evidence-v1` — decompiler-neutral symbols/comments;
 - `ppc-lab-experiment-v1` / `ppc-lab-differential-v1` — input manifests.
 

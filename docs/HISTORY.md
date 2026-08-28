@@ -80,3 +80,7 @@ v1.4 made fleet/orchestration output durable without adding a server daemon. PPC
 
 v1.5 added an optional dependency-free HTTP transport after the server/fleet/evidence stack made a persistent integration endpoint worthwhile. The API deliberately wraps rather than replaces the stable worker contract, defaults to loopback, requires bearer authentication for remote binds, preserves worker containment, and keeps the evidence network surface read-only. TLS and public-facing service concerns remain deployment infrastructure rather than PPC Lab core responsibilities.
 
+
+## v1.6.0 — Trace Intelligence & Coverage Analytics — 2026-08-28
+
+v1.6 promoted instruction traces into reusable behavioral-analysis artifacts: dynamic coverage/hotness, observed CFG/calls, A/B trace comparison, Graphviz export, evidence-store persistence, and decompiler-evidence enrichment while keeping `ppc-lab-trace-v1` compatible.

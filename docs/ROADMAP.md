@@ -30,7 +30,11 @@ Server/fleet output can now become durable research infrastructure instead of di
 
 The persistent network/service transport became justified for easier cross-project/server integration. A dependency-free optional HTTP layer now exposes health/capabilities, the stable v1 worker execution contract, and read-only evidence queries while retaining loopback-first binding, bearer authentication for remote binds, worker root/time containment, bounded bodies, and no embedded TLS/cloud stack.
 
-## Post-1.5 — only when justified
+## v1.6 — Trace intelligence & coverage analytics — COMPLETE
+
+Instruction traces can now be promoted into durable behavioral evidence: dynamic coverage, hot functions/instructions, observed blocks/control flow/calls, Graphviz export, trace diffing, evidence-store ingestion, and decompiler-evidence enrichment.
+
+## Post-1.6 — only when justified
 
 Potential future capability buckets:
 
