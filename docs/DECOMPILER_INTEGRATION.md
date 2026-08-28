@@ -63,3 +63,15 @@ import_ppc_lab_evidence(bv, '/tmp/target.evidence.json')
 The adapters are deliberately thin. PPC Lab owns evidence production and the
 neutral schema; decompiler scripts only apply labels/comments. This makes the
 research data portable even if individual decompiler APIs change.
+
+## Aggregate accumulated v2.4 knowledge
+
+When a target has accumulated multiple traces, triage findings, symbols, and manual evidence, export the graph's target-scoped aggregate instead of importing each run separately:
+
+```bash
+ppc-lab-knowledge export-decompiler /srv/ppc-knowledge \
+  --target-sha256 <target-sha-prefix> \
+  --json /tmp/target.knowledge.evidence.json
+```
+
+The output is still `ppc-lab-evidence-v1`, so the existing Ghidra, IDA, and Binary Ninja adapters need no graph-specific code.

@@ -75,3 +75,7 @@ PPC Lab v2.1 also installs `ppc-lab-prioritize` plus `ppc-lab-priority-policy-v1
 ## Campaign control plane
 
 A normal v2.3 install also installs `ppc-lab-control` beside `ppc-lab-schedule`. No extra Python packages, database, broker, or service framework are required. The four control-plane JSON schemas are installed under the normal `share/ppc-lab/schemas` directory. `ppc-lab-control serve` is a foreground process so deployments can use their existing OS/container supervisor rather than a PPC-Lab-specific daemon installer.
+
+## Research knowledge graph
+
+A normal v2.4 install adds `ppc-lab-knowledge` and the five v2.4 knowledge query/report/traversal/verification schemas. The tool uses Python's bundled `sqlite3` module; no graph database, broker, or service is required. The graph can index installed-server evidence directories or synchronize an existing `ppc-lab-evidence` store while leaving target binaries in their original private storage.

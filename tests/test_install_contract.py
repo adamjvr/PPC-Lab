@@ -64,6 +64,8 @@ def main() -> int:
         assert scheduler.is_file(), scheduler
         control = prefix / "bin" / "ppc-lab-control"
         assert control.is_file(), control
+        knowledge = prefix / "bin" / "ppc-lab-knowledge"
+        assert knowledge.is_file(), knowledge
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -103,11 +105,16 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-telemetry-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-history-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-control-history-record-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-knowledge-query-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-knowledge-report-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-knowledge-related-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-knowledge-path-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-knowledge-verify-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 2.3.0"
+        assert version.stdout.strip() == "PPC Lab 2.4.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout

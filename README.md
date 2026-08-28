@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v2.4.0 — Research Knowledge Graph
+
+v2.4 turns accumulated PPC Lab evidence into cross-project research memory. `ppc-lab-knowledge` indexes target hashes, documents, symbols/functions, addresses, dynamic coverage, stable behavior fingerprints, corpus cases, triage findings, campaigns, and decompiler annotations in a local SQLite relationship graph. It can synchronize an existing evidence store, explain relationship paths, find the same observed behavior across different target hashes, and export accumulated target-scoped findings back into the existing decompiler-neutral evidence format. Target binaries remain external.
+
+```bash
+ppc-lab-knowledge init /srv/ppc-knowledge
+ppc-lab-knowledge sync-evidence /srv/ppc-knowledge /srv/ppc-evidence
+ppc-lab-knowledge query /srv/ppc-knowledge --type behavior --json
+ppc-lab-knowledge related /srv/ppc-knowledge behavior:<sha256> --depth 2 --json
+```
+
+See [`docs/KNOWLEDGE_GRAPH.md`](docs/KNOWLEDGE_GRAPH.md).
+
 ## v2.3.0 — Campaign Control Plane
 
 v2.3 turns the v2.2 scheduler into long-lived server infrastructure without adding a database or service framework. `ppc-lab-control` provides a persistent scheduler-run queue, deterministic priority ordering, foreground supervision, live process/scheduler telemetry, pause/resume/drain/cancel controls, and append-only campaign-run history. Existing `ppc-lab-schedule` and `ppc-lab-campaign` semantics remain unchanged underneath it.

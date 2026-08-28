@@ -62,9 +62,13 @@ Autonomous campaigns can share long-lived research hosts under deterministic wei
 
 Scheduler runs can now live in a persistent priority queue with foreground supervision, live process/scheduler telemetry, pause/resume/drain/cancel controls, restart-aware recovery, single-supervisor coordination, and append-only run history. The control plane deliberately stays filesystem-backed and dependency-free.
 
-## v2.4 — Research knowledge graph — NEXT WHEN CONTINUING
+## v2.4 — Research knowledge graph — COMPLETE
 
-The next dense milestone is accumulated research knowledge rather than more queue machinery: connect target hashes, images, symbols/functions, traces, coverage, corpus cases, triage findings, campaign/evidence records, and decompiler annotations into queryable cross-project relationships so PPC Lab can answer “where have we seen this code/behavior/state relationship before?” without copying private target binaries.
+Accumulated research is now relationship memory rather than disconnected result directories. A dependency-free SQLite graph connects target SHA-256 identities, JSON evidence, symbols/functions/addresses, dynamic coverage, stable behavior fingerprints, corpus cases, triage findings, campaigns, and decompiler annotations. Existing evidence stores can be synchronized, graph neighborhoods/paths can explain cross-project relationships, and target-scoped knowledge exports back into the neutral decompiler-evidence format without copying private binaries.
+
+## v2.5 — Automated hypothesis engine — NEXT WHEN CONTINUING
+
+Use accumulated graph relationships plus execution evidence to propose bounded, reviewable follow-up experiments: infer likely argument/state roles, rank unexplained routines/fields, generate explicit candidate jobs, score hypotheses by supporting/contradicting evidence, and require normal PPC Lab execution/corpus/triage evidence before a hypothesis can be promoted. This should remain deterministic and evidence-first rather than becoming an opaque AI dependency.
 
 ## Post-2.0 — only when justified
 

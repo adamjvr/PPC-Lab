@@ -188,3 +188,8 @@ ppc-lab-campaign campaign.json --out /srv/ppc-runs/current
 
 Use `--dry-run` first when targeting a new server/root layout. Use `--resume` only for the exact same manifest and PPC Lab engine version. Treat `complete-with-findings` as useful research output; treat `complete-with-regressions` as a durable behavioral expectation that changed and needs review. See `CAMPAIGNS.md`.
 
+
+
+## 12. Index durable findings in the knowledge graph
+
+Once evidence is worth keeping across projects, ingest or synchronize it into `ppc-lab-knowledge`. Query target/function/behavior relationships before designing another experiment: an apparently new routine may already share a behavior fingerprint, call relationship, corpus protection, or divergence signature with prior work. Treat graph matches as experiment-selection evidence, not proof of semantic equivalence. Export target-scoped aggregate annotations back to the decompiler when the graph has stronger accumulated context than any single run.

@@ -103,3 +103,7 @@ PPC Lab 2.1 extends `ppc-lab-exploration-v1` additively with the deterministic `
 ## v2.3 control-plane compatibility
 
 `ppc-lab-control-v1`, `ppc-lab-control-item-v1`, `ppc-lab-control-telemetry-v1`, `ppc-lab-control-history-v1`, and `ppc-lab-control-history-record-v1` are additive 2.x operational contracts above the scheduler. Queue priority controls scheduler-run admission only; it does not alter scheduler project fairness or guest execution behavior. Optional telemetry/history fields may be added in 2.x. Existing field meanings and terminal-history semantics require a new schema identifier if changed incompatibly.
+
+## v2.4 knowledge-graph compatibility
+
+`ppc-lab-knowledge-query-v1`, `ppc-lab-knowledge-report-v1`, `ppc-lab-knowledge-related-v1`, `ppc-lab-knowledge-path-v1`, and `ppc-lab-knowledge-verify-v1` are additive 2.x research-index contracts. Graph node/edge types may grow additively, but existing relation meanings and target SHA-256 identity semantics must not change incompatibly under the same schema identifiers. Decompiler export intentionally remains `ppc-lab-evidence-v1`.

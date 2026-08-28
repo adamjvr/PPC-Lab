@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.4.0 — 2026-08-28 — Research Knowledge Graph
+
+- Added dependency-free `ppc-lab-knowledge` SQLite relationship graph over accumulated PPC Lab JSON research artifacts.
+- Added SHA-256 target identity and target-scoped symbol/function/address relationships without copying private target binaries.
+- Added cross-target stable behavior and dynamic coverage fingerprint nodes for “where have we seen this before?” research queries.
+- Added corpus-case, differential-triage, campaign, symbol, execution, call-edge, and manual-annotation relationship ingestion.
+- Added direct synchronization from existing v1.4 evidence stores.
+- Added node filtering, related-neighborhood traversal, shortest relationship paths, graph reports, and integrity verification.
+- Added decompiler-neutral aggregate export back to `ppc-lab-evidence-v1` for the existing Ghidra/IDA/Binary Ninja adapters.
+- Added five stable v2.4 graph query/report/traversal/verification schemas and install/capability contracts.
+- Added end-to-end regression coverage for cross-target shared behavior, evidence synchronization, graph paths, and decompiler export.
+
 ## 2.3.0 — 2026-08-28 — Campaign Control Plane
 
 - Add installed `ppc-lab-control`, a dependency-free persistent queue/supervisor above `ppc-lab-schedule`.

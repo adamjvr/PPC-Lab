@@ -16,6 +16,10 @@ During extraction:
 - the previous synthetic and differential-result tests were retained and generalized.
 
 
+## v2.4.0 — Research Knowledge Graph — 2026-08-28
+
+Accumulated PPC Lab JSON evidence became queryable relationship memory. Targets are keyed by SHA-256, target-scoped symbols/functions/addresses connect to traces, coverage, corpus cases, triage and campaigns, shared behavior fingerprints can reveal cross-project observations, existing evidence stores can be synchronized, and accumulated findings can be exported back into the neutral decompiler-evidence format without archiving target binaries.
+
 ## v2.3.0 — Campaign Control Plane — 2026-08-28
 
 PPC Lab added a durable operational layer above the v2.2 scheduler: persistent scheduler-run queueing, live process/scheduler telemetry, pause/resume/drain/cancel controls, single-supervisor coordination, conservative restart recovery, and append-only run history. The control plane remains a local standard-library filesystem supervisor rather than a mandatory daemon/database stack.
