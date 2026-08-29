@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-support-bundle-v1",
+  "title": "PPC Lab support bundle manifest v1",
+  "type": "object",
+  "required": ["schema", "support_api", "platform_version", "target_binaries_included", "files"],
+  "properties": {
+    "schema": {"const": "ppc-lab-support-bundle-v1"},
+    "support_api": {"const": 1},
+    "platform_version": {"type": "string"},
+    "target_binaries_included": {"const": false},
+    "redactions_applied": {"type": "integer", "minimum": 0},
+    "files": {"type": "array", "items": {"type": "object", "required": ["path", "size", "sha256"]}}
+  }
+}

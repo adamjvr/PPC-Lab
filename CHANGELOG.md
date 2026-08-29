@@ -1,3 +1,12 @@
+## 3.3.0 — 2026-08-28 — LTS Diagnostics & Supportability
+
+- Add installed `ppc-lab-support diagnose/bundle/verify` for target-neutral whole-install diagnostics and auditable support artifacts.
+- Collect core doctor/capabilities, companion readiness, compatibility declarations, optional persisted-state/evidence/knowledge integrity, control-plane telemetry, and recent failed campaign records.
+- Add bounded UTF-8 text-log collection with secret and declared-root redaction; usernames, hostnames, environment dumps, persisted databases, and target bytes are excluded by design.
+- Add restricted `ppc-lab-support-bundle-v1` archives containing only a support report, SHA-256 manifest, and optional redacted text logs; verification rejects unexpected members or modified payloads.
+- Add `ppc-lab-support-report-v1`, install/capability/LTS invariant coverage, and dedicated supportability documentation.
+- Preserve the post-v3 feature freeze: this release adds diagnostics/support infrastructure, not another PPC execution/runtime subsystem.
+
 ## 3.2.0 — 2026-08-28 — LTS Compatibility & Upgrade Assurance
 
 - Add `ppc-lab-compat` snapshots and same-major baseline checks for public C++ API/ABI markers, stable schemas/tools, and persisted-state format levels.

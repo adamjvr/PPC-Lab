@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-support-report-v1",
+  "title": "PPC Lab support diagnostics report v1",
+  "type": "object",
+  "required": ["schema", "support_api", "platform_version", "generated_at", "system", "checks", "healthy", "failed_checks"],
+  "properties": {
+    "schema": {"const": "ppc-lab-support-report-v1"},
+    "support_api": {"const": 1},
+    "platform_version": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "system": {"type": "object"},
+    "checks": {"type": "object"},
+    "healthy": {"type": "boolean"},
+    "failed_checks": {"type": "array", "items": {"type": "string"}},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  }
+}

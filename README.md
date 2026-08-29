@@ -12,6 +12,18 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.3.0 — LTS Diagnostics & Supportability
+
+v3.3 is an operational-hardening release for the frozen v3 platform. `ppc-lab-support` collects target-neutral whole-install diagnostics and produces a narrowly constrained, redacted support ZIP for bug reports without copying target binaries, persisted databases, environment secrets, or arbitrary attachments.
+
+```bash
+ppc-lab-support diagnose --evidence /srv/ppc-evidence --knowledge /srv/ppc-knowledge --control /srv/ppc-control --json
+ppc-lab-support bundle --evidence /srv/ppc-evidence --knowledge /srv/ppc-knowledge --control /srv/ppc-control --log /var/log/ppc-lab-worker.log --out ppc-lab-support.zip
+ppc-lab-support verify ppc-lab-support.zip --json
+```
+
+See [`docs/SUPPORTABILITY.md`](docs/SUPPORTABILITY.md).
+
 ## v3.2.0 — LTS Compatibility & Upgrade Assurance
 
 v3.2 is a release-hardening checkpoint for the completed v3 platform. `ppc-lab-compat` mechanically checks the current tree against the checked-in v3.1 LTS baseline, audits persisted research state without mutating it, and makes every reproducible source release declare its compatibility surface inside `RELEASE-MANIFEST.json`. No new PPC execution subsystem is added.

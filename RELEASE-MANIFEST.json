@@ -20,6 +20,7 @@
       "ppc-lab-prioritize",
       "ppc-lab-release",
       "ppc-lab-schedule",
+      "ppc-lab-support",
       "ppc-lab-target",
       "ppc-lab-trace-analyze",
       "ppc-lab-trace-capture",
@@ -35,7 +36,7 @@
       "knowledge": 1
     },
     "platform_major": 3,
-    "platform_version": "3.2.0",
+    "platform_version": "3.3.0",
     "policy": {
       "api_abi_change_breaking": true,
       "persisted_format_downgrade_forbidden": true,
@@ -91,6 +92,8 @@
       "ppc-lab-scheduler-state-v1.schema.json",
       "ppc-lab-scheduler-summary-v1.schema.json",
       "ppc-lab-scheduler-v1.schema.json",
+      "ppc-lab-support-bundle-v1.schema.json",
+      "ppc-lab-support-report-v1.schema.json",
       "ppc-lab-target-profile-package-v1.schema.json",
       "ppc-lab-target-profile-v1.schema.json",
       "ppc-lab-trace-analysis-v1.schema.json",
@@ -119,14 +122,14 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "b434d832c35ad16eaf37f41e9b51d8762821585d4810e62da0982918e0f36636",
-      "size": 25605
+      "sha256": "57be15058cf713213b0eb636d5b2786f0a2ff79f2a3919334ce950a995cd6b85",
+      "size": 26649
     },
     {
       "mode": "0644",
       "path": "CMakeLists.txt",
-      "sha256": "7c9b22f45761aea7931f21bb290a86d91fd1ad71789cda74c812921acc63f4db",
-      "size": 12967
+      "sha256": "2ba2bdc8f53a39574ace7c427e9a0f82cdaedeb14e761d5fe0471646d47830b9",
+      "size": 13219
     },
     {
       "mode": "0644",
@@ -143,8 +146,8 @@
     {
       "mode": "0644",
       "path": "README.md",
-      "sha256": "32917e823f0144c833d36466e6892911a1cbccd450d8095c42db66faac6e9a06",
-      "size": 27653
+      "sha256": "df563933c6f2866322747aee1989cbccb9fab5f2ffa882aec53bd49d41c211bc",
+      "size": 28423
     },
     {
       "mode": "0755",
@@ -335,8 +338,8 @@
     {
       "mode": "0644",
       "path": "docs/MAINTENANCE.md",
-      "sha256": "29c9da5af9b2c288cc861cf4142ebe1e2560177eadb7ab1aef9dae0ab0ceb449",
-      "size": 2480
+      "sha256": "8c61f1f3244e67ca9cae61e06326677fa48a09456c2fc062ce49fc44d8ebdc46",
+      "size": 2945
     },
     {
       "mode": "0644",
@@ -421,6 +424,12 @@
       "path": "docs/STABILITY.md",
       "sha256": "fc71b751f765733535e8c8c683d1991422dc7d680b22b247c6a571d7870ecbec",
       "size": 13125
+    },
+    {
+      "mode": "0644",
+      "path": "docs/SUPPORTABILITY.md",
+      "sha256": "8317365e12a87a619c0732b5eaee046ba1293e8d33086d5db2faf56e4792ca4d",
+      "size": 2283
     },
     {
       "mode": "0644",
@@ -898,6 +907,18 @@
     },
     {
       "mode": "0644",
+      "path": "schemas/ppc-lab-support-bundle-v1.schema.json",
+      "sha256": "0716658f6f628276cdfe28d948f14d6d4f731303d66de9fd85f60b8f37e21820",
+      "size": 634
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/ppc-lab-support-report-v1.schema.json",
+      "sha256": "96d45ef6f4972e7ccd095421391536937c075ac0cf5a32462038b5b6f01979fa",
+      "size": 729
+    },
+    {
+      "mode": "0644",
       "path": "schemas/ppc-lab-target-profile-package-v1.schema.json",
       "sha256": "47bc60efa4665d83b30bbdfdfea3ee489c408907fb8daf4793d2d08c46a4348b",
       "size": 599
@@ -947,8 +968,8 @@
     {
       "mode": "0755",
       "path": "scripts/check_repository_invariants.py",
-      "sha256": "43e41fe775fb3c90d5b00991d9e2f94c57234befc5582dfd5ab4705f1677187c",
-      "size": 5663
+      "sha256": "765ee871c58e5c9c69f7c49bf8034ffba76c5cb65fd6798eae25f5b9d847f367",
+      "size": 5783
     },
     {
       "mode": "0755",
@@ -1043,8 +1064,8 @@
     {
       "mode": "0755",
       "path": "scripts/ppc_lab_platform.py",
-      "sha256": "84973eaa186fcc9c61dfc3497fae62ca7c06bc0b25aa97273a7b069660ea7fa3",
-      "size": 19130
+      "sha256": "8f989a7ad052145071c5643f58ff47cec8eddf5f2d22b593d0700fd543a3513c",
+      "size": 19167
     },
     {
       "mode": "0755",
@@ -1063,6 +1084,12 @@
       "path": "scripts/ppc_lab_schedule.py",
       "sha256": "824b2e95a57d33e8780316a2a20bbd50ad572ab6b21f21826860044875025445",
       "size": 18314
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/ppc_lab_support.py",
+      "sha256": "c466cde6389e7a2939a1e94a8c0f595f42ce1f6df0728c5d4bc0844160693d79",
+      "size": 13976
     },
     {
       "mode": "0755",
@@ -1259,13 +1286,13 @@
     {
       "mode": "0755",
       "path": "tests/test_cli_elf.py",
-      "sha256": "d994555fa1517bb3a3c19887ed10451316c6262796ebfb284dd4ad8bce454e6a",
+      "sha256": "ddadfb6425c60c6c1b3ddd31bd0098cf586c450f3ed9c877371a3be1cce05ca9",
       "size": 4098
     },
     {
       "mode": "0755",
       "path": "tests/test_compatibility_assurance.py",
-      "sha256": "28768c436e53ac3f6bb34724ae2d53e2bd7bdb12d059eca05d6884e1c35529b3",
+      "sha256": "7259b261edbbc29a77d747890f24b5f29cb415c8af27138d1dfca50a364fd636",
       "size": 2113
     },
     {
@@ -1313,7 +1340,7 @@
     {
       "mode": "0755",
       "path": "tests/test_http_api.py",
-      "sha256": "9d0e45d103f2edec545f9f1f226e2a1ad67346fce371009acdb155a2d75fb337",
+      "sha256": "fb809b580d1210efa6e40570c51ee199e9294620c97b17cf72d17f5f2c329fd7",
       "size": 6148
     },
     {
@@ -1331,8 +1358,8 @@
     {
       "mode": "0755",
       "path": "tests/test_install_contract.py",
-      "sha256": "90e6362ce2097f67b17570cb8d29775ab0baa548a235f777cee0612da3366b1f",
-      "size": 13822
+      "sha256": "fb27f48ae9a3a0ddddf172e728716885a3b244c4e9bdb59d3958b5ba09843084",
+      "size": 14280
     },
     {
       "mode": "0644",
@@ -1379,7 +1406,7 @@
     {
       "mode": "0755",
       "path": "tests/test_platform_consolidation.py",
-      "sha256": "8a244955c38a9c38f0e04ba86a916442a0bd82a0d95c7f2b8e5ff77d86e729a4",
+      "sha256": "3cb50ab12e0a5f7a554a7481415057c4f8e609e1946621d8beba125f67672ef5",
       "size": 2789
     },
     {
@@ -1391,7 +1418,7 @@
     {
       "mode": "0755",
       "path": "tests/test_release_engineering.py",
-      "sha256": "57d03f46311239360d0feec00c41354a7a2c9279e695136d02ee739caf908382",
+      "sha256": "7362fefe0538ee9536eb244249ea22bf4a2bff891961844130230082de6cf7ae",
       "size": 1987
     },
     {
@@ -1405,6 +1432,12 @@
       "path": "tests/test_result_tools.py",
       "sha256": "c6b73789852c3f565387252349714f2dd6d58ae4619deb5d81ffc2819d84f2e1",
       "size": 1486
+    },
+    {
+      "mode": "0755",
+      "path": "tests/test_supportability.py",
+      "sha256": "ae141a8349c2d332cf8f06e231de0342a9c373f678937ccff8e1f99e693c9586",
+      "size": 3029
     },
     {
       "mode": "0755",
@@ -1427,13 +1460,13 @@
     {
       "mode": "0644",
       "path": "tools/ppc_lab.cpp",
-      "sha256": "90ae93cd8dfec75774edc1961b9d8861d89afc89aa0a12edc971d0ca1728a14c",
-      "size": 44106
+      "sha256": "a90472ec1ec1b6cdb32523d565685cedcba2b75c3aaa4993ac96f3d0f4da249b",
+      "size": 44208
     }
   ],
   "license": "GPL-3.0-only",
   "release_api": 1,
   "schema": "ppc-lab-release-manifest-v1",
   "target_profile_api": 1,
-  "version": "3.2.0"
+  "version": "3.3.0"
 }

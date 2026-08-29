@@ -13,7 +13,7 @@ def sqlite_store(root:Path,name:str,tables:list[str]):
         c.execute("INSERT INTO meta(key,value) VALUES('platform_format_version','1')"); c.execute("INSERT INTO meta(key,value) VALUES('schema_version','1')")
 
 def main()->int:
-    cur=mod.build_snapshot(ROOT); assert cur['platform_version']=='3.2.0'; assert cur['compatibility_api']==1
+    cur=mod.build_snapshot(ROOT); assert cur['platform_version']=='3.3.0'; assert cur['compatibility_api']==1
     assert 'ppc-lab-compat' in cur['installed_tools']; assert 'ppc-lab-compatibility-snapshot-v1.schema.json' in cur['schemas']
     base=json.loads((ROOT/'compat/baselines/v3.1.0.json').read_text()); assert mod.compare(cur,base)==[]
     broken=json.loads(json.dumps(base)); broken['cpp_abi']=99; broken['schemas'].append('never-existed-v1.schema.json')

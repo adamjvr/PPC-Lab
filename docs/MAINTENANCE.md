@@ -46,3 +46,8 @@ New target projects should use `ppc-lab-target` rather than adding project-speci
 ## v3.2 compatibility gate
 
 Before a target-driven v3.x patch is released, run `ppc-lab-compat check compat/baselines/v3.1.0.json --root .`. A failure is a release blocker unless the project intentionally moves to a new major compatibility line. Old baselines are immutable release evidence.
+
+
+## v3.3 support bundle gate
+
+For target-driven defects that cannot be reproduced immediately, collect `ppc-lab-support diagnose` first. If a shareable artifact is needed, use `ppc-lab-support bundle` and run `ppc-lab-support verify` before attaching it to an issue. Do not replace this with a generic tar/zip of server state: support bundles are deliberately constrained so private target binaries and persisted research databases are not swept into bug reports.

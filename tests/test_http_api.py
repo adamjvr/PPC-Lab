@@ -80,7 +80,7 @@ with tempfile.TemporaryDirectory(prefix="ppclab-api-test-") as td_text:
         assert status == 401 and unauthorized["error"] == "unauthorized"
 
         status, health = request(base + "/v1/health", token=token)
-        assert status == 200 and health["ok"] is True and health["version"] == "3.2.0"
+        assert status == 200 and health["ok"] is True and health["version"] == "3.3.0"
 
         status, caps = request(base + "/v1/capabilities", token=token)
         assert status == 200 and caps["protocols"]["http_api"] == "ppc-lab-http-api-v1"
