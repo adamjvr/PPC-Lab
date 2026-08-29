@@ -24,10 +24,14 @@ A v3 release should not be published if this path fails even when isolated unit 
 
 ## Archive certification
 
-The downloadable source archive is the artifact that must be certified:
+The downloadable source archive is the artifact that must be certified. PPC Lab 3.9.3 automates the clean-room sequence:
 
-1. create a source-only archive (exclude build trees, Python caches, transient databases and private targets);
-2. extract into an empty directory;
-3. configure/build the extracted copy;
-4. run repository invariants, installed-package contract, platform consolidation, and mature-platform acceptance;
-5. record SHA-256 of the exact archive.
+```bash
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+ppc-lab-release certify . \
+  --out build/PPC-Lab-source.zip \
+  --workspace build/certification \
+  --json build/certification.json
+```
+
+The command creates the deterministic source-only ZIP, rejects unsafe/ambiguous archive members, extracts into a clean workspace, verifies the embedded manifest, runs the complete portable qualification gate against the extracted copy, and records the SHA-256 of the exact archive. A public archive is not accepted unless the certification report says `ok: true`.

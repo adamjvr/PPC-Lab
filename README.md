@@ -12,16 +12,23 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
-## v3.9.2 — LTS Portable Release Qualification
+## v3.9.3 — LTS Exact Archive Certification
 
-PPC Lab 3.9.2 adds a CI-provider-neutral release gate to the existing `ppc-lab-release` tool. `ppc-lab-release qualify` verifies the checked-in source manifest, configures a real Release build, confirms that release-critical tests are registered, builds the tree, runs the complete CTest suite, and emits a target-neutral `ppc-lab-release-qualification-v1` JSON report. Source/build paths are redacted in the report, private PPC inputs are never opened or copied, and no hostname or username is recorded. No PPC execution, loader, runtime, persistence, replication, public C++ API/ABI, or existing schema behavior changed.
+PPC Lab 3.9.3 closes the last manual release-acceptance gap: `ppc-lab-release certify` creates the deterministic source ZIP, validates its archive envelope, clean-extracts the exact downloadable bytes, verifies the embedded manifest, and runs the same portable qualification gate against that extracted tree. The resulting `ppc-lab-release-certification-v1` report pins the exact archive SHA-256 and nests the target-neutral qualification evidence. No PPC execution, loader, runtime, persistence, replication, public C++ API/ABI, or existing schema semantics changed.
 
 ```bash
 ppc-lab-release manifest . --out RELEASE-MANIFEST.json
-ppc-lab-release qualify . --build-dir build/qualification --json build/qualification.json
+ppc-lab-release certify . \
+  --out build/PPC-Lab-v3.9.3-source.zip \
+  --workspace build/certification \
+  --json build/certification.json
 ```
 
-See [`docs/RELEASE_ENGINEERING.md`](docs/RELEASE_ENGINEERING.md).
+The earlier `ppc-lab-release qualify` command remains the fast working-tree gate; `certify` is the final gate for the exact archive intended for distribution. See [`docs/RELEASE_ENGINEERING.md`](docs/RELEASE_ENGINEERING.md).
+
+## v3.9.2 — LTS Portable Release Qualification
+
+PPC Lab 3.9.2 added the CI-provider-neutral `ppc-lab-release qualify` gate used by archive certification and by CI/self-hosted validation.
 
 ## v3.9.1 — LTS CI & Install-Contract Hotfix
 

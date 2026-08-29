@@ -1,3 +1,11 @@
+## 3.9.3 — 2026-08-28 — LTS Exact Archive Certification
+
+- Extend installed `ppc-lab-release` with `certify`, which creates the exact reproducible source ZIP, validates its member envelope, clean-extracts it, verifies the embedded manifest, and runs the portable release qualification gate against the extracted bytes.
+- Add `ppc-lab-release-certification-v1` evidence recording the archive SHA-256/size/member count, source and embedded manifest identities, certification checks, and nested privacy-minimal qualification report.
+- Reject duplicate, traversal, backslash, directory, symlink, and other non-regular archive members before certification extraction.
+- Add release-certification schema/capability/install/compatibility coverage and make the certification regression itself release-critical.
+- Preserve all existing v3 C++ API/ABI, target-profile, persistence, security, replication, loader/runtime, and PPC execution behavior; this patch automates the final archive-acceptance step only.
+
 ## 3.9.2 — 2026-08-28 — LTS Portable Release Qualification
 
 - Extend installed `ppc-lab-release` with a dependency-free `qualify` gate that verifies the checked-in release manifest, configures a real Release build, builds it, and runs the complete CTest suite.

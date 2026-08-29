@@ -58,7 +58,7 @@ try:
         mod._run_capture = lambda argv, root, build_dir: discovery(mod.QUALIFICATION_REQUIRED_TESTS)
         doc = mod.qualify_release(ROOT, build, cmake="cmake", ctest="ctest")
         assert doc["schema"] == "ppc-lab-release-qualification-v1"
-        assert doc["release_api"] == 1 and doc["platform_version"] == "3.9.2"
+        assert doc["release_api"] == 1 and doc["platform_version"] == "3.9.3"
         assert doc["ok"] is True
         assert doc["source"]["license"] == "GPL-3.0-only"
         assert doc["source"]["manifest_sha256"]

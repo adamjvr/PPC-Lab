@@ -22,7 +22,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-PLATFORM_VERSION = "3.9.2"
+PLATFORM_VERSION = "3.9.3"
 STATUS_SCHEMA = "ppc-lab-platform-status-v1"
 UPGRADE_SCHEMA = "ppc-lab-upgrade-report-v1"
 ACCEPTANCE_SCHEMA = "ppc-lab-acceptance-report-v1"

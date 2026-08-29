@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-release-certification-v1.schema.json",
+  "title": "PPC Lab source archive certification report v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "release_api",
+    "platform_version",
+    "ok",
+    "archive",
+    "source",
+    "configuration",
+    "checks",
+    "qualification"
+  ],
+  "properties": {
+    "schema": {"const": "ppc-lab-release-certification-v1"},
+    "release_api": {"const": 1},
+    "platform_version": {"type": "string"},
+    "ok": {"type": "boolean"},
+    "archive": {
+      "type": "object",
+      "required": [
+        "name",
+        "sha256",
+        "size",
+        "source_date_epoch",
+        "members",
+        "total_uncompressed_bytes",
+        "manifest_sha256"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "sha256": {"type": ["string", "null"]},
+        "size": {"type": ["integer", "null"], "minimum": 0},
+        "source_date_epoch": {"type": "integer"},
+        "members": {"type": ["integer", "null"], "minimum": 0},
+        "total_uncompressed_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "manifest_sha256": {"type": ["string", "null"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["manifest", "manifest_sha256", "license"],
+      "properties": {
+        "manifest": {"const": "RELEASE-MANIFEST.json"},
+        "manifest_sha256": {"type": ["string", "null"]},
+        "license": {"const": "GPL-3.0-only"}
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "required": ["config", "unicorn"],
+      "properties": {
+        "config": {"type": "string"},
+        "unicorn": {"type": "boolean"}
+      }
+    },
+    "checks": {"type": "array", "items": {"type": "object"}},
+    "qualification": {
+      "type": ["object", "null"]
+    }
+  }
+}

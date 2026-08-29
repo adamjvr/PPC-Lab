@@ -82,6 +82,12 @@ Release validity must not depend on one hosted CI vendor. Regenerate `RELEASE-MA
 
 The qualification report is deliberately target-neutral and privacy-minimal: no target binaries, usernames, hostnames, environment dumps, or credentials. Preserve this boundary when extending the release gate.
 
+## v3.9.3 exact archive certification gate
+
+The final public-release artifact should be certified, not merely created. After regenerating `RELEASE-MANIFEST.json`, run `ppc-lab-release certify . --out build/PPC-Lab-source.zip --workspace build/certification --json build/certification.json`. Certification must validate the ZIP member envelope, prove the embedded manifest is byte-identical to the checked-in source manifest, and produce an `ok: true` nested release-qualification report from the clean extraction.
+
+Do not weaken the archive envelope to accept path traversal, duplicate names, backslash aliases, directory entries, symlinks, device files, or other non-regular members. Certification reports remain metadata-only and must not capture private PPC target bytes, credentials, usernames, hostnames, or environment dumps.
+
 ## v3.9.1 CI/install-contract gate
 
 For patch releases, keep the installed CMake package usable from both single-configuration and multi-configuration generators. Do not force `--config` during installation of a single-configuration build with no matching configuration export. CI should also keep `fail-fast: false` so one hosted runner cannot erase evidence from the other supported operating systems.

@@ -64,9 +64,25 @@ The resulting `ppc-lab-release-qualification-v1` report records PPC Lab/tool/pla
 
 Hosted CI is therefore a transport for this gate, not the definition of the gate. A hosted-runner outage or account-side Actions restriction can be distinguished from a PPC Lab release failure by running the exact same qualification command locally or on another provider.
 
+## Exact source archive certification (v3.9.3+)
+
+Working-tree qualification is necessary but does not prove that the ZIP published to users contains the same source or remains buildable after clean extraction. The final distribution gate is therefore:
+
+```bash
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+ppc-lab-release certify . \
+  --out build/PPC-Lab-v3.9.3-source.zip \
+  --workspace build/certification \
+  --json build/certification.json
+```
+
+`certify` creates the deterministic ZIP with the requested `SOURCE_DATE_EPOCH`, rejects unsafe/ambiguous members before extraction, clean-extracts the exact archive, verifies the embedded manifest against both the extracted bytes and the checked-in source manifest, then invokes `qualify` on that extracted source tree. The `ppc-lab-release-certification-v1` report records the exact archive SHA-256, size, member count, embedded/source manifest SHA-256 values, certification checks, and the nested privacy-minimal qualification report.
+
+The certification workspace and JSON report should live under an excluded build directory (or outside the source tree) so producing evidence does not invalidate the checked-in source manifest. The archive itself is excluded from source manifests by release policy.
+
 ## Release gate
 
-A public release should not be tagged until the qualification report is `ok: true` and the reproducible source archive verifies after extraction. For low-level debugging the older component commands remain useful, but they are no longer separate release policy:
+A public release should not be tagged until the working-tree qualification report is `ok: true` and the exact distribution archive has an `ok: true` certification report. For low-level debugging the older component commands remain useful, but they are no longer separate release policy:
 
 ```bash
 python3 scripts/check_repository_invariants.py
@@ -74,7 +90,7 @@ python3 scripts/check_repository_invariants.py
 ctest --test-dir build/release --output-on-failure
 ```
 
-For post-v3 maintenance releases, target SDK, install-contract, compatibility, replication, release-engineering, and release-qualification regressions remain release-critical.
+For post-v3 maintenance releases, target SDK, install-contract, compatibility, replication, release-engineering, release-qualification, and release-certification regressions remain release-critical.
 
 ## What this is not
 

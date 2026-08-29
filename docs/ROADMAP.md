@@ -106,3 +106,7 @@ v3.9 adds content-addressed offline replication and multi-site resilience only. 
 
 v3.9.2 adds portable release qualification only. It converts the existing manifest/build/test/install gates into one CI-provider-neutral command and machine-readable report after a real hosted-runner failure demonstrated that release evidence must be separable from CI transport availability. The standing PPC execution/runtime roadmap remains frozen and target-driven.
 
+## Post-roadmap LTS checkpoint: v3.9.3
+
+v3.9.3 adds exact source-archive certification only. It creates the reproducible distribution ZIP, validates and clean-extracts that archive, verifies the embedded manifest, then runs the v3.9.2 portable qualification gate against the extracted bytes. This closes the release-acceptance gap between a qualified working tree and the artifact users actually download without reopening PPC execution/runtime development.
+
