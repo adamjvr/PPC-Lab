@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-deployment-report-v1.schema.json",
+  "title": "PPC Lab deployment operation report",
+  "type": "object",
+  "required": ["schema", "operation", "ok"],
+  "properties": {
+    "schema": {"const": "ppc-lab-deployment-report-v1"},
+    "operation": {"enum": ["install", "verify", "uninstall"]},
+    "ok": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

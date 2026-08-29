@@ -207,3 +207,8 @@ ppc-lab-platform upgrade-check \
 ```
 
 See `docs/UPGRADING.md` before applying `migrate`.
+
+
+## LTS deployment
+
+Server operators should use [`DEPLOYMENT.md`](DEPLOYMENT.md) and `ppc-lab-deploy`; generated deployment assets are infrastructure only and must never embed private target binaries.

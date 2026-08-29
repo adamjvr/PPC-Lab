@@ -213,3 +213,8 @@ Campaign changes should be tested as composition behavior, not by mocking away e
 The standing feature roadmap is closed. New work must be justified by a concrete PPC target/deployment and include a minimal reproducible regression. Changes to persisted evidence/knowledge/control formats require an explicit `ppc-lab-platform` migration path, first-run backup behavior, upgrade documentation, and a migration regression. Stable schema meanings must not be changed in place.
 
 Before a major release, run the synthetic mature-platform acceptance described in `RELEASE_ACCEPTANCE.md` in addition to the ordinary unit/integration suite.
+
+
+## LTS deployment
+
+Server operators should use [`DEPLOYMENT.md`](DEPLOYMENT.md) and `ppc-lab-deploy`; generated deployment assets are infrastructure only and must never embed private target binaries.

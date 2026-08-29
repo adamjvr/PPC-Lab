@@ -18,8 +18,8 @@ with tempfile.TemporaryDirectory(prefix='ppclab-release-') as raw:
     td=Path(raw); manifest=td/'manifest.json'
     run('manifest',ROOT,'--out',manifest)
     doc=json.loads(manifest.read_text())
-    assert doc['schema']=='ppc-lab-release-manifest-v1' and doc['version']=='3.3.0'
-    assert doc['compatibility']['schema']=='ppc-lab-compatibility-snapshot-v1' and doc['compatibility']['platform_version']=='3.3.0'
+    assert doc['schema']=='ppc-lab-release-manifest-v1' and doc['version']=='3.4.0'
+    assert doc['compatibility']['schema']=='ppc-lab-compatibility-snapshot-v1' and doc['compatibility']['platform_version']=='3.4.0'
     assert doc['license']=='GPL-3.0-only' and doc['cpp_api']==1 and doc['cpp_abi']==1 and doc['target_profile_api']==1
     run('verify',ROOT,manifest)
 
@@ -29,8 +29,8 @@ with tempfile.TemporaryDirectory(prefix='ppclab-release-') as raw:
     with zipfile.ZipFile(a) as zf:
         assert 'RELEASE-MANIFEST.json' in zf.namelist()
         embedded=json.loads(zf.read('RELEASE-MANIFEST.json'))
-        assert embedded['version']=='3.3.0' and embedded['schema']=='ppc-lab-release-manifest-v1'
-        assert embedded['compatibility']['platform_version']=='3.3.0'
+        assert embedded['version']=='3.4.0' and embedded['schema']=='ppc-lab-release-manifest-v1'
+        assert embedded['compatibility']['platform_version']=='3.4.0'
         assert not any('/build/' in '/'+n or n.startswith('.git/') for n in zf.namelist())
         extract=td/'extract'; zf.extractall(extract)
     run('verify',extract,extract/'RELEASE-MANIFEST.json')

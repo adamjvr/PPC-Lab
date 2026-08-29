@@ -1,3 +1,14 @@
+## 3.4.0 — 2026-08-28 — LTS Deployment & Service Management
+
+- Add dependency-free `ppc-lab-deploy plan/install/verify/uninstall` for Linux/systemd research servers.
+- Generate hardened API and campaign-control systemd units plus a mode-0600 environment file.
+- Standardize state, evidence, knowledge, cache, log, configuration, and private target-input roots.
+- Add safe `--dest-root` staging so deployments can be built and verified without root or a running systemd instance.
+- Add deployment manifest/report schemas with SHA-256 and file-mode verification and symlink-substitution rejection.
+- Preserve research state and private target inputs on ordinary uninstall; destructive purge remains explicit.
+- Keep remote API binding conservative: loopback by default and documented bearer-token/TLS-or-SSH requirements for remote exposure.
+- Extend LTS install, capability, compatibility, invariant, documentation, and regression contracts for deployment support.
+
 ## 3.3.0 — 2026-08-28 — LTS Diagnostics & Supportability
 
 - Add installed `ppc-lab-support diagnose/bundle/verify` for target-neutral whole-install diagnostics and auditable support artifacts.

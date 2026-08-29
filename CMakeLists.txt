@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 3.3.0 LANGUAGES CXX)
+project(PPCLab VERSION 3.4.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -102,6 +102,7 @@ install(PROGRAMS scripts/ppc_lab_target.py DESTINATION ${CMAKE_INSTALL_BINDIR} R
 install(PROGRAMS scripts/ppc_lab_release.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-release)
 install(PROGRAMS scripts/ppc_lab_compat.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-compat)
 install(PROGRAMS scripts/ppc_lab_support.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-support)
+install(PROGRAMS scripts/ppc_lab_deploy.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-deploy)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -195,5 +196,6 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_release_engineering COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_release_engineering.py)
     add_test(NAME ppc_lab_compatibility_assurance COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_compatibility_assurance.py)
     add_test(NAME ppc_lab_supportability COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_supportability.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_deployment COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_deployment.py)
     set_tests_properties(ppc_lab_platform_acceptance PROPERTIES RUN_SERIAL TRUE TIMEOUT 180)
 endif()

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-deployment-v1.schema.json",
+  "title": "PPC Lab LTS deployment plan",
+  "type": "object",
+  "required": ["schema", "deployment_api", "ppc_lab_version", "platform", "files", "directories", "manifest_path", "policy"],
+  "properties": {
+    "schema": {"const": "ppc-lab-deployment-v1"},
+    "deployment_api": {"const": 1},
+    "ppc_lab_version": {"type": "string"},
+    "platform": {"const": "linux-systemd"},
+    "files": {"type": "array"},
+    "directories": {"type": "array"},
+    "manifest_path": {"type": "string"},
+    "policy": {"type": "object"}
+  },
+  "additionalProperties": true
+}

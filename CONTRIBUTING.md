@@ -92,3 +92,8 @@ PPC Lab 3.0 closes the standing feature roadmap. Please do not add speculative P
 ## Target profiles and release artifacts
 
 Use `ppc-lab-target init/validate/pack` for new target adapters. Keep private/proprietary target bytes outside public profiles unless redistribution rights are explicit. Before proposing release-engineering changes, run `tests/test_target_sdk.py` and `tests/test_release_engineering.py`; compatibility-number changes require an intentional documented contract decision.
+
+
+## LTS deployment
+
+Server operators should use [`DEPLOYMENT.md`](DEPLOYMENT.md) and `ppc-lab-deploy`; generated deployment assets are infrastructure only and must never embed private target binaries.

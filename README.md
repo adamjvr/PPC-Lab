@@ -12,6 +12,10 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.4.0 — LTS Deployment & Service Management
+
+PPC Lab 3.4 adds a dependency-free server deployment surface for the mature v3 LTS platform. `ppc-lab-deploy` can plan, stage, install, verify, and uninstall hardened Linux/systemd service assets for the research API and persistent campaign control plane. It standardizes server directories, verifies generated assets by hash and mode, never copies target binaries, preserves research state by default, and supports a harmless `--dest-root` staging mode for packaging/CI. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ## v3.3.0 — LTS Diagnostics & Supportability
 
 v3.3 is an operational-hardening release for the frozen v3 platform. `ppc-lab-support` collects target-neutral whole-install diagnostics and produces a narrowly constrained, redacted support ZIP for bug reports without copying target binaries, persisted databases, environment secrets, or arbitrary attachments.
@@ -438,6 +442,7 @@ PPC-Lab/
 | [`docs/FLEET.md`](docs/FLEET.md) | How do I distribute stable jobs across local/OpenSSH PPC Lab hosts? |
 | [`docs/EVIDENCE_STORE.md`](docs/EVIDENCE_STORE.md) | How do I index, query, deduplicate, and verify long-lived PPC Lab evidence? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | How do I stage, install, verify, and remove hardened Linux/systemd service assets? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |
 | [`docs/ELF32.md`](docs/ELF32.md) | What ELF32 PPC intake/relocation behavior is supported? |

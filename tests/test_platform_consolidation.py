@@ -43,7 +43,7 @@ with tempfile.TemporaryDirectory(prefix='ppclab-v3-platform-') as raw:
     p=platform('status','--core',CLI,'--tool-dir',ROOT/'scripts','--json')
     assert p.returncode==0,(p.stdout,p.stderr); status=json.loads(p.stdout)
     assert status['schema']=='ppc-lab-platform-status-v1' and status['ready'] is True
-    assert status['core']['version']=='3.3.0' and status['companions']['hypothesize']['available'] is True
+    assert status['core']['version']=='3.4.0' and status['companions']['hypothesize']['available'] is True
 
     p=platform('doctor','--core',CLI,'--tool-dir',ROOT/'scripts','--evidence',evidence,'--knowledge',knowledge,'--control',control,'--json')
     assert p.returncode==0,(p.stdout,p.stderr); doctor=json.loads(p.stdout)
