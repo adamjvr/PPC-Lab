@@ -34,7 +34,14 @@ def main() -> int:
             if line.startswith("CMAKE_BUILD_TYPE:STRING=") and line.split("=", 1)[1]:
                 config = line.split("=", 1)[1]
                 break
-        run(cmake, "--install", str(build), "--prefix", str(prefix), "--config", config)
+        multi_config = any(
+            line.startswith("CMAKE_CONFIGURATION_TYPES:") and line.split("=", 1)[1]
+            for line in cache.splitlines()
+        )
+        install_args = [cmake, "--install", str(build), "--prefix", str(prefix)]
+        if multi_config:
+            install_args.extend(["--config", config])
+        run(*install_args)
 
         exe_name = "ppc-lab.exe" if os.name == "nt" else "ppc-lab"
         exe = prefix / "bin" / exe_name
@@ -43,7 +50,7 @@ def main() -> int:
         version_header = prefix / "include" / "ppclab" / "Version.hpp"
         assert version_header.is_file(), version_header
         version_text = version_header.read_text(encoding="utf-8")
-        assert '#define PPCLAB_VERSION_STRING "3.9.0"' in version_text
+        assert '#define PPCLAB_VERSION_STRING "3.9.1"' in version_text
         assert '#define PPCLAB_CPP_API_VERSION 1' in version_text
         assert '#define PPCLAB_CPP_ABI_VERSION 1' in version_text
         worker = prefix / "bin" / "ppc-lab-worker"
@@ -178,7 +185,7 @@ def main() -> int:
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 3.9.0"
+        assert version.stdout.strip() == "PPC Lab 3.9.1"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout

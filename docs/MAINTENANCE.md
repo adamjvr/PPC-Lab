@@ -76,4 +76,7 @@ Treat auth stores and audit logs as operational state, not source artifacts. Rot
 Multi-site synchronization must preserve the `ppc-lab-replication-*-v1` contracts. Replication is content-addressed research metadata, not generic file synchronization: private target bytes, credentials, arbitrary logs/files, and active scheduler/control state must remain excluded. A reused site/generation with a different bundle identity is a hard conflict and must never be silently accepted.
 
 Use `ppc-lab-backup` for single-site disaster recovery and `ppc-lab-replicate` for cross-site convergence. Do not weaken either boundary by treating replication ZIPs as full server backups.
+## v3.9.1 CI/install-contract gate
+
+For patch releases, keep the installed CMake package usable from both single-configuration and multi-configuration generators. Do not force `--config` during installation of a single-configuration build with no matching configuration export. CI should also keep `fail-fast: false` so one hosted runner cannot erase evidence from the other supported operating systems.
 

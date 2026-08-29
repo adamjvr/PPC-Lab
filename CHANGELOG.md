@@ -1,3 +1,11 @@
+## 3.9.1 — 2026-08-28 — LTS CI & Install-Contract Hotfix
+
+- Fix `tests/test_install_contract.py` so single-configuration CMake generators install their `NOCONFIG` export correctly instead of forcing `--config Release` and dropping the imported target location metadata.
+- Make CI configure Linux/macOS as actual Release builds instead of relying on `--config Release`, which single-configuration generators ignore.
+- Set the OS matrix to `fail-fast: false` so a hosted-runner or platform-specific failure does not cancel diagnostic coverage on the other operating systems.
+- Bump the patch release to 3.9.1 while preserving every v3 public API, ABI, schema, persisted-format, target-binary privacy, and replication contract.
+- No PPC execution/runtime/loader functionality changed.
+
 ## 3.9.0 — 2026-08-28 — LTS Replication & Multi-Site Resilience
 
 - Add installed `ppc-lab-replicate init/export/verify/import/status` for dependency-free, transport-neutral multi-site synchronization.

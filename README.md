@@ -12,6 +12,10 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.9.1 — LTS CI & Install-Contract Hotfix
+
+PPC Lab 3.9.1 is a maintenance-only hotfix. It repairs the downstream CMake package test for single-configuration generators, ensures CI uses a real Release configuration on Linux/macOS, and disables matrix fail-fast so one runner failure cannot hide the other platform results. No PPC execution, loader, runtime, schema, persistence, replication, or API behavior changed.
+
 ## v3.9.0 — LTS Replication & Multi-Site Resilience
 
 PPC Lab 3.9 adds dependency-free, offline-safe replication for accumulated evidence and knowledge across independent research servers. `ppc-lab-replicate` exports content-addressed JSON bundles, imports them idempotently, tracks immutable site/generation receipts, detects divergent generation conflicts, and copies only redacted terminal control history. Private PPC target binaries and live queue/process state are never replicated. See [`docs/REPLICATION.md`](docs/REPLICATION.md).
