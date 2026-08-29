@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +57,28 @@ def check_spdx() -> None:
         fail("missing GPL-3.0-only SPDX header: " + ", ".join(sorted(missing)))
 
 
+
+
+def check_portable_paths() -> None:
+    """Reject source-tree paths that collide on case-insensitive filesystems."""
+    excluded_dirs = {
+        ".git", "build", "build-release", "build-asan", "build-debug",
+        "__pycache__", ".pytest_cache", ".mypy_cache", ".idea", ".vscode",
+    }
+    groups: dict[str, list[str]] = {}
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or path.is_symlink():
+            continue
+        rel = path.relative_to(ROOT)
+        if any(part in excluded_dirs for part in rel.parts):
+            continue
+        rel_text = rel.as_posix()
+        key = unicodedata.normalize("NFC", rel_text).casefold()
+        groups.setdefault(key, []).append(rel_text)
+    collisions = [sorted(set(paths)) for paths in groups.values() if len(set(paths)) > 1]
+    if collisions:
+        rendered = "; ".join(" <-> ".join(group) for group in sorted(collisions))
+        fail("case-fold path collision breaks macOS/Windows checkout portability: " + rendered)
 
 
 def check_version_sync() -> None:
@@ -159,10 +182,11 @@ def check_target_neutral_core() -> None:
 def main() -> int:
     check_license()
     check_spdx()
+    check_portable_paths()
     check_version_sync()
     check_lts_contract()
     check_target_neutral_core()
-    print("PASS: GPLv3/SPDX, version/LTS contract sync, and target-neutral core invariants")
+    print("PASS: GPLv3/SPDX, portable paths, version/LTS contract sync, and target-neutral core invariants")
     return 0
 
 

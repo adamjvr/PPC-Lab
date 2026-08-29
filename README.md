@@ -12,6 +12,16 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.9.4 — LTS Portable-Path Integrity Hotfix
+
+PPC Lab 3.9.4 fixes a source-tree portability defect discovered when the v3.9.3 archive was applied over an existing Linux checkout: historical case-colliding helper paths existed as both `Tools/*.command` and `tools/*.command`. The canonical wrappers remain under `Tools/`; the lowercase duplicates are removed. Repository invariants, release manifests, and source-archive certification now reject case-fold path collisions before a release can be accepted. No PPC execution, loader, runtime, persistence, replication, public C++ API/ABI, or schema semantics changed.
+
+When upgrading an existing checkout that still contains the historical lowercase aliases, remove those two tracked files before verification:
+
+```bash
+git rm -f tools/build.command tools/verify.command
+```
+
 ## v3.9.3 — LTS Exact Archive Certification
 
 PPC Lab 3.9.3 closes the last manual release-acceptance gap: `ppc-lab-release certify` creates the deterministic source ZIP, validates its archive envelope, clean-extracts the exact downloadable bytes, verifies the embedded manifest, and runs the same portable qualification gate against that extracted tree. The resulting `ppc-lab-release-certification-v1` report pins the exact archive SHA-256 and nests the target-neutral qualification evidence. No PPC execution, loader, runtime, persistence, replication, public C++ API/ABI, or existing schema semantics changed.

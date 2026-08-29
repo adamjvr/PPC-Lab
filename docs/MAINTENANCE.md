@@ -92,3 +92,9 @@ Do not weaken the archive envelope to accept path traversal, duplicate names, ba
 
 For patch releases, keep the installed CMake package usable from both single-configuration and multi-configuration generators. Do not force `--config` during installation of a single-configuration build with no matching configuration export. CI should also keep `fail-fast: false` so one hosted runner cannot erase evidence from the other supported operating systems.
 
+## v3.9.4 portable-path integrity gate
+
+The tracked source tree and every certified source ZIP must be representable without aliasing on case-insensitive filesystems. Do not add paths that differ only by case or Unicode canonical-equivalent spelling. `scripts/check_repository_invariants.py`, release-manifest verification, and archive inspection enforce this boundary.
+
+The convenience wrappers are canonical under `Tools/`; `tools/` remains the C++ source directory. Existing Linux checkouts created before v3.9.4 should remove the obsolete `tools/build.command` and `tools/verify.command` tracked aliases once with `git rm` before running release verification.
+

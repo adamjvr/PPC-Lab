@@ -16,6 +16,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import unicodedata
 import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any, Sequence
@@ -77,6 +78,26 @@ def compatibility_snapshot(root: Path) -> dict[str, Any]:
     return module.build_snapshot(root)
 
 
+def portable_path_key(path: str) -> str:
+    """Return a conservative case-insensitive/canonical-equivalence path key."""
+    return unicodedata.normalize("NFC", path).casefold()
+
+
+def casefold_collisions(paths: Sequence[str]) -> list[list[str]]:
+    """Return groups of source paths that collide on case-insensitive filesystems."""
+    groups: dict[str, list[str]] = {}
+    for path in paths:
+        groups.setdefault(portable_path_key(path), []).append(path)
+    return [sorted(group) for group in groups.values() if len(set(group)) > 1]
+
+
+def _collision_errors(paths: Sequence[str], *, label: str) -> list[str]:
+    return [
+        f"{label} case-fold path collision: " + " <-> ".join(group)
+        for group in casefold_collisions(paths)
+    ]
+
+
 def source_files(root: Path, extra_exclude: set[Path] | None = None) -> list[Path]:
     root = root.resolve()
     excluded = {p.resolve() for p in (extra_exclude or set())}
@@ -103,6 +124,10 @@ def mode_for(path: Path) -> str:
 
 def build_manifest(root: Path, *, extra_exclude: set[Path] | None = None) -> dict[str, Any]:
     files = source_files(root, extra_exclude)
+    rels = [p.relative_to(root.resolve()).as_posix() for p in files]
+    collisions = _collision_errors(rels, label="source")
+    if collisions:
+        raise ReleaseError("; ".join(collisions))
     return {
         "schema": MANIFEST_SCHEMA,
         "release_api": API_VERSION,
@@ -141,6 +166,8 @@ def verify(root: Path, manifest: dict[str, Any], manifest_path: Path | None = No
     listed = {x.get("path"): x for x in manifest.get("files", []) if isinstance(x, dict)}
     exclude = {manifest_path} if manifest_path else set()
     actual = {p.relative_to(root).as_posix(): p for p in source_files(root, exclude)}
+    errors.extend(_collision_errors([str(x) for x in listed if isinstance(x, str)], label="manifest"))
+    errors.extend(_collision_errors(list(actual), label="source"))
     for rel, p in actual.items():
         item = listed.get(rel)
         if item is None:
@@ -192,6 +219,7 @@ def inspect_source_archive(path: Path) -> dict[str, Any]:
     total_uncompressed = 0
     manifest_count = 0
     seen: set[str] = set()
+    portable_seen: dict[str, str] = {}
     try:
         with zipfile.ZipFile(path, "r") as zf:
             for info in zf.infolist():
@@ -201,6 +229,12 @@ def inspect_source_archive(path: Path) -> dict[str, Any]:
                 if name in seen:
                     errors.append(f"duplicate archive member: {name}")
                 seen.add(name)
+                portable_key = portable_path_key(name)
+                prior = portable_seen.get(portable_key)
+                if prior is not None and prior != name:
+                    errors.append(f"archive case-fold path collision: {prior} <-> {name}")
+                else:
+                    portable_seen[portable_key] = name
                 if not name or name.endswith("/"):
                     errors.append(f"archive contains non-file member: {name!r}")
                     continue

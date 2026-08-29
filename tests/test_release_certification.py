@@ -35,7 +35,7 @@ try:
         workspace = td / "workspace"
         doc = mod.certify_release(ROOT, archive, workspace, epoch=946684800)
         assert doc["schema"] == "ppc-lab-release-certification-v1"
-        assert doc["release_api"] == 1 and doc["platform_version"] == "3.9.3"
+        assert doc["release_api"] == 1 and doc["platform_version"] == "3.9.4"
         assert doc["ok"] is True
         assert archive.is_file() and doc["archive"]["sha256"] == mod.sha256_file(archive)
         assert doc["archive"]["manifest_sha256"] == doc["source"]["manifest_sha256"]
@@ -45,6 +45,17 @@ try:
         extracted = workspace / "source"
         assert (extracted / "RELEASE-MANIFEST.json").is_file()
         assert mod.verify(extracted, json.loads((extracted / "RELEASE-MANIFEST.json").read_text()), extracted / "RELEASE-MANIFEST.json") == []
+
+        assert mod.casefold_collisions(["Tools/build.command", "tools/build.command"]) == [["Tools/build.command", "tools/build.command"]]
+
+        casefold_bad = td / "casefold-bad.zip"
+        with zipfile.ZipFile(casefold_bad, "w") as zf:
+            zf.writestr("Tools/build.command", b"one")
+            zf.writestr("tools/build.command", b"two")
+            zf.writestr("RELEASE-MANIFEST.json", b"{}")
+        casefold_inspected = mod.inspect_source_archive(casefold_bad)
+        assert casefold_inspected["ok"] is False
+        assert any("case-fold path collision" in error for error in casefold_inspected["errors"])
 
         bad = td / "bad.zip"
         with zipfile.ZipFile(bad, "w") as zf:

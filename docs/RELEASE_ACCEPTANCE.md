@@ -35,3 +35,8 @@ ppc-lab-release certify . \
 ```
 
 The command creates the deterministic source-only ZIP, rejects unsafe/ambiguous archive members, extracts into a clean workspace, verifies the embedded manifest, runs the complete portable qualification gate against the extracted copy, and records the SHA-256 of the exact archive. A public archive is not accepted unless the certification report says `ok: true`.
+
+## Portable-path acceptance (v3.9.4+)
+
+A release fails acceptance if the source tree, manifest, or source ZIP contains two paths that collide after Unicode NFC normalization and case-folding. This is required so the exact certified source artifact has one unambiguous representation on Linux, macOS, and Windows rather than relying on filesystem-specific case behavior.
+

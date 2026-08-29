@@ -1,3 +1,11 @@
+## 3.9.4 — 2026-08-28 — LTS Portable-Path Integrity Hotfix
+
+- Remove the historical lowercase `tools/build.command` and `tools/verify.command` aliases; `Tools/build.command` and `Tools/verify.command` are the single canonical convenience wrappers.
+- Add repository and release-tool checks that reject case-fold/canonical-equivalence path collisions which cannot be represented safely on normal case-insensitive macOS/Windows filesystems.
+- Reject case-fold collisions in source manifests and source ZIP envelopes before extraction/certification.
+- Add regression coverage for case-colliding archive members and keep exact-archive certification release-critical.
+- Preserve all existing v3 C++ API/ABI, target-profile, persistence, security, replication, loader/runtime, and PPC execution behavior; this is a release-integrity/checkout-portability hotfix only.
+
 ## 3.9.3 — 2026-08-28 — LTS Exact Archive Certification
 
 - Extend installed `ppc-lab-release` with `certify`, which creates the exact reproducible source ZIP, validates its member envelope, clean-extracts it, verifies the embedded manifest, and runs the portable release qualification gate against the extracted bytes.

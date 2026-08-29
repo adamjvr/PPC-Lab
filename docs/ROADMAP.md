@@ -110,3 +110,7 @@ v3.9.2 adds portable release qualification only. It converts the existing manife
 
 v3.9.3 adds exact source-archive certification only. It creates the reproducible distribution ZIP, validates and clean-extracts that archive, verifies the embedded manifest, then runs the v3.9.2 portable qualification gate against the extracted bytes. This closes the release-acceptance gap between a qualified working tree and the artifact users actually download without reopening PPC execution/runtime development.
 
+## Post-roadmap LTS checkpoint: v3.9.4
+
+v3.9.4 repairs source-tree checkout portability only. Historical `Tools/` versus `tools/` helper aliases created case-fold path collisions that can break or silently alias on case-insensitive filesystems and caused v3.9.3 qualification to fail when its archive was applied over an existing Linux checkout. The canonical wrappers now live only under `Tools/`, and repository/release certification rejects future case-fold collisions. The standing PPC execution/runtime roadmap remains frozen and target-driven.
+

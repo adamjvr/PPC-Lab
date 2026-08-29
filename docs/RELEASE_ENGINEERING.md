@@ -64,6 +64,10 @@ The resulting `ppc-lab-release-qualification-v1` report records PPC Lab/tool/pla
 
 Hosted CI is therefore a transport for this gate, not the definition of the gate. A hosted-runner outage or account-side Actions restriction can be distinguished from a PPC Lab release failure by running the exact same qualification command locally or on another provider.
 
+## Portable source paths (v3.9.4+)
+
+Release source paths must remain unique after Unicode NFC normalization plus case-folding. This prevents Git trees and source archives from containing aliases such as `Tools/build.command` and `tools/build.command`, which are distinct on Linux but collide on common macOS/Windows filesystems. Repository invariants, manifest generation/verification, and archive inspection all enforce this rule.
+
 ## Exact source archive certification (v3.9.3+)
 
 Working-tree qualification is necessary but does not prove that the ZIP published to users contains the same source or remains buildable after clean extraction. The final distribution gate is therefore:
