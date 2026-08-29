@@ -1,3 +1,14 @@
+## 3.5.0 — 2026-08-28 — LTS Backup, Restore & Disaster Recovery
+
+- Add installed `ppc-lab-backup create/verify/inspect/restore` for dependency-free disaster recovery of persistent PPC Lab research state.
+- Snapshot evidence and knowledge SQLite databases with SQLite's online backup API and verify `PRAGMA integrity_check` before packaging.
+- Copy only immutable evidence JSON objects referenced by the consistent database snapshot; caches, logs, API secrets, and private target-input roots are never archived.
+- Snapshot persistent control-plane JSON/NDJSON state while excluding transient locks, telemetry, service-control markers, and arbitrary/binary files; active control planes are rejected by default.
+- Add content-hashed backup manifests, strict ZIP member/path validation, database/control integrity verification, and restore-time overwrite protection.
+- Add `--force` restore with automatic pre-restore safety preservation and optional public deployment-metadata recovery without reading the secret environment file.
+- Add stable `ppc-lab-backup-v1` and `ppc-lab-backup-report-v1` LTS contracts, installed tooling, capability discovery, compatibility metadata, documentation, and end-to-end recovery regression coverage.
+- Preserve the post-v3 feature freeze: this release adds operational durability, not another PPC execution/runtime subsystem.
+
 ## 3.4.0 — 2026-08-28 — LTS Deployment & Service Management
 
 - Add dependency-free `ppc-lab-deploy plan/install/verify/uninstall` for Linux/systemd research servers.

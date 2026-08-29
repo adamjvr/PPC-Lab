@@ -51,3 +51,9 @@ Before a target-driven v3.x patch is released, run `ppc-lab-compat check compat/
 ## v3.3 support bundle gate
 
 For target-driven defects that cannot be reproduced immediately, collect `ppc-lab-support diagnose` first. If a shareable artifact is needed, use `ppc-lab-support bundle` and run `ppc-lab-support verify` before attaching it to an issue. Do not replace this with a generic tar/zip of server state: support bundles are deliberately constrained so private target binaries and persisted research databases are not swept into bug reports.
+
+## LTS disaster-recovery maintenance
+
+Persistent-state format changes must preserve the v3.5 backup boundary. Before changing evidence, knowledge, or control persistence, maintainers must keep `ppc-lab-backup create/verify/restore` and `ppc-lab-compat state` interoperable or explicitly treat the change as a major-version compatibility event.
+
+Do not broaden the backup format into a generic server archive. Private target inputs, API-token environment files, caches, arbitrary binary attachments, and general logs remain outside `ppc-lab-backup-v1`.

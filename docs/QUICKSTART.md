@@ -212,3 +212,14 @@ See `docs/UPGRADING.md` before applying `migrate`.
 ## LTS deployment
 
 Server operators should use [`DEPLOYMENT.md`](DEPLOYMENT.md) and `ppc-lab-deploy`; generated deployment assets are infrastructure only and must never embed private target binaries.
+
+### Back up server research state
+
+On a deployed research server, periodically create a verified state backup. Drain/stop the control plane first for the strongest control-state consistency:
+
+```bash
+ppc-lab-backup create --state-root /var/lib/ppc-lab --out ppc-lab-state.zip
+ppc-lab-backup verify ppc-lab-state.zip
+```
+
+This backs up evidence, knowledge, and control state only. The private target corpus must be protected separately. See [`BACKUP_RESTORE.md`](BACKUP_RESTORE.md).

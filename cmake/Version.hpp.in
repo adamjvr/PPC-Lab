@@ -11,6 +11,7 @@
 #define PPCLAB_TARGET_PROFILE_API_VERSION 1
 #define PPCLAB_RELEASE_API_VERSION 1
 #define PPCLAB_COMPATIBILITY_API_VERSION 1
+#define PPCLAB_BACKUP_API_VERSION 1
 
 namespace ppclab {
 inline constexpr const char* kLibraryVersion = PPCLAB_VERSION_STRING;
@@ -19,4 +20,5 @@ inline constexpr unsigned kCppAbiVersion = PPCLAB_CPP_ABI_VERSION;
 inline constexpr unsigned kTargetProfileApiVersion = PPCLAB_TARGET_PROFILE_API_VERSION;
 inline constexpr unsigned kReleaseApiVersion = PPCLAB_RELEASE_API_VERSION;
 inline constexpr unsigned kCompatibilityApiVersion = PPCLAB_COMPATIBILITY_API_VERSION;
+inline constexpr unsigned kBackupApiVersion = PPCLAB_BACKUP_API_VERSION;
 }

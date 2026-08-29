@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-backup-v1.schema.json",
+  "title": "PPC Lab LTS disaster-recovery backup manifest",
+  "type": "object",
+  "required": ["schema", "backup_api", "ppc_lab_version", "components", "files", "policy"],
+  "properties": {
+    "schema": {"const": "ppc-lab-backup-v1"},
+    "backup_api": {"const": 1},
+    "ppc_lab_version": {"type": "string"},
+    "components": {"type": "array", "items": {"enum": ["evidence", "knowledge", "control"]}, "uniqueItems": true},
+    "files": {"type": "array"},
+    "policy": {
+      "type": "object",
+      "required": ["target_binaries_copied", "api_secrets_copied"],
+      "properties": {
+        "target_binaries_copied": {"const": false},
+        "api_secrets_copied": {"const": false}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

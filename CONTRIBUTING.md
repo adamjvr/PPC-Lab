@@ -97,3 +97,5 @@ Use `ppc-lab-target init/validate/pack` for new target adapters. Keep private/pr
 ## LTS deployment
 
 Server operators should use [`DEPLOYMENT.md`](DEPLOYMENT.md) and `ppc-lab-deploy`; generated deployment assets are infrastructure only and must never embed private target binaries.
+
+Disaster-recovery changes must preserve the `ppc-lab-backup-v1` rule: backups may contain PPC Lab evidence/knowledge/control state and public deployment metadata, but never the private target root, API-token environment files, caches, or arbitrary binary attachments.

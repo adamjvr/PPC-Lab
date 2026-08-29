@@ -12,6 +12,16 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.5.0 — LTS Backup, Restore & Disaster Recovery
+
+PPC Lab 3.5 adds a target-safe disaster-recovery surface for the mature v3 LTS deployment. `ppc-lab-backup` creates hash-verified backups of evidence, knowledge, and control-plane state using live-safe SQLite snapshots while deliberately excluding private target inputs, caches, secrets, transient service files, and arbitrary binary files. Restore refuses to overwrite existing state unless explicitly forced, and forced restore preserves the previous state under a pre-restore safety directory. See [`docs/BACKUP_RESTORE.md`](docs/BACKUP_RESTORE.md).
+
+```bash
+ppc-lab-backup create --state-root /var/lib/ppc-lab --deployment /etc/ppc-lab/deployment.json --out ppc-lab-state.zip
+ppc-lab-backup verify ppc-lab-state.zip
+ppc-lab-backup restore ppc-lab-state.zip --state-root /var/lib/ppc-lab
+```
+
 ## v3.4.0 — LTS Deployment & Service Management
 
 PPC Lab 3.4 adds a dependency-free server deployment surface for the mature v3 LTS platform. `ppc-lab-deploy` can plan, stage, install, verify, and uninstall hardened Linux/systemd service assets for the research API and persistent campaign control plane. It standardizes server directories, verifies generated assets by hash and mode, never copies target binaries, preserves research state by default, and supports a harmless `--dest-root` staging mode for packaging/CI. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).

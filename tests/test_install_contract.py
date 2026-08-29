@@ -43,7 +43,7 @@ def main() -> int:
         version_header = prefix / "include" / "ppclab" / "Version.hpp"
         assert version_header.is_file(), version_header
         version_text = version_header.read_text(encoding="utf-8")
-        assert '#define PPCLAB_VERSION_STRING "3.4.0"' in version_text
+        assert '#define PPCLAB_VERSION_STRING "3.5.0"' in version_text
         assert '#define PPCLAB_CPP_API_VERSION 1' in version_text
         assert '#define PPCLAB_CPP_ABI_VERSION 1' in version_text
         worker = prefix / "bin" / "ppc-lab-worker"
@@ -86,6 +86,8 @@ def main() -> int:
         assert support_tool.is_file(), support_tool
         deploy_tool = prefix / "bin" / "ppc-lab-deploy"
         assert deploy_tool.is_file(), deploy_tool
+        backup_tool = prefix / "bin" / "ppc-lab-backup"
+        assert backup_tool.is_file(), backup_tool
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -144,12 +146,14 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-support-bundle-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-deployment-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-deployment-report-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-backup-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-backup-report-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/compat/baselines/v3.1.0.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 3.4.0"
+        assert version.stdout.strip() == "PPC Lab 3.5.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -189,6 +193,8 @@ def main() -> int:
         assert '"support_bundle": "ppc-lab-support-bundle-v1"' in caps.stdout
         assert '"deployment": "ppc-lab-deployment-v1"' in caps.stdout
         assert '"deployment_report": "ppc-lab-deployment-report-v1"' in caps.stdout
+        assert '"backup": "ppc-lab-backup-v1"' in caps.stdout
+        assert '"backup_report": "ppc-lab-backup-report-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()

@@ -72,3 +72,14 @@ sudo ppc-lab-deploy uninstall /etc/ppc-lab/deployment.json --purge-state
 ```
 
 Back up evidence, knowledge, control state, and private target inputs before using `--purge-state`.
+
+## Disaster recovery
+
+Before destructive deployment changes or `--purge-state`, create and verify a PPC Lab state backup. See [`BACKUP_RESTORE.md`](BACKUP_RESTORE.md).
+
+```bash
+ppc-lab-backup create --state-root /var/lib/ppc-lab --out /backup/ppc-lab-state.zip
+ppc-lab-backup verify /backup/ppc-lab-state.zip
+```
+
+The deployment's private target-input root is intentionally separate from this backup and must be protected independently.

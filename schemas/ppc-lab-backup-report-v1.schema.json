@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-backup-report-v1.schema.json",
+  "title": "PPC Lab LTS backup operation report",
+  "type": "object",
+  "required": ["schema", "operation", "ok"],
+  "properties": {
+    "schema": {"const": "ppc-lab-backup-report-v1"},
+    "operation": {"enum": ["create", "verify", "inspect", "restore"]},
+    "ok": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

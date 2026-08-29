@@ -350,3 +350,49 @@ ppc-lab-platform acceptance
 ```
 
 `upgrade-check` returns exit `2` for incompatible persisted state. `migrate` is deliberately explicit (`--yes`) and creates first-run pre-v3 backups. `acceptance` uses only a generated synthetic PPC ELF fixture.
+
+## `ppc-lab-backup` — LTS disaster recovery
+
+Create a persistent-state backup:
+
+```bash
+ppc-lab-backup create \
+  --state-root /var/lib/ppc-lab \
+  --deployment /etc/ppc-lab/deployment.json \
+  --out ppc-lab-state.zip
+```
+
+Options:
+
+- `--root PATH` — PPC Lab source root used to record the platform version when running from a source tree.
+- `--state-root PATH` — persistent state root containing `evidence/`, `knowledge/`, and `control/`.
+- `--deployment PATH` — optionally include the public `ppc-lab-deployment-v1` manifest. The secret environment file is not read.
+- `--allow-live-control` — allow an emergency filesystem snapshot while the control supervisor is active. Recovery-grade backups should normally drain/stop the control plane instead.
+- `--out PATH` — output ZIP.
+- `--json` — machine-readable `ppc-lab-backup-report-v1` output.
+
+Verify or inspect:
+
+```bash
+ppc-lab-backup verify ppc-lab-state.zip --json
+ppc-lab-backup inspect ppc-lab-state.zip --json
+```
+
+Restore into an empty state root:
+
+```bash
+ppc-lab-backup restore ppc-lab-state.zip \
+  --state-root /var/lib/ppc-lab
+```
+
+Restore deliberately over existing components:
+
+```bash
+ppc-lab-backup restore ppc-lab-state.zip \
+  --state-root /var/lib/ppc-lab \
+  --force
+```
+
+`--force` preserves the replaced component directories beneath a generated `.pre-restore-*` safety directory. `--deployment-out PATH` can separately recover the public deployment manifest for review.
+
+Exit codes follow the usual PPC Lab convention: `0` success/verified, `1` verification failure, `2` invocation/input/restore-safety error.
