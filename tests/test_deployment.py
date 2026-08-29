@@ -12,7 +12,7 @@ def main()->int:
     with tempfile.TemporaryDirectory(prefix='ppclab-deploy-') as td:
         stage=Path(td)/'root'
         plan=json.loads(run('plan','--service','both','--json').stdout)
-        assert plan['schema']=='ppc-lab-deployment-v1' and plan['ppc_lab_version']=='3.9.1'
+        assert plan['schema']=='ppc-lab-deployment-v1' and plan['ppc_lab_version']=='3.9.2'
         assert plan['policy']['target_binaries_copied'] is False
         assert {f['path'] for f in plan['files']}=={'/etc/ppc-lab/ppc-lab.env','/etc/systemd/system/ppc-lab-api.service','/etc/systemd/system/ppc-lab-control.service'}
         report=json.loads(run('install','--service','both','--dest-root',str(stage),'--json').stdout); assert report['ok']

@@ -1,3 +1,11 @@
+## 3.9.2 — 2026-08-28 — LTS Portable Release Qualification
+
+- Extend installed `ppc-lab-release` with a dependency-free `qualify` gate that verifies the checked-in release manifest, configures a real Release build, builds it, and runs the complete CTest suite.
+- Require discovery of the repository-invariant, install-contract, CLI selftest, release-engineering, release-qualification, compatibility, and replication tests before a release can qualify.
+- Add `ppc-lab-release-qualification-v1` machine-readable evidence with redacted source/build roots, tool/platform metadata, output hashes, and bounded failure tails while omitting usernames, hostnames, credentials, and target bytes.
+- Make the GitHub workflow invoke the same qualification command used locally so hosted CI, self-hosted CI, and manual release validation share one gate.
+- Preserve all existing v3 C++ API/ABI, target-profile, release, compatibility, persistence, security, replication, and target-binary privacy contracts; no PPC execution/runtime behavior changed.
+
 ## 3.9.1 — 2026-08-28 — LTS CI & Install-Contract Hotfix
 
 - Fix `tests/test_install_contract.py` so single-configuration CMake generators install their `NOCONFIG` export correctly instead of forcing `--config Release` and dropping the imported target location metadata.

@@ -102,4 +102,7 @@ v3.7 adds observability and capacity planning only. It measures the mature serve
 ## Post-roadmap LTS checkpoint: v3.9
 
 v3.9 adds content-addressed offline replication and multi-site resilience only. Evidence and knowledge can converge across independent research servers while active control queues remain site-local. The standing PPC execution/runtime roadmap remains frozen and target-driven.
+## Post-roadmap LTS checkpoint: v3.9.2
+
+v3.9.2 adds portable release qualification only. It converts the existing manifest/build/test/install gates into one CI-provider-neutral command and machine-readable report after a real hosted-runner failure demonstrated that release evidence must be separable from CI transport availability. The standing PPC execution/runtime roadmap remains frozen and target-driven.
 

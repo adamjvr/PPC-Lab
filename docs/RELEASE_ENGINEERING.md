@@ -47,9 +47,26 @@ ppc-lab-release verify ./PPC-Lab-v3.1.0-source \
   ./PPC-Lab-v3.1.0-source/RELEASE-MANIFEST.json
 ```
 
+## Portable release qualification (v3.9.2+)
+
+The authoritative post-v3 release gate is now available through the same installed release tool on Linux, macOS, Windows, self-hosted runners, and ordinary developer machines:
+
+```bash
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+ppc-lab-release qualify . \
+  --build-dir build/qualification \
+  --json build/qualification.json
+```
+
+`qualify` first verifies the checked-in `RELEASE-MANIFEST.json`, then configures with `CMAKE_BUILD_TYPE=Release` and Unicorn disabled by default, confirms that the release-critical tests are registered, builds with `--config Release`, and runs the complete CTest suite with failure output enabled. The default deliberately exercises the dependency-free builtin PPC backend so release qualification does not depend on optional Unicorn development packages. Use `--unicorn on` only as an additional environment-specific gate.
+
+The resulting `ppc-lab-release-qualification-v1` report records PPC Lab/tool/platform versions, the manifest SHA-256, required-test discovery, command exit status, redacted command lines, and SHA-256 hashes of command output. Failure tails are bounded. Source/build roots are replaced by `$ROOT`/`$BUILD`; usernames, hostnames, environment variables, credentials, and PPC target bytes are not collected.
+
+Hosted CI is therefore a transport for this gate, not the definition of the gate. A hosted-runner outage or account-side Actions restriction can be distinguished from a PPC Lab release failure by running the exact same qualification command locally or on another provider.
+
 ## Release gate
 
-A public release should not be tagged until these pass:
+A public release should not be tagged until the qualification report is `ok: true` and the reproducible source archive verifies after extraction. For low-level debugging the older component commands remain useful, but they are no longer separate release policy:
 
 ```bash
 python3 scripts/check_repository_invariants.py
@@ -57,7 +74,7 @@ python3 scripts/check_repository_invariants.py
 ctest --test-dir build/release --output-on-failure
 ```
 
-For post-v3 maintenance releases, the target SDK and release-engineering tests are release-critical even when long-running server/fleet regressions are split into separate CI jobs.
+For post-v3 maintenance releases, target SDK, install-contract, compatibility, replication, release-engineering, and release-qualification regressions remain release-critical.
 
 ## What this is not
 

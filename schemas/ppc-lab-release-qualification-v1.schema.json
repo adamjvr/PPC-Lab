@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-release-qualification-v1.schema.json",
+  "title": "PPC Lab release qualification report v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "release_api",
+    "platform_version",
+    "ok",
+    "source",
+    "environment",
+    "configuration",
+    "required_tests",
+    "checks"
+  ],
+  "properties": {
+    "schema": {"const": "ppc-lab-release-qualification-v1"},
+    "release_api": {"const": 1},
+    "platform_version": {"type": "string"},
+    "ok": {"type": "boolean"},
+    "source": {
+      "type": "object",
+      "required": ["manifest", "license"],
+      "properties": {
+        "manifest": {"const": "RELEASE-MANIFEST.json"},
+        "manifest_sha256": {"type": ["string", "null"]},
+        "license": {"const": "GPL-3.0-only"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["system", "machine", "python", "cmake", "ctest"]
+    },
+    "configuration": {
+      "type": "object",
+      "required": ["config", "unicorn", "build_dir"],
+      "properties": {
+        "config": {"type": "string"},
+        "unicorn": {"type": "boolean"},
+        "build_dir": {"type": "string"}
+      }
+    },
+    "required_tests": {"type": "array", "items": {"type": "string"}},
+    "checks": {"type": "array", "items": {"type": "object"}}
+  }
+}

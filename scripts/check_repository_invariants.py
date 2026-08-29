@@ -100,6 +100,7 @@ def check_lts_contract() -> None:
         "ppc-lab-target-profile-v1.schema.json",
         "ppc-lab-target-profile-package-v1.schema.json",
         "ppc-lab-release-manifest-v1.schema.json",
+        "ppc-lab-release-qualification-v1.schema.json",
         "ppc-lab-compatibility-snapshot-v1.schema.json",
         "ppc-lab-support-report-v1.schema.json",
         "ppc-lab-support-bundle-v1.schema.json",

@@ -12,6 +12,17 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.9.2 — LTS Portable Release Qualification
+
+PPC Lab 3.9.2 adds a CI-provider-neutral release gate to the existing `ppc-lab-release` tool. `ppc-lab-release qualify` verifies the checked-in source manifest, configures a real Release build, confirms that release-critical tests are registered, builds the tree, runs the complete CTest suite, and emits a target-neutral `ppc-lab-release-qualification-v1` JSON report. Source/build paths are redacted in the report, private PPC inputs are never opened or copied, and no hostname or username is recorded. No PPC execution, loader, runtime, persistence, replication, public C++ API/ABI, or existing schema behavior changed.
+
+```bash
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+ppc-lab-release qualify . --build-dir build/qualification --json build/qualification.json
+```
+
+See [`docs/RELEASE_ENGINEERING.md`](docs/RELEASE_ENGINEERING.md).
+
 ## v3.9.1 — LTS CI & Install-Contract Hotfix
 
 PPC Lab 3.9.1 is a maintenance-only hotfix. It repairs the downstream CMake package test for single-configuration generators, ensures CI uses a real Release configuration on Linux/macOS, and disables matrix fail-fast so one runner failure cannot hide the other platform results. No PPC execution, loader, runtime, schema, persistence, replication, or API behavior changed.
