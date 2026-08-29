@@ -410,3 +410,17 @@ ppc-lab-observe capacity STORE [--since-hours H] [--target-clear-hours H] [--jso
 ```
 
 `check` exits `1` only for a critical policy result; warnings remain exit `0` so monitoring systems can distinguish degraded capacity from a hard health failure. Invalid stores/policies/tool responses exit `2`. See [`OBSERVABILITY.md`](OBSERVABILITY.md).
+
+## `ppc-lab-security` — LTS access control and audit integrity
+
+```bash
+ppc-lab-security init AUTH.json
+ppc-lab-security issue AUTH.json --role viewer|runner|researcher|admin [--scope SCOPE] [--label NAME] [--json]
+ppc-lab-security list AUTH.json [--json]
+ppc-lab-security verify AUTH.json TOKEN [--require SCOPE] [--json]
+ppc-lab-security rotate AUTH.json TOKEN_ID [--json]
+ppc-lab-security revoke AUTH.json TOKEN_ID [--json]
+ppc-lab-security audit-verify AUDIT.jsonl [--json]
+```
+
+See [`SECURITY.md`](SECURITY.md) for scope and deployment semantics.

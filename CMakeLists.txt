@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 3.7.0 LANGUAGES CXX)
+project(PPCLab VERSION 3.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -106,6 +106,7 @@ install(PROGRAMS scripts/ppc_lab_deploy.py DESTINATION ${CMAKE_INSTALL_BINDIR} R
 install(PROGRAMS scripts/ppc_lab_backup.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-backup)
 install(PROGRAMS scripts/ppc_lab_upgrade.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-upgrade)
 install(PROGRAMS scripts/ppc_lab_observe.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-observe)
+install(PROGRAMS scripts/ppc_lab_security.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-security)
 install(DIRECTORY channels/ DESTINATION ${CMAKE_INSTALL_DATADIR}/ppc-lab/channels)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
@@ -204,5 +205,6 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_backup_restore COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_backup_restore.py)
     add_test(NAME ppc_lab_upgrade_rollback COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_upgrade_rollback.py)
     add_test(NAME ppc_lab_observability COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_observability.py)
+    add_test(NAME ppc_lab_security_access COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_security_access.py $<TARGET_FILE:ppc_lab_cli>)
     set_tests_properties(ppc_lab_platform_acceptance PROPERTIES RUN_SERIAL TRUE TIMEOUT 180)
 endif()

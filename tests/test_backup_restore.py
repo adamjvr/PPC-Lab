@@ -38,7 +38,7 @@ def main():
         plan=json.loads(run(DEPLOY,'plan','--json').stdout); deployment.write_text(json.dumps(plan)+'\n')
         archive=t/'backup.zip'
         created=json.loads(run(BACKUP,'create','--root',ROOT,'--state-root',state,'--deployment',deployment,'--out',archive,'--json').stdout)
-        assert created['ok'] and created['manifest']['ppc_lab_version']=='3.7.0'
+        assert created['ok'] and created['manifest']['ppc_lab_version']=='3.8.0'
         assert created['manifest']['policy']['target_binaries_copied'] is False
         with zipfile.ZipFile(archive) as z:
             names=set(z.namelist()); blob=b''.join(z.read(n) for n in names)

@@ -87,11 +87,12 @@ def check_lts_contract() -> None:
         "PPCLAB_BACKUP_API_VERSION": "1",
         "PPCLAB_UPGRADE_API_VERSION": "1",
         "PPCLAB_OBSERVABILITY_API_VERSION": "1",
+        "PPCLAB_SECURITY_API_VERSION": "1",
     }
     for macro, value in required.items():
         if f"#define {macro} {value}" not in version_template:
             fail(f"public compatibility contract missing {macro}={value}")
-    for tool in ("ppc_lab_target.py", "ppc_lab_release.py", "ppc_lab_compat.py", "ppc_lab_support.py", "ppc_lab_deploy.py", "ppc_lab_backup.py", "ppc_lab_upgrade.py", "ppc_lab_observe.py"):
+    for tool in ("ppc_lab_target.py", "ppc_lab_release.py", "ppc_lab_compat.py", "ppc_lab_support.py", "ppc_lab_deploy.py", "ppc_lab_backup.py", "ppc_lab_upgrade.py", "ppc_lab_observe.py", "ppc_lab_security.py"):
         if f"scripts/{tool}" not in cmake:
             fail(f"CMake install contract is missing {tool}")
     for schema in (
@@ -114,6 +115,8 @@ def check_lts_contract() -> None:
         "ppc-lab-observability-policy-v1.schema.json",
         "ppc-lab-observability-check-v1.schema.json",
         "ppc-lab-capacity-report-v1.schema.json",
+        "ppc-lab-auth-store-v1.schema.json",
+        "ppc-lab-audit-record-v1.schema.json",
     ):
         if not (ROOT / "schemas" / schema).is_file():
             fail(f"missing v3 LTS schema: {schema}")

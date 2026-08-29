@@ -14,6 +14,7 @@
 #define PPCLAB_BACKUP_API_VERSION 1
 #define PPCLAB_UPGRADE_API_VERSION 1
 #define PPCLAB_OBSERVABILITY_API_VERSION 1
+#define PPCLAB_SECURITY_API_VERSION 1
 
 namespace ppclab {
 inline constexpr const char* kLibraryVersion = PPCLAB_VERSION_STRING;
@@ -25,4 +26,5 @@ inline constexpr unsigned kCompatibilityApiVersion = PPCLAB_COMPATIBILITY_API_VE
 inline constexpr unsigned kBackupApiVersion = PPCLAB_BACKUP_API_VERSION;
 inline constexpr unsigned kUpgradeApiVersion = PPCLAB_UPGRADE_API_VERSION;
 inline constexpr unsigned kObservabilityApiVersion = PPCLAB_OBSERVABILITY_API_VERSION;
+inline constexpr unsigned kSecurityApiVersion = PPCLAB_SECURITY_API_VERSION;
 }

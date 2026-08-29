@@ -1,3 +1,13 @@
+## 3.8.0 — 2026-08-28 — LTS Security, Access Control & Auditability
+
+- Add installed `ppc-lab-security` for scoped bearer-token lifecycle management: init, issue, list, verify, revoke, rotate, and audit-chain verification.
+- Store only PBKDF2-SHA256 token verifiers; one-time bearer secrets are never persisted or emitted by list/report operations.
+- Add viewer, runner, researcher, and admin roles plus explicit `status:read`, `evidence:read`, and `execute:run` least-privilege scopes.
+- Extend the stable HTTP API with optional scoped auth stores while preserving legacy single-token mode and loopback-only unauthenticated compatibility.
+- Add SHA-256 hash-chained JSONL authorization audit records with independent tamper verification and no target bytes or bearer secrets.
+- Add stable `ppc-lab-auth-store-v1` and `ppc-lab-audit-record-v1` contracts, Security API v1 metadata, install/LTS invariant coverage, and security documentation.
+- Preserve the post-v3 feature freeze: this release hardens operator access and auditability only; no PPC execution/runtime subsystem changes.
+
 ## 3.7.0 — 2026-08-28 — LTS Observability & Capacity Planning
 
 - Add installed `ppc-lab-observe init/sample/report/check/capacity` for dependency-free long-term server telemetry and capacity analysis.

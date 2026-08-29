@@ -12,6 +12,10 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.8.0 — LTS Security, Access Control & Auditability
+
+PPC Lab 3.8 adds optional scoped bearer tokens and tamper-evident API audit logging for long-lived research servers. `ppc-lab-security` manages least-privilege viewer/runner/researcher/admin credentials without storing bearer secrets, while the HTTP API can enforce per-endpoint scopes through `--auth-store`. Legacy single-token mode remains available for compatibility. See [`docs/SECURITY.md`](docs/SECURITY.md).
+
 ## v3.7.0 — LTS Observability & Capacity Planning
 
 PPC Lab can now measure the health and capacity of a long-running research server without adding a metrics daemon or external dependency. `ppc-lab-observe` samples the stable control-plane JSON surface plus host pressure, stores immutable JSON observations, reports queue/throughput/failure trends, evaluates explicit health thresholds, and estimates how many execution slots are needed to clear the current backlog. Target binaries are never read or copied.

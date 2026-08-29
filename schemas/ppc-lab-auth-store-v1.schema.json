@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"PPC Lab auth store v1","type":"object","required":["schema","security_api","tokens"],"properties":{"schema":{"const":"ppc-lab-auth-store-v1"},"security_api":{"const":1},"tokens":{"type":"object"}},"additionalProperties":true}

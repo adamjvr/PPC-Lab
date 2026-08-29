@@ -20,7 +20,7 @@ def project_version(root:Path)->str:
 def macro_versions(root:Path)->dict[str,int]:
     text=(root/'cmake/Version.hpp.in').read_text(encoding='utf-8')
     out={}
-    for key,macro in [('cpp_api','PPCLAB_CPP_API_VERSION'),('cpp_abi','PPCLAB_CPP_ABI_VERSION'),('target_profile_api','PPCLAB_TARGET_PROFILE_API_VERSION'),('release_api','PPCLAB_RELEASE_API_VERSION'),('compatibility_api','PPCLAB_COMPATIBILITY_API_VERSION'),('backup_api','PPCLAB_BACKUP_API_VERSION'),('observability_api','PPCLAB_OBSERVABILITY_API_VERSION')]:
+    for key,macro in [('cpp_api','PPCLAB_CPP_API_VERSION'),('cpp_abi','PPCLAB_CPP_ABI_VERSION'),('target_profile_api','PPCLAB_TARGET_PROFILE_API_VERSION'),('release_api','PPCLAB_RELEASE_API_VERSION'),('compatibility_api','PPCLAB_COMPATIBILITY_API_VERSION'),('backup_api','PPCLAB_BACKUP_API_VERSION'),('observability_api','PPCLAB_OBSERVABILITY_API_VERSION'),('security_api','PPCLAB_SECURITY_API_VERSION')]:
         m=re.search(rf'#define {macro} ([0-9]+)',text)
         if not m: raise CompatError(f'missing public version macro {macro}')
         out[key]=int(m.group(1))

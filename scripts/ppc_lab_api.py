@@ -25,6 +25,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
+try:
+    from ppc_lab_security import verify_token as _verify_scoped_token, audit_append as _audit_append
+except ImportError:
+    _verify_scoped_token = None
+    _audit_append = None
+
 API_PROTOCOL = "ppc-lab-http-api-v1"
 HEALTH_SCHEMA = "ppc-lab-api-health-v1"
 DISCOVERY_SCHEMA = "ppc-lab-api-discovery-v1"
@@ -60,18 +66,27 @@ def _run_json(command: list[str], *, stdin: str | None = None, timeout: float = 
 
 class ServerState:
     def __init__(self, *, ppc_lab: str, worker: str, evidence: str | None, root: Path | None,
-                 evidence_store: Path | None, token: str | None, job_timeout: float,
-                 max_body: int, expose_command: bool) -> None:
+                 evidence_store: Path | None, token: str | None, auth_store: Path | None,
+                 audit_log: Path | None, job_timeout: float, max_body: int, expose_command: bool) -> None:
         self.ppc_lab = ppc_lab
         self.worker = worker
         self.evidence = evidence
         self.root = root
         self.evidence_store = evidence_store
         self.token = token
+        self.auth_store = auth_store
+        self.audit_log = audit_log
+        self.audit_lock = threading.Lock()
         self.job_timeout = job_timeout
         self.max_body = max_body
         self.expose_command = expose_command
         self.capabilities = self._load_capabilities()
+
+    def audit(self, event: dict[str, Any]) -> None:
+        if self.audit_log is None or _audit_append is None:
+            return
+        with self.audit_lock:
+            _audit_append(self.audit_log, event)
 
     def _load_capabilities(self) -> dict[str, Any]:
         _, value, _ = _run_json([self.ppc_lab, "capabilities", "--json"], timeout=10.0)
@@ -108,18 +123,34 @@ class Handler(BaseHTTPRequestHandler):
     def _error(self, status: int, message: str) -> None:
         self._send(status, {"schema": API_PROTOCOL, "ok": False, "error": message})
 
-    def _authorized(self) -> bool:
-        token = self.server.state.token
-        if token is None:
-            return True
+    def _principal(self, required_scope: str) -> dict[str, Any] | None:
+        st = self.server.state
         supplied = self.headers.get("Authorization", "")
         prefix = "Bearer "
-        return supplied.startswith(prefix) and hmac.compare_digest(supplied[len(prefix):], token)
+        raw = supplied[len(prefix):] if supplied.startswith(prefix) else None
+        principal: dict[str, Any] | None = None
+        if st.auth_store is not None:
+            if raw and _verify_scoped_token is not None:
+                result = _verify_scoped_token(st.auth_store, raw, required_scope)
+                if result.get("ok"):
+                    principal = result
+        elif st.token is not None:
+            if raw is not None and hmac.compare_digest(raw, st.token):
+                principal = {"ok": True, "token_id": "legacy", "label": "legacy-token", "role": "admin", "scopes": ["*"]}
+        else:
+            principal = {"ok": True, "token_id": "anonymous-local", "label": "anonymous-local", "role": "local", "scopes": ["*"]}
+        st.audit({
+            "event": "api.authorization", "method": self.command, "path": urlparse(self.path).path,
+            "required_scope": required_scope, "allowed": principal is not None,
+            "token_id": principal.get("token_id") if principal else None,
+            "client": self.client_address[0] if self.client_address else None,
+        })
+        return principal
 
-    def _require_auth(self) -> bool:
-        if self._authorized():
+    def _require_scope(self, scope: str) -> bool:
+        if self._principal(scope) is not None:
             return True
-        self.send_response(HTTPStatus.UNAUTHORIZED)
+        self.send_response(HTTPStatus.FORBIDDEN if self.headers.get("Authorization") else HTTPStatus.UNAUTHORIZED)
         body = b'{"schema":"ppc-lab-http-api-v1","ok":false,"error":"unauthorized"}\n'
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -146,9 +177,10 @@ class Handler(BaseHTTPRequestHandler):
             raise ValueError(f"invalid JSON: {exc}") from exc
 
     def do_GET(self) -> None:
-        if not self._require_auth():
-            return
         path = urlparse(self.path).path
+        scope = "evidence:read" if path.startswith("/v1/evidence/") else "status:read"
+        if not self._require_scope(scope):
+            return
         try:
             if path in {"/", "/v1"}:
                 st = self.server.state
@@ -156,6 +188,7 @@ class Handler(BaseHTTPRequestHandler):
                     "schema": DISCOVERY_SCHEMA,
                     "protocol": API_PROTOCOL,
                     "version": st.capabilities.get("version"),
+                    "security": {"scoped_tokens": st.auth_store is not None, "audit_log": st.audit_log is not None},
                     "endpoints": ["GET /v1/health", "GET /v1/capabilities", "POST /v1/run"] +
                                  (["GET /v1/evidence/report", "POST /v1/evidence/query", "GET /v1/evidence/artifacts/{ref}"] if st.evidence_store else []),
                 })
@@ -168,7 +201,9 @@ class Handler(BaseHTTPRequestHandler):
                 protocols = dict(caps.get("protocols", {}))
                 protocols["http_api"] = API_PROTOCOL
                 caps["protocols"] = protocols
-                caps["api"] = {"evidence": self.server.state.evidence_store is not None}
+                api_info = dict(caps.get("api", {}))
+                api_info.update({"evidence": self.server.state.evidence_store is not None, "scoped_auth": self.server.state.auth_store is not None})
+                caps["api"] = api_info
                 self._send(200, caps)
                 return
             if path == "/v1/evidence/report":
@@ -185,9 +220,10 @@ class Handler(BaseHTTPRequestHandler):
             self._error(500, str(exc))
 
     def do_POST(self) -> None:
-        if not self._require_auth():
-            return
         path = urlparse(self.path).path
+        scope = "execute:run" if path == "/v1/run" else "evidence:read" if path.startswith("/v1/evidence/") else "status:read"
+        if not self._require_scope(scope):
+            return
         try:
             body = self._body()
         except OverflowError as exc:
@@ -297,7 +333,9 @@ def main() -> int:
     parser.add_argument("--evidence", help="path to ppc-lab-evidence")
     parser.add_argument("--root", help="restrict executable job input files to this directory")
     parser.add_argument("--evidence-store", help="enable read-only evidence endpoints for this existing store")
-    parser.add_argument("--token", help="bearer token (or use PPC_LAB_API_TOKEN)")
+    parser.add_argument("--token", help="legacy full-access bearer token (or use PPC_LAB_API_TOKEN)")
+    parser.add_argument("--auth-store", help="scoped token store created by ppc-lab-security")
+    parser.add_argument("--audit-log", help="tamper-evident JSONL API audit log (defaults beside --auth-store)")
     parser.add_argument("--allow-unauthenticated-remote", action="store_true", help="DANGEROUS: permit non-loopback bind without a token")
     parser.add_argument("--job-timeout", type=float, default=60.0, help="worker timeout per request (default: 60)")
     parser.add_argument("--max-body", type=int, default=MAX_BODY_DEFAULT, help="maximum JSON request bytes (default: 1 MiB)")
@@ -311,8 +349,18 @@ def main() -> int:
     if args.max_body <= 0:
         parser.error("--max-body must be > 0")
     token = args.token or os.environ.get("PPC_LAB_API_TOKEN")
-    if not _loopback(args.host) and token is None and not args.allow_unauthenticated_remote:
-        parser.error("non-loopback binding requires --token/PPC_LAB_API_TOKEN (or explicit --allow-unauthenticated-remote)")
+    auth_store = Path(args.auth_store).expanduser().resolve() if args.auth_store else None
+    if auth_store is not None:
+        if _verify_scoped_token is None or not auth_store.is_file():
+            parser.error("--auth-store must be an existing PPC Lab auth store")
+        # Validate schema without exposing token material.
+        probe = _verify_scoped_token(auth_store, "invalid.invalid", "status:read")
+        if probe.get("reason") == "auth-store-error": parser.error("--auth-store is invalid")
+    audit_log = Path(args.audit_log).expanduser().resolve() if args.audit_log else (auth_store.parent / "audit.jsonl" if auth_store else None)
+    if auth_store is not None and token is not None:
+        parser.error("use either --auth-store or --token, not both")
+    if not _loopback(args.host) and token is None and auth_store is None and not args.allow_unauthenticated_remote:
+        parser.error("non-loopback binding requires --auth-store or --token/PPC_LAB_API_TOKEN (or explicit --allow-unauthenticated-remote)")
 
     ppc_lab = _find_command(args.ppc_lab, "PPC_LAB_BIN", "ppc-lab", "../build/release/ppc-lab")
     worker = _find_command(args.worker, "PPC_LAB_WORKER", "ppc-lab-worker", "ppc_lab_worker.py")
@@ -328,8 +376,8 @@ def main() -> int:
         parser.error("--root must be an existing directory")
 
     state = ServerState(ppc_lab=ppc_lab, worker=worker, evidence=evidence, root=root,
-                        evidence_store=evidence_store, token=token, job_timeout=args.job_timeout,
-                        max_body=args.max_body, expose_command=args.expose_command)
+                        evidence_store=evidence_store, token=token, auth_store=auth_store, audit_log=audit_log,
+                        job_timeout=args.job_timeout, max_body=args.max_body, expose_command=args.expose_command)
     server = ApiServer((args.host, args.port), Handler, state)
     host, port = server.server_address[:2]
     display_host = "127.0.0.1" if host in {"0.0.0.0", "::"} else host

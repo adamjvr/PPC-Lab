@@ -83,3 +83,7 @@ ppc-lab-backup verify /backup/ppc-lab-state.zip
 ```
 
 The deployment's private target-input root is intentionally separate from this backup and must be protected independently.
+
+## Scoped API authentication (v3.8+)
+
+For multi-user or automated server access, prefer an auth store over the legacy single full-access token. Create `/etc/ppc-lab/auth.json` with `ppc-lab-security`, issue only the scopes each client needs, and start `ppc-lab-api` with `--auth-store /etc/ppc-lab/auth.json --audit-log /var/log/ppc-lab/audit.jsonl`. Keep both files writable/readable only by the PPC Lab service account or administrators. Remote exposure still belongs behind TLS termination or an SSH tunnel.

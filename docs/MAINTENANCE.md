@@ -67,3 +67,7 @@ Public v3.x releases should pass `ppc-lab-upgrade preflight` on the stable chann
 Operational regressions should be measured rather than inferred from anecdotal queue delay. Long-running servers should periodically collect `ppc-lab-observe sample` data and use `report/check/capacity` when changing worker-slot counts, scheduler policy, storage layout, or host hardware.
 
 The observability store is deliberately JSON-only and target-neutral. Do not add target binaries, environment-secret capture, arbitrary process dumps, or a mandatory external metrics/database stack to `ppc-lab-observability-*-v1`. A future exporter to another monitoring system should consume these stable reports rather than redefine the sample contract.
+
+### Security credentials and audit logs
+
+Treat auth stores and audit logs as operational state, not source artifacts. Rotate credentials when operators/automation change, revoke unused tokens, and periodically run `ppc-lab-security audit-verify`. Do not add bearer tokens to diagnostics, support bundles, Git, or behavioral corpora.
