@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-target-profile-package-v1.schema.json",
+  "title": "PPC Lab target profile package v1",
+  "type": "object",
+  "required": ["schema", "profile_schema", "profile_api", "id", "minimum_ppc_lab", "files"],
+  "properties": {
+    "schema": {"const": "ppc-lab-target-profile-package-v1"},
+    "profile_schema": {"const": "ppc-lab-target-profile-v1"},
+    "profile_api": {"const": 1},
+    "id": {"type": "string"},
+    "minimum_ppc_lab": {"type": "string"},
+    "files": {"type": "array"}
+  }
+}

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 3.0.0 LANGUAGES CXX)
+project(PPCLab VERSION 3.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,6 +12,12 @@ option(PPC_LAB_ENABLE_SANITIZERS "Build with AddressSanitizer and UBSan" OFF)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/ppclab)
+configure_file(
+    cmake/Version.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/ppclab/Version.hpp
+    @ONLY)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 if(PPC_LAB_ENABLE_UNICORN)
@@ -33,6 +39,7 @@ add_library(ppc_lab STATIC
 
 target_include_directories(ppc_lab PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_compile_features(ppc_lab PUBLIC cxx_std_20)
 
@@ -66,6 +73,7 @@ install(TARGETS ppc_lab ppc_lab_cli
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/ppclab/Version.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ppclab)
 install(FILES LICENSE README.md CHANGELOG.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DOCDIR}/docs)
 install(DIRECTORY schemas/ DESTINATION ${CMAKE_INSTALL_DATADIR}/ppc-lab/schemas)
@@ -89,6 +97,8 @@ install(PROGRAMS scripts/ppc_lab_control.py DESTINATION ${CMAKE_INSTALL_BINDIR} 
 install(PROGRAMS scripts/ppc_lab_knowledge.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-knowledge)
 install(PROGRAMS scripts/ppc_lab_hypothesize.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-hypothesize)
 install(PROGRAMS scripts/ppc_lab_platform.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-platform)
+install(PROGRAMS scripts/ppc_lab_target.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-target)
+install(PROGRAMS scripts/ppc_lab_release.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-release)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -178,5 +188,7 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_hypothesis_engine COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_hypothesis_engine.py)
     add_test(NAME ppc_lab_platform_consolidation COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_platform_consolidation.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_platform_acceptance COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_platform_acceptance.py $<TARGET_FILE:ppc_lab_cli>)
+    add_test(NAME ppc_lab_target_sdk COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_target_sdk.py)
+    add_test(NAME ppc_lab_release_engineering COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_release_engineering.py)
     set_tests_properties(ppc_lab_platform_acceptance PROPERTIES RUN_SERIAL TRUE TIMEOUT 180)
 endif()

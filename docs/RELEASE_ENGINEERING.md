@@ -1,0 +1,64 @@
+# Reproducible Release Engineering
+
+PPC Lab v3.1 adds `ppc-lab-release` so public source releases can be reproduced and independently verified without GitHub-specific tooling.
+
+## Compatibility versions
+
+Installed `ppclab/Version.hpp` exports:
+
+```cpp
+PPCLAB_VERSION_STRING
+PPCLAB_CPP_API_VERSION
+PPCLAB_CPP_ABI_VERSION
+PPCLAB_TARGET_PROFILE_API_VERSION
+```
+
+For v3.1 the C++ API, C++ ABI contract marker, and target-profile API are all `1`. The CMake package continues to use same-major semantic-version compatibility. These numbers are deliberate compatibility promises; they are not incremented for ordinary implementation changes.
+
+## Create a release manifest
+
+```bash
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+```
+
+`ppc-lab-release-manifest-v1` records the PPC Lab version, GPL-3.0-only license id, public compatibility numbers, and a sorted path/size/mode/SHA-256 inventory of source files. Build trees, VCS state, Python caches, editor state, and archive outputs are excluded.
+
+Verify it later with:
+
+```bash
+ppc-lab-release verify . RELEASE-MANIFEST.json
+```
+
+Any added, removed, resized, or byte-modified source file fails verification.
+
+## Reproducible source ZIP
+
+```bash
+export SOURCE_DATE_EPOCH=946684800
+ppc-lab-release archive . --out PPC-Lab-v3.1.0-source.zip
+```
+
+Files are sorted, ZIP timestamps are derived from `SOURCE_DATE_EPOCH`, regular/executable modes are normalized, and the archive embeds its source inventory as `RELEASE-MANIFEST.json`. Two archives made from identical source bytes with the same epoch are byte-identical.
+
+The embedded release manifest intentionally does not include itself. After extraction:
+
+```bash
+ppc-lab-release verify ./PPC-Lab-v3.1.0-source \
+  ./PPC-Lab-v3.1.0-source/RELEASE-MANIFEST.json
+```
+
+## Release gate
+
+A public release should not be tagged until these pass:
+
+```bash
+python3 scripts/check_repository_invariants.py
+./Tools/verify.command
+ctest --test-dir build/release --output-on-failure
+```
+
+For post-v3 maintenance releases, the target SDK and release-engineering tests are release-critical even when long-running server/fleet regressions are split into separate CI jobs.
+
+## What this is not
+
+This is not a binary-signing system, package-manager substitute, or legal provenance oracle. SHA-256 manifests prove byte identity relative to the manifest; they do not prove who authored a file or whether a target binary may be redistributed.

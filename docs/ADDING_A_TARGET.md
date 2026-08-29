@@ -1,5 +1,14 @@
 # Adding a target profile
 
+Since v3.1, start with the installed target SDK rather than hand-creating the profile skeleton:
+
+```bash
+ppc-lab-target init profiles/my-target --id my-target --name "My Target"
+ppc-lab-target validate profiles/my-target
+```
+
+The generated `profile.json` is the stable `ppc-lab-target-profile-v1` contract. Existing hand-authored profile directories remain valid; adopting the manifest is recommended when they are next touched.
+
 A profile is intentionally cheap. Most projects should need only a directory, a concise README, derived metadata, a deterministic invocation script, and validation records.
 
 ## Directory skeleton

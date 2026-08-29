@@ -12,6 +12,22 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.1.0 — LTS Target SDK & Reproducible Releases
+
+v3.1 is a post-roadmap maintenance release. It adds a stable target-adapter contract and deterministic release tooling so future PPC projects can integrate without modifying generic PPC Lab code and maintainers can reproduce exactly what was published. It adds no new execution subsystem.
+
+```bash
+ppc-lab-target init ./profiles/my-target --id my-target --name "My Target"
+ppc-lab-target validate ./profiles/my-target
+ppc-lab-target pack ./profiles/my-target --out my-target-profile.zip
+
+ppc-lab-release manifest . --out RELEASE-MANIFEST.json
+ppc-lab-release verify . RELEASE-MANIFEST.json
+SOURCE_DATE_EPOCH=946684800 ppc-lab-release archive . --out PPC-Lab-source.zip
+```
+
+The installed C++ package also exports `ppclab/Version.hpp` with explicit API/ABI contract numbers. See [`docs/TARGET_PROFILE_SDK.md`](docs/TARGET_PROFILE_SDK.md), [`docs/RELEASE_ENGINEERING.md`](docs/RELEASE_ENGINEERING.md), and [`docs/MAINTENANCE.md`](docs/MAINTENANCE.md).
+
 ## v3.0.0 — Mature PPC Research Automation Platform
 
 v3.0 closes the standing feature roadmap. The new `ppc-lab-platform` operator surface consolidates whole-install health, persisted-state compatibility/migration, and a synthetic end-to-end release acceptance path across intake, execution/exploration, evidence, hypothesis promotion, and knowledge ingestion. It deliberately adds **no new execution subsystem**. From v3 onward, PPC Lab returns to target-driven maintenance.

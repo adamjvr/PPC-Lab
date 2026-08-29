@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-3.0-only
+#pragma once
+
+#define PPCLAB_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PPCLAB_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PPCLAB_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define PPCLAB_VERSION_STRING "@PROJECT_VERSION@"
+
+#define PPCLAB_CPP_API_VERSION 1
+#define PPCLAB_CPP_ABI_VERSION 1
+#define PPCLAB_TARGET_PROFILE_API_VERSION 1
+
+namespace ppclab {
+inline constexpr const char* kLibraryVersion = PPCLAB_VERSION_STRING;
+inline constexpr unsigned kCppApiVersion = PPCLAB_CPP_API_VERSION;
+inline constexpr unsigned kCppAbiVersion = PPCLAB_CPP_ABI_VERSION;
+inline constexpr unsigned kTargetProfileApiVersion = PPCLAB_TARGET_PROFILE_API_VERSION;
+}

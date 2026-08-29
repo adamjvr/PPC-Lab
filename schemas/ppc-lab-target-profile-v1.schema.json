@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-target-profile-v1.schema.json",
+  "title": "PPC Lab target profile v1",
+  "type": "object",
+  "required": ["schema", "profile_api", "id", "name", "minimum_ppc_lab", "architecture", "inputs"],
+  "properties": {
+    "schema": {"const": "ppc-lab-target-profile-v1"},
+    "profile_api": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "minimum_ppc_lab": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "architecture": {
+      "type": "object",
+      "required": ["guest", "endian"],
+      "properties": {"guest": {"const": "ppc32"}, "endian": {"const": "big"}}
+    },
+    "inputs": {"type": "array"},
+    "entry_points": {"type": "array"},
+    "runtime": {"type": "object"},
+    "layout": {"type": "object"},
+    "redistributable_files": {"type": "array", "items": {"type": "string"}},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

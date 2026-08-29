@@ -40,6 +40,12 @@ def main() -> int:
         exe = prefix / "bin" / exe_name
         assert exe.is_file(), exe
         assert (prefix / "include" / "ppclab" / "ppc" / "UniversalImage.hpp").is_file()
+        version_header = prefix / "include" / "ppclab" / "Version.hpp"
+        assert version_header.is_file(), version_header
+        version_text = version_header.read_text(encoding="utf-8")
+        assert '#define PPCLAB_VERSION_STRING "3.1.0"' in version_text
+        assert '#define PPCLAB_CPP_API_VERSION 1' in version_text
+        assert '#define PPCLAB_CPP_ABI_VERSION 1' in version_text
         worker = prefix / "bin" / "ppc-lab-worker"
         assert worker.is_file(), worker
         orchestrator = prefix / "bin" / "ppc-lab-orchestrate"
@@ -70,6 +76,10 @@ def main() -> int:
         platform = prefix / "bin" / "ppc-lab-platform"
         assert hypothesize.is_file(), hypothesize
         assert platform.is_file(), platform
+        target_sdk = prefix / "bin" / "ppc-lab-target"
+        release_tool = prefix / "bin" / "ppc-lab-release"
+        assert target_sdk.is_file(), target_sdk
+        assert release_tool.is_file(), release_tool
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
             assert (prefix / "bin" / name).is_file(), name
         schema_candidates = list(prefix.glob("share/ppc-lab/schemas/ppc-lab-job-v1.schema.json"))
@@ -120,11 +130,14 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-platform-status-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-upgrade-report-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-acceptance-report-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-target-profile-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-target-profile-package-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-release-manifest-v1.schema.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 3.0.0"
+        assert version.stdout.strip() == "PPC Lab 3.1.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -155,19 +168,26 @@ def main() -> int:
         assert '"platform_status": "ppc-lab-platform-status-v1"' in caps.stdout
         assert '"upgrade_report": "ppc-lab-upgrade-report-v1"' in caps.stdout
         assert '"acceptance_report": "ppc-lab-acceptance-report-v1"' in caps.stdout
+        assert '"target_profile": "ppc-lab-target-profile-v1"' in caps.stdout
+        assert '"target_profile_package": "ppc-lab-target-profile-package-v1"' in caps.stdout
+        assert '"release_manifest": "ppc-lab-release-manifest-v1"' in caps.stdout
+        assert '"api": {"cpp": 1, "abi": 1, "target_profile": 1, "release": 1}' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()
         (consumer / "CMakeLists.txt").write_text(
             "cmake_minimum_required(VERSION 3.20)\n"
             "project(PPCLabConsumer LANGUAGES CXX)\n"
-            "find_package(PPCLab 3.0 CONFIG REQUIRED)\n"
+            "find_package(PPCLab 3.1 CONFIG REQUIRED)\n"
             "add_executable(consumer main.cpp)\n"
             "target_link_libraries(consumer PRIVATE PPCLab::core)\n",
             encoding="utf-8",
         )
         (consumer / "main.cpp").write_text(
             '#include "ppclab/ppc/UniversalImage.hpp"\n'
+            '#include "ppclab/Version.hpp"\n'
+            "static_assert(PPCLAB_CPP_API_VERSION == 1);\n"
+            "static_assert(PPCLAB_CPP_ABI_VERSION == 1);\n"
             "int main() { return ppclab::ppc::UniversalImageLoader::formatName("
             "ppclab::ppc::UniversalImageFormat::Elf32PpcBe)[0] == 'E' ? 0 : 1; }\n",
             encoding="utf-8",

@@ -88,3 +88,7 @@ Hypothesis-engine changes must remain deterministic and evidence-first. New role
 ## PPC Lab 3 maintenance boundary
 
 PPC Lab 3.0 closes the standing feature roadmap. Please do not add speculative PPC64, little-endian, JIT, OS-runtime, service-framework, or database work without a real target/deployment that demonstrates the requirement. Persisted-format changes need an explicit migration and rollback-safe backup path through `ppc-lab-platform`.
+
+## Target profiles and release artifacts
+
+Use `ppc-lab-target init/validate/pack` for new target adapters. Keep private/proprietary target bytes outside public profiles unless redistribution rights are explicit. Before proposing release-engineering changes, run `tests/test_target_sdk.py` and `tests/test_release_engineering.py`; compatibility-number changes require an intentional documented contract decision.

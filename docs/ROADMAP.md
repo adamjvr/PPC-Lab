@@ -87,3 +87,7 @@ Potential future capability buckets:
 - additional ISA fidelity where a real workload exposes a missing/approximate instruction.
 
 None of these are standing obligations. A missing capability should arrive with a real target, a minimal reproduction, and a regression test.
+
+## Post-roadmap LTS checkpoint: v3.1
+
+v3.1 does not reopen the standing feature roadmap. It formalizes the target-adapter and release-engineering contracts needed to keep the completed v3 platform inexpensive to maintain. Further work remains target-driven.

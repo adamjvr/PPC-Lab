@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.0 — 2026-08-28 — LTS Target SDK & Reproducible Releases
+
+- Add installed `ppc-lab-target`, a dependency-free target-profile SDK for generating, validating, inspecting, and reproducibly packaging project adapters around the stable PPC Lab core.
+- Add `ppc-lab-target-profile-v1` and `ppc-lab-target-profile-package-v1` contracts with explicit external-input declarations and a default no-private-binary packaging rule.
+- Add installed `ppc-lab-release`, deterministic source-manifest/archive tooling using stable SHA-256 file inventories, normalized modes/timestamps, and embedded `RELEASE-MANIFEST.json`.
+- Add `ppc-lab-release-manifest-v1` plus explicit C++ API/ABI and target-profile API version metadata through installed `ppclab/Version.hpp`.
+- Extend capabilities, repository invariants, install/downstream package tests, and documentation to enforce the v3 LTS compatibility boundary.
+- Keep v3.1 deliberately non-expansive: no new PPC execution/runtime subsystem; this release reduces future maintenance and target-integration friction.
+
 ## 3.0.0 — 2026-08-28 — Mature Platform Consolidation
 
 - Added installed `ppc-lab-platform` as the consolidated operator surface for whole-install status/doctor, persisted-state upgrade checks/migrations, and mature-platform acceptance.
