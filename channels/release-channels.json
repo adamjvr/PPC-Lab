@@ -1,0 +1,23 @@
+{
+  "channel_api": 1,
+  "channels": {
+    "candidate": {
+      "allow_downgrade": false,
+      "allow_prerelease": true,
+      "major": 3
+    },
+    "pinned": {
+      "allow_downgrade": false,
+      "allow_prerelease": false,
+      "major": 3,
+      "pin": null
+    },
+    "stable": {
+      "allow_downgrade": false,
+      "allow_prerelease": false,
+      "major": 3
+    }
+  },
+  "default": "stable",
+  "schema": "ppc-lab-release-channel-v1"
+}

@@ -1,0 +1,26 @@
+{
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-release-channel-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "channel_api": {
+      "const": 1
+    },
+    "channels": {
+      "type": "object"
+    },
+    "default": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "ppc-lab-release-channel-v1"
+    }
+  },
+  "required": [
+    "schema",
+    "channel_api",
+    "default",
+    "channels"
+  ],
+  "title": "PPC Lab release channels v1",
+  "type": "object"
+}

@@ -57,3 +57,7 @@ For target-driven defects that cannot be reproduced immediately, collect `ppc-la
 Persistent-state format changes must preserve the v3.5 backup boundary. Before changing evidence, knowledge, or control persistence, maintainers must keep `ppc-lab-backup create/verify/restore` and `ppc-lab-compat state` interoperable or explicitly treat the change as a major-version compatibility event.
 
 Do not broaden the backup format into a generic server archive. Private target inputs, API-token environment files, caches, arbitrary binary attachments, and general logs remain outside `ppc-lab-backup-v1`.
+
+## v3.6 transactional upgrade gate
+
+Public v3.x releases should pass `ppc-lab-upgrade preflight` on the stable channel before source replacement. The updater is intentionally repository/source oriented: it verifies the deterministic release manifest and v3 compatibility declaration, preserves Git/build state, and produces a rollback transaction before changing managed files. Do not weaken manifest, path, symlink, downgrade, or rollback-hash checks for convenience.

@@ -1,0 +1,42 @@
+{
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-upgrade-transaction-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "from_version": {
+      "type": "string"
+    },
+    "rollback_archive": {
+      "type": "string"
+    },
+    "rollback_sha256": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "ppc-lab-upgrade-transaction-v1"
+    },
+    "status": {
+      "type": "string"
+    },
+    "to_version": {
+      "type": "string"
+    },
+    "transaction_id": {
+      "type": "string"
+    },
+    "upgrade_api": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema",
+    "upgrade_api",
+    "transaction_id",
+    "status",
+    "from_version",
+    "to_version",
+    "rollback_archive",
+    "rollback_sha256"
+  ],
+  "title": "PPC Lab transactional upgrade record v1",
+  "type": "object"
+}

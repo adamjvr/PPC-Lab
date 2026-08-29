@@ -1,3 +1,14 @@
+## 3.6.0 — 2026-08-28 — LTS Upgrade/Rollback & Release Channels
+
+- Add installed `ppc-lab-upgrade` for deterministic release preflight, staging, transactional source-tree apply, and verified rollback.
+- Verify every incoming source archive against its embedded reproducible `RELEASE-MANIFEST.json` before modification.
+- Enforce same-major v3 LTS API/ABI/schema/tool compatibility against the current source tree before apply.
+- Add stable/candidate/pinned release-channel policy with stable downgrade/prerelease/major-change rejection.
+- Preserve `.git`, build directories, and non-source runtime state during source replacement.
+- Create SHA-256-pinned rollback snapshots before apply and automatically restore after mid-apply failure.
+- Add stable `ppc-lab-upgrade-plan-v1`, `ppc-lab-upgrade-transaction-v1`, and `ppc-lab-release-channel-v1` contracts, install metadata, documentation, and regression coverage.
+- Preserve the post-v3 feature freeze: this release hardens LTS operations and does not add another PPC execution/runtime subsystem.
+
 ## 3.5.0 — 2026-08-28 — LTS Backup, Restore & Disaster Recovery
 
 - Add installed `ppc-lab-backup create/verify/inspect/restore` for dependency-free disaster recovery of persistent PPC Lab research state.

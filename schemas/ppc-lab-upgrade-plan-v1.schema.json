@@ -1,0 +1,42 @@
+{
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-upgrade-plan-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "archive_sha256": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "current_version": {
+      "type": "string"
+    },
+    "errors": {
+      "type": "array"
+    },
+    "incoming_version": {
+      "type": "string"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "schema": {
+      "const": "ppc-lab-upgrade-plan-v1"
+    },
+    "upgrade_api": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema",
+    "upgrade_api",
+    "ok",
+    "current_version",
+    "incoming_version",
+    "archive_sha256",
+    "channel",
+    "errors"
+  ],
+  "title": "PPC Lab transactional upgrade plan v1",
+  "type": "object"
+}
