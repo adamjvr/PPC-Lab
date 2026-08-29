@@ -82,20 +82,23 @@ def check_lts_contract() -> None:
         "PPCLAB_CPP_API_VERSION": "1",
         "PPCLAB_CPP_ABI_VERSION": "1",
         "PPCLAB_TARGET_PROFILE_API_VERSION": "1",
+        "PPCLAB_RELEASE_API_VERSION": "1",
+        "PPCLAB_COMPATIBILITY_API_VERSION": "1",
     }
     for macro, value in required.items():
         if f"#define {macro} {value}" not in version_template:
             fail(f"public compatibility contract missing {macro}={value}")
-    for tool in ("ppc_lab_target.py", "ppc_lab_release.py"):
+    for tool in ("ppc_lab_target.py", "ppc_lab_release.py", "ppc_lab_compat.py"):
         if f"scripts/{tool}" not in cmake:
             fail(f"CMake install contract is missing {tool}")
     for schema in (
         "ppc-lab-target-profile-v1.schema.json",
         "ppc-lab-target-profile-package-v1.schema.json",
         "ppc-lab-release-manifest-v1.schema.json",
+        "ppc-lab-compatibility-snapshot-v1.schema.json",
     ):
         if not (ROOT / "schemas" / schema).is_file():
-            fail(f"missing v3.1 LTS schema: {schema}")
+            fail(f"missing v3 LTS schema: {schema}")
 
 def check_target_neutral_core() -> None:
     roots = ["include", "src", "tools", "scripts", "tests", "cmake", "integrations"]

@@ -42,3 +42,7 @@ Post-v3 maintenance should preserve these explicit contract numbers unless a rea
 - release manifest: `ppc-lab-release-manifest-v1`
 
 New target projects should use `ppc-lab-target` rather than adding project-specific logic to generic source. Public releases should be produced or independently checked with `ppc-lab-release`.
+
+## v3.2 compatibility gate
+
+Before a target-driven v3.x patch is released, run `ppc-lab-compat check compat/baselines/v3.1.0.json --root .`. A failure is a release blocker unless the project intentionally moves to a new major compatibility line. Old baselines are immutable release evidence.

@@ -12,6 +12,12 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.2.0 — LTS Compatibility & Upgrade Assurance
+
+v3.2 is a release-hardening checkpoint for the completed v3 platform. `ppc-lab-compat` mechanically checks the current tree against the checked-in v3.1 LTS baseline, audits persisted research state without mutating it, and makes every reproducible source release declare its compatibility surface inside `RELEASE-MANIFEST.json`. No new PPC execution subsystem is added.
+
+See `docs/COMPATIBILITY.md`.
+
 ## v3.1.0 — LTS Target SDK & Reproducible Releases
 
 v3.1 is a post-roadmap maintenance release. It adds a stable target-adapter contract and deterministic release tooling so future PPC projects can integrate without modifying generic PPC Lab code and maintainers can reproduce exactly what was published. It adds no new execution subsystem.

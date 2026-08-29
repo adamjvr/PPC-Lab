@@ -3,15 +3,54 @@
   "$id": "https://ppc-lab.invalid/schemas/ppc-lab-release-manifest-v1.schema.json",
   "title": "PPC Lab release manifest v1",
   "type": "object",
-  "required": ["schema", "release_api", "version", "license", "cpp_api", "cpp_abi", "target_profile_api", "files"],
+  "required": [
+    "schema",
+    "release_api",
+    "version",
+    "license",
+    "cpp_api",
+    "cpp_abi",
+    "target_profile_api",
+    "files"
+  ],
   "properties": {
-    "schema": {"const": "ppc-lab-release-manifest-v1"},
-    "release_api": {"const": 1},
-    "version": {"type": "string"},
-    "license": {"const": "GPL-3.0-only"},
-    "cpp_api": {"type": "integer", "minimum": 1},
-    "cpp_abi": {"type": "integer", "minimum": 1},
-    "target_profile_api": {"type": "integer", "minimum": 1},
-    "files": {"type": "array"}
+    "schema": {
+      "const": "ppc-lab-release-manifest-v1"
+    },
+    "release_api": {
+      "const": 1
+    },
+    "version": {
+      "type": "string"
+    },
+    "license": {
+      "const": "GPL-3.0-only"
+    },
+    "cpp_api": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "cpp_abi": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "target_profile_api": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "files": {
+      "type": "array"
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "ppc-lab-compatibility-snapshot-v1"
+        }
+      },
+      "required": [
+        "schema"
+      ]
+    }
   }
 }

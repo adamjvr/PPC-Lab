@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 cmake_minimum_required(VERSION 3.20)
-project(PPCLab VERSION 3.1.0 LANGUAGES CXX)
+project(PPCLab VERSION 3.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -77,6 +77,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/ppclab/Version.hpp DESTINATI
 install(FILES LICENSE README.md CHANGELOG.md DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(DIRECTORY docs/ DESTINATION ${CMAKE_INSTALL_DOCDIR}/docs)
 install(DIRECTORY schemas/ DESTINATION ${CMAKE_INSTALL_DATADIR}/ppc-lab/schemas)
+install(DIRECTORY compat/ DESTINATION ${CMAKE_INSTALL_DATADIR}/ppc-lab/compat)
 install(PROGRAMS scripts/ppc_lab_worker.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-worker)
 install(PROGRAMS scripts/ppc_lab_orchestrate.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-orchestrate)
 install(PROGRAMS scripts/ppc_lab_fleet.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-fleet)
@@ -99,6 +100,7 @@ install(PROGRAMS scripts/ppc_lab_hypothesize.py DESTINATION ${CMAKE_INSTALL_BIND
 install(PROGRAMS scripts/ppc_lab_platform.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-platform)
 install(PROGRAMS scripts/ppc_lab_target.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-target)
 install(PROGRAMS scripts/ppc_lab_release.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-release)
+install(PROGRAMS scripts/ppc_lab_compat.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME ppc-lab-compat)
 install(EXPORT PPCLabTargets
     FILE PPCLabTargets.cmake
     NAMESPACE PPCLab::
@@ -190,5 +192,6 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME ppc_lab_platform_acceptance COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_platform_acceptance.py $<TARGET_FILE:ppc_lab_cli>)
     add_test(NAME ppc_lab_target_sdk COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_target_sdk.py)
     add_test(NAME ppc_lab_release_engineering COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_release_engineering.py)
+    add_test(NAME ppc_lab_compatibility_assurance COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tests/test_compatibility_assurance.py)
     set_tests_properties(ppc_lab_platform_acceptance PROPERTIES RUN_SERIAL TRUE TIMEOUT 180)
 endif()

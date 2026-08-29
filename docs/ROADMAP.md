@@ -91,3 +91,7 @@ None of these are standing obligations. A missing capability should arrive with 
 ## Post-roadmap LTS checkpoint: v3.1
 
 v3.1 does not reopen the standing feature roadmap. It formalizes the target-adapter and release-engineering contracts needed to keep the completed v3 platform inexpensive to maintain. Further work remains target-driven.
+
+## Post-roadmap LTS checkpoint: v3.2
+
+v3.2 adds compatibility and upgrade assurance only. The standing feature roadmap remains complete; further execution/runtime expansion is still target-driven.

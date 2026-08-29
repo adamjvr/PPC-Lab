@@ -1,3 +1,12 @@
+## 3.2.0 — 2026-08-28 — LTS Compatibility & Upgrade Assurance
+
+- Add `ppc-lab-compat` snapshots and same-major baseline checks for public C++ API/ABI markers, stable schemas/tools, and persisted-state format levels.
+- Add the checked-in v3.1.0 LTS compatibility baseline and dependency-free compatibility regression coverage.
+- Embed the full compatibility declaration in reproducible `RELEASE-MANIFEST.json` output.
+- Add read-only evidence/knowledge/control state compatibility auditing via the existing v3 platform migration contract.
+- Add compatibility API metadata, installed schema/tool contracts, and thorough LTS compatibility documentation.
+- Keep the post-v3 freeze intact: no new execution/runtime subsystem.
+
 # Changelog
 
 ## 3.1.0 — 2026-08-28 — LTS Target SDK & Reproducible Releases

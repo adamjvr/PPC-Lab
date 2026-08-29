@@ -7,6 +7,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import importlib.util
 import os
 import re
 import stat
@@ -34,6 +35,15 @@ def project_version(root: Path) -> str:
     if not m: raise ReleaseError("cannot determine project version")
     return m.group(1)
 
+
+def compatibility_snapshot(root: Path) -> dict[str, Any]:
+    module_path=root/"scripts"/"ppc_lab_compat.py"
+    if not module_path.is_file(): raise ReleaseError("missing scripts/ppc_lab_compat.py")
+    spec=importlib.util.spec_from_file_location("ppclab_release_compat",module_path)
+    if spec is None or spec.loader is None: raise ReleaseError("cannot load compatibility module")
+    module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module.build_snapshot(root)
+
 def source_files(root: Path, extra_exclude: set[Path] | None = None) -> list[Path]:
     root=root.resolve(); excluded={p.resolve() for p in (extra_exclude or set())}; out=[]
     for p in root.rglob("*"):
@@ -54,6 +64,7 @@ def build_manifest(root: Path, *, extra_exclude: set[Path] | None = None) -> dic
     return {
         "schema":MANIFEST_SCHEMA,"release_api":API_VERSION,"version":project_version(root),
         "license":"GPL-3.0-only","cpp_api":1,"cpp_abi":1,"target_profile_api":1,
+        "compatibility":compatibility_snapshot(root),
         "files":[{"path":p.relative_to(root).as_posix(),"size":p.stat().st_size,"mode":mode_for(p),"sha256":sha256_file(p)} for p in files],
     }
 

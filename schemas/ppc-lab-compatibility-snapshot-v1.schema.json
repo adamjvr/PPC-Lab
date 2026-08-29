@@ -1,0 +1,65 @@
+{
+  "$id": "https://ppc-lab.invalid/schemas/ppc-lab-compatibility-snapshot-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "compatibility_api": {
+      "const": 1
+    },
+    "cpp_abi": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "cpp_api": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "installed_tools": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "persisted_formats": {
+      "type": "object"
+    },
+    "platform_major": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "platform_version": {
+      "type": "string"
+    },
+    "release_api": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "schema": {
+      "const": "ppc-lab-compatibility-snapshot-v1"
+    },
+    "schemas": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_profile_api": {
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema",
+    "compatibility_api",
+    "platform_version",
+    "platform_major",
+    "cpp_api",
+    "cpp_abi",
+    "target_profile_api",
+    "release_api",
+    "schemas",
+    "installed_tools",
+    "persisted_formats"
+  ],
+  "title": "PPC Lab LTS compatibility snapshot v1",
+  "type": "object"
+}

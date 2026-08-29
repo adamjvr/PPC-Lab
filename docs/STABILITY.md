@@ -121,3 +121,8 @@ PPC Lab 3.0 is a CMake/package major-version boundary, but it intentionally pres
 `ppc-lab-platform-status-v1`, `ppc-lab-upgrade-report-v1`, and `ppc-lab-acceptance-report-v1` are additive operational contracts. Persisted evidence/knowledge/control formats have explicit integer/metadata migration anchors. An incompatible persisted change requires an explicit migration with safety backup and regression coverage; version fields must never be edited merely to bypass a compatibility check.
 
 The v3 standing feature roadmap is closed. Future ISA, runtime, loader, backend, protocol, or service work is justified by a real target/deployment and a reproducible regression, not by feature-list completeness.
+
+
+## v3 LTS mechanical compatibility gate
+
+Starting with v3.2, `ppc-lab-compat` turns the v3 LTS promises into a release test. The checked-in v3.1.0 baseline is the minimum same-major public contract. Additive tools/schemas are allowed; removing baseline contracts or changing public API/ABI markers is a breaking change.
