@@ -126,3 +126,7 @@ The v3 standing feature roadmap is closed. Future ISA, runtime, loader, backend,
 ## v3 LTS mechanical compatibility gate
 
 Starting with v3.2, `ppc-lab-compat` turns the v3 LTS promises into a release test. The checked-in v3.1.0 baseline is the minimum same-major public contract. Additive tools/schemas are allowed; removing baseline contracts or changing public API/ABI markers is a breaking change.
+
+## v3.7 observability compatibility
+
+`ppc-lab-observability-store-v1`, `ppc-lab-observation-v1`, `ppc-lab-observability-report-v1`, `ppc-lab-observability-policy-v1`, `ppc-lab-observability-check-v1`, and `ppc-lab-capacity-report-v1` are additive v3 LTS contracts. The public observability API marker is `PPCLAB_OBSERVABILITY_API_VERSION=1`. Samples/report fields may gain optional data, but existing metric meanings and the no-target-binary policy must not be silently redefined within v3.

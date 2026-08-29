@@ -12,6 +12,19 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.7.0 — LTS Observability & Capacity Planning
+
+PPC Lab can now measure the health and capacity of a long-running research server without adding a metrics daemon or external dependency. `ppc-lab-observe` samples the stable control-plane JSON surface plus host pressure, stores immutable JSON observations, reports queue/throughput/failure trends, evaluates explicit health thresholds, and estimates how many execution slots are needed to clear the current backlog. Target binaries are never read or copied.
+
+```bash
+ppc-lab-observe sample /var/lib/ppc-lab/observability --control-root /var/lib/ppc-lab/control --slots 4
+ppc-lab-observe report /var/lib/ppc-lab/observability --since-hours 24 --json
+ppc-lab-observe check /var/lib/ppc-lab/observability --since-hours 24 --json
+ppc-lab-observe capacity /var/lib/ppc-lab/observability --target-clear-hours 2 --json
+```
+
+See [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md).
+
 ## v3.6.0 — LTS Upgrade/Rollback & Release Channels
 
 PPC Lab can now preflight deterministic source releases, enforce v3 LTS compatibility/channel policy, apply them transactionally while preserving Git/build state, and restore a SHA-256-pinned rollback snapshot.
@@ -464,6 +477,7 @@ PPC-Lab/
 | [`docs/EVIDENCE_STORE.md`](docs/EVIDENCE_STORE.md) | How do I index, query, deduplicate, and verify long-lived PPC Lab evidence? |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | How do I install the CLI/core package or consume it from CMake? |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | How do I stage, install, verify, and remove hardened Linux/systemd service assets? |
+| [`docs/OBSERVABILITY.md`](docs/OBSERVABILITY.md) | How do I track queue health, throughput, host pressure, and capacity over time? |
 | [`docs/STABILITY.md`](docs/STABILITY.md) | What compatibility promises start at v1.0? |
 | [`docs/BINARY_INTAKE.md`](docs/BINARY_INTAKE.md) | How do all native loaders fit together? |
 | [`docs/ELF32.md`](docs/ELF32.md) | What ELF32 PPC intake/relocation behavior is supported? |

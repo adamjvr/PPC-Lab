@@ -1,3 +1,14 @@
+## 3.7.0 — 2026-08-28 — LTS Observability & Capacity Planning
+
+- Add installed `ppc-lab-observe init/sample/report/check/capacity` for dependency-free long-term server telemetry and capacity analysis.
+- Sample the stable control-plane status/history JSON contracts plus portable CPU/load, Linux memory availability, and declared disk free-space metrics without opening PPC target inputs.
+- Store immutable JSON-only observations and derive queue/active p50/p95/max, queue-pressure fraction, terminal deltas, completed jobs/hour, failure rate, and service-time summaries.
+- Add explicit warning/critical policy evaluation for queue depth, failure rate, normalized load, available memory, disk space, and estimated backlog-clear time.
+- Add capacity reports using observed throughput and configured slots/median service time without inventing future arrival rates.
+- Add observability API v1, six stable additive schemas, capability/install/LTS invariant coverage, documentation, and end-to-end regression tests.
+- Harden reproducible release packaging so common local `build-release`, `build-asan`, and `build-debug` trees cannot leak compiled artifacts into source archives.
+- Preserve the post-v3 feature freeze: this is operational telemetry only, not a new PPC execution/runtime subsystem.
+
 ## 3.6.0 — 2026-08-28 — LTS Upgrade/Rollback & Release Channels
 
 - Add installed `ppc-lab-upgrade` for deterministic release preflight, staging, transactional source-tree apply, and verified rollback.

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-capacity-report-v1",
+  "title": "PPC Lab capacity report v1",
+  "type": "object",
+  "required": ["schema", "observability_api", "target_backlog_clear_hours", "latest_queue_depth"],
+  "properties": {
+    "schema": {"const": "ppc-lab-capacity-report-v1"},
+    "observability_api": {"const": 1}
+  },
+  "additionalProperties": true
+}

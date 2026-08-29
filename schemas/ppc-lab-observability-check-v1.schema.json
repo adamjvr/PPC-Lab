@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-observability-check-v1",
+  "title": "PPC Lab observability health check v1",
+  "type": "object",
+  "required": ["schema", "observability_api", "status", "ok", "alerts", "report"],
+  "properties": {
+    "schema": {"const": "ppc-lab-observability-check-v1"},
+    "observability_api": {"const": 1},
+    "status": {"enum": ["ok", "warning", "critical"]},
+    "ok": {"type": "boolean"},
+    "alerts": {"type": "array"}
+  },
+  "additionalProperties": true
+}

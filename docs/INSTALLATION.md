@@ -84,3 +84,7 @@ A normal v2.4 install adds `ppc-lab-knowledge` and the five v2.4 knowledge query
 ## Automated hypothesis engine
 
 A normal v2.5 install adds `ppc-lab-hypothesize` plus the hypothesis report/experiment/promoted-record schemas. It uses only Python's standard library and consumes normal exploration JSON. Follow-up experiments are ordinary `ppc-lab-exploration-v1` manifests, so no additional execution daemon or dependency is required.
+
+## v3.7 observability companion
+
+The installed command set includes `ppc-lab-observe`. It is a standard-library operational companion and requires no metrics daemon, Prometheus client, or database package. Point it at the persistent `ppc-lab-control` root and a writable observability store. See [`OBSERVABILITY.md`](OBSERVABILITY.md).

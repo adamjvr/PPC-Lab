@@ -396,3 +396,17 @@ ppc-lab-backup restore ppc-lab-state.zip \
 `--force` preserves the replaced component directories beneath a generated `.pre-restore-*` safety directory. `--deployment-out PATH` can separately recover the public deployment manifest for review.
 
 Exit codes follow the usual PPC Lab convention: `0` success/verified, `1` verification failure, `2` invocation/input/restore-safety error.
+
+## `ppc-lab-observe` — LTS observability and capacity planning
+
+Initialize a JSON-only metrics store and capture samples from the stable control-plane API:
+
+```text
+ppc-lab-observe init STORE
+ppc-lab-observe sample STORE --control-root ROOT [--control-tool PATH] [--slots N] [--disk-path PATH ...] [--json]
+ppc-lab-observe report STORE [--since-hours H] [--json]
+ppc-lab-observe check STORE [--since-hours H] [--policy POLICY.json] [--json]
+ppc-lab-observe capacity STORE [--since-hours H] [--target-clear-hours H] [--json]
+```
+
+`check` exits `1` only for a critical policy result; warnings remain exit `0` so monitoring systems can distinguish degraded capacity from a hard health failure. Invalid stores/policies/tool responses exit `2`. See [`OBSERVABILITY.md`](OBSERVABILITY.md).

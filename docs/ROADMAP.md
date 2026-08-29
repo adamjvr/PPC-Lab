@@ -95,3 +95,7 @@ v3.1 does not reopen the standing feature roadmap. It formalizes the target-adap
 ## Post-roadmap LTS checkpoint: v3.2
 
 v3.2 adds compatibility and upgrade assurance only. The standing feature roadmap remains complete; further execution/runtime expansion is still target-driven.
+
+## Post-roadmap LTS checkpoint: v3.7
+
+v3.7 adds observability and capacity planning only. It measures the mature server/control-plane stack through stable JSON contracts and keeps the standing execution/runtime roadmap frozen. New PPC ISA/runtime features remain target-driven.

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-observation-v1",
+  "title": "PPC Lab observability sample v1",
+  "type": "object",
+  "required": ["schema", "observability_api", "unix", "control", "host", "policy"],
+  "properties": {
+    "schema": {"const": "ppc-lab-observation-v1"},
+    "observability_api": {"const": 1},
+    "unix": {"type": "number"},
+    "utc": {"type": "string"},
+    "control": {"type": "object"},
+    "host": {"type": "object"},
+    "policy": {"type": "object"}
+  },
+  "additionalProperties": true
+}

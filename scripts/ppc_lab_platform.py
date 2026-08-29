@@ -22,7 +22,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-PLATFORM_VERSION = "3.6.0"
+PLATFORM_VERSION = "3.7.0"
 STATUS_SCHEMA = "ppc-lab-platform-status-v1"
 UPGRADE_SCHEMA = "ppc-lab-upgrade-report-v1"
 ACCEPTANCE_SCHEMA = "ppc-lab-acceptance-report-v1"
@@ -100,7 +100,7 @@ TOOL_SOURCES = {
     "campaign": "ppc_lab_campaign.py", "schedule": "ppc_lab_schedule.py", "control": "ppc_lab_control.py",
     "knowledge": "ppc_lab_knowledge.py", "hypothesize": "ppc_lab_hypothesize.py",
     "trace-analyze": "ppc_trace_analyze.py", "trace-diff": "ppc_trace_diff.py",
-    "support": "ppc_lab_support.py", "backup": "ppc_lab_backup.py",
+    "support": "ppc_lab_support.py", "backup": "ppc_lab_backup.py", "observe": "ppc_lab_observe.py",
 }
 
 

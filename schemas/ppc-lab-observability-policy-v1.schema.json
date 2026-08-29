@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ppc-lab-observability-policy-v1",
+  "title": "PPC Lab observability health policy v1",
+  "type": "object",
+  "required": ["schema"],
+  "properties": {
+    "schema": {"const": "ppc-lab-observability-policy-v1"},
+    "observability_api": {"type": "integer", "minimum": 1}
+  },
+  "additionalProperties": {"type": ["number", "integer", "string", "boolean", "null"]}
+}

@@ -61,3 +61,9 @@ Do not broaden the backup format into a generic server archive. Private target i
 ## v3.6 transactional upgrade gate
 
 Public v3.x releases should pass `ppc-lab-upgrade preflight` on the stable channel before source replacement. The updater is intentionally repository/source oriented: it verifies the deterministic release manifest and v3 compatibility declaration, preserves Git/build state, and produces a rollback transaction before changing managed files. Do not weaken manifest, path, symlink, downgrade, or rollback-hash checks for convenience.
+
+## v3.7 observability gate
+
+Operational regressions should be measured rather than inferred from anecdotal queue delay. Long-running servers should periodically collect `ppc-lab-observe sample` data and use `report/check/capacity` when changing worker-slot counts, scheduler policy, storage layout, or host hardware.
+
+The observability store is deliberately JSON-only and target-neutral. Do not add target binaries, environment-secret capture, arbitrary process dumps, or a mandatory external metrics/database stack to `ppc-lab-observability-*-v1`. A future exporter to another monitoring system should consume these stable reports rather than redefine the sample contract.

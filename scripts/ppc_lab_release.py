@@ -18,7 +18,7 @@ from typing import Any
 
 MANIFEST_SCHEMA = "ppc-lab-release-manifest-v1"
 API_VERSION = 1
-EXCLUDE_DIRS = {".git", "build", "__pycache__", ".pytest_cache", ".mypy_cache", ".idea", ".vscode"}
+EXCLUDE_DIRS = {".git", "build", "build-release", "build-asan", "build-debug", "__pycache__", ".pytest_cache", ".mypy_cache", ".idea", ".vscode"}
 EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".zip", ".tar", ".gz", ".xz", ".7z"}
 
 class ReleaseError(RuntimeError): pass
