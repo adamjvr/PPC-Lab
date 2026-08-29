@@ -99,3 +99,7 @@ v3.2 adds compatibility and upgrade assurance only. The standing feature roadmap
 ## Post-roadmap LTS checkpoint: v3.7
 
 v3.7 adds observability and capacity planning only. It measures the mature server/control-plane stack through stable JSON contracts and keeps the standing execution/runtime roadmap frozen. New PPC ISA/runtime features remain target-driven.
+## Post-roadmap LTS checkpoint: v3.9
+
+v3.9 adds content-addressed offline replication and multi-site resilience only. Evidence and knowledge can converge across independent research servers while active control queues remain site-local. The standing PPC execution/runtime roadmap remains frozen and target-driven.
+

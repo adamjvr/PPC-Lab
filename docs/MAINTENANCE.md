@@ -71,3 +71,9 @@ The observability store is deliberately JSON-only and target-neutral. Do not add
 ### Security credentials and audit logs
 
 Treat auth stores and audit logs as operational state, not source artifacts. Rotate credentials when operators/automation change, revoke unused tokens, and periodically run `ppc-lab-security audit-verify`. Do not add bearer tokens to diagnostics, support bundles, Git, or behavioral corpora.
+## v3.9 replication gate
+
+Multi-site synchronization must preserve the `ppc-lab-replication-*-v1` contracts. Replication is content-addressed research metadata, not generic file synchronization: private target bytes, credentials, arbitrary logs/files, and active scheduler/control state must remain excluded. A reused site/generation with a different bundle identity is a hard conflict and must never be silently accepted.
+
+Use `ppc-lab-backup` for single-site disaster recovery and `ppc-lab-replicate` for cross-site convergence. Do not weaken either boundary by treating replication ZIPs as full server backups.
+

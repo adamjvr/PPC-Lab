@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"PPC Lab replication store v1","type":"object","required":["schema","replication_api","site","next_generation"],"properties":{"schema":{"const":"ppc-lab-replication-store-v1"},"replication_api":{"const":1},"site":{"type":"string"},"next_generation":{"type":"integer","minimum":1}},"additionalProperties":true}

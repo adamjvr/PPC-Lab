@@ -23,6 +23,7 @@
       "ppc-lab-platform",
       "ppc-lab-prioritize",
       "ppc-lab-release",
+      "ppc-lab-replicate",
       "ppc-lab-schedule",
       "ppc-lab-security",
       "ppc-lab-support",
@@ -40,10 +41,11 @@
     "persisted_formats": {
       "control": 1,
       "evidence": 1,
-      "knowledge": 1
+      "knowledge": 1,
+      "replication": 1
     },
     "platform_major": 3,
-    "platform_version": "3.8.0",
+    "platform_version": "3.9.0",
     "policy": {
       "api_abi_change_breaking": true,
       "persisted_format_downgrade_forbidden": true,
@@ -51,6 +53,7 @@
       "schema_removal_breaking": true
     },
     "release_api": 1,
+    "replication_api": 1,
     "schema": "ppc-lab-compatibility-snapshot-v1",
     "schemas": [
       "ppc-lab-acceptance-report-v1.schema.json",
@@ -109,6 +112,11 @@
       "ppc-lab-priority-report-v1.schema.json",
       "ppc-lab-release-channel-v1.schema.json",
       "ppc-lab-release-manifest-v1.schema.json",
+      "ppc-lab-replication-bundle-v1.schema.json",
+      "ppc-lab-replication-receipt-v1.schema.json",
+      "ppc-lab-replication-status-v1.schema.json",
+      "ppc-lab-replication-store-v1.schema.json",
+      "ppc-lab-replication-verify-v1.schema.json",
       "ppc-lab-scheduler-state-v1.schema.json",
       "ppc-lab-scheduler-summary-v1.schema.json",
       "ppc-lab-scheduler-v1.schema.json",
@@ -145,14 +153,14 @@
     {
       "mode": "0644",
       "path": "CHANGELOG.md",
-      "sha256": "06a16280c85adb71109a7ec47b0c70127515e4553f9edd1f67383efc15b4fcc9",
-      "size": 32420
+      "sha256": "92eafd9aa97f8a40e1cc422c5a9f27be131f15357f148a55981fb509e198674e",
+      "size": 33597
     },
     {
       "mode": "0644",
       "path": "CMakeLists.txt",
-      "sha256": "883870b2515b073bcc3d2626408ed43fb1d15f0df346bef3a60bec09169d7936",
-      "size": 14448
+      "sha256": "c97f5359d5e6062e18a727e05c255a67503558d73f76550d8c89c05b1785a2fb",
+      "size": 14671
     },
     {
       "mode": "0644",
@@ -169,8 +177,8 @@
     {
       "mode": "0644",
       "path": "README.md",
-      "sha256": "e7ed3b12bb63f69b6f73d0b64ebb627f4085b54befa52623d2df1c72c04b6efd",
-      "size": 32051
+      "sha256": "279baf3d25f6b106d04711533e9be59fbbac1ae10c1eb4a45de38e636dd85ad2",
+      "size": 32861
     },
     {
       "mode": "0755",
@@ -205,8 +213,8 @@
     {
       "mode": "0644",
       "path": "cmake/Version.hpp.in",
-      "sha256": "47a4b444d80cfd75848be088130ade2e7ed02430e54ddbc9edb3044816857c4c",
-      "size": 1397
+      "sha256": "c04cc4c2fdfe335268f834e9e28123b915526b87b98719a404163d8aa63754e4",
+      "size": 1521
     },
     {
       "mode": "0644",
@@ -259,8 +267,8 @@
     {
       "mode": "0644",
       "path": "docs/CLI_REFERENCE.md",
-      "sha256": "9b6e81d6e33acf31f0950bd4af0c2e10c678a1601c989b902cf56607cdfd4f33",
-      "size": 14513
+      "sha256": "eba47fbd5491742693d2f5e6f0985edbbb8c3528de05669a4dc3f2342968a05a",
+      "size": 15052
     },
     {
       "mode": "0644",
@@ -355,8 +363,8 @@
     {
       "mode": "0644",
       "path": "docs/INSTALLATION.md",
-      "sha256": "ccd0bc1833e1f94110f9f52b76ef255d9606e2bc13e4db980490c994007ee35b",
-      "size": 5430
+      "sha256": "cdf85a1ed0813aa8cb5452a3bfe25564e187d920519ce3eec5ce758fe25e17d8",
+      "size": 5725
     },
     {
       "mode": "0644",
@@ -379,8 +387,8 @@
     {
       "mode": "0644",
       "path": "docs/MAINTENANCE.md",
-      "sha256": "c7ac76baccaf6e683426ed726e6ed26f37ef9431c3537fe9daf25196ac6b9731",
-      "size": 4977
+      "sha256": "f84fe629c3a1b8d805fb7c79e385f24fb17bd3881f323d1c303ae0eb29a03e13",
+      "size": 5592
     },
     {
       "mode": "0644",
@@ -432,6 +440,12 @@
     },
     {
       "mode": "0644",
+      "path": "docs/REPLICATION.md",
+      "sha256": "12dac0ed6517cabefb7c802b06ac60b978b355ec9af25f15a1855dd29112d679",
+      "size": 4921
+    },
+    {
+      "mode": "0644",
       "path": "docs/RESEARCH_WORKFLOW.md",
       "sha256": "f7632733ce7799e3ee747b8ed13ca3f2b41e63dfe059a49fc56dec078afc5752",
       "size": 8425
@@ -445,8 +459,8 @@
     {
       "mode": "0644",
       "path": "docs/ROADMAP.md",
-      "sha256": "501c9bd5c3109c26acb4bd43af906601c9f6a12b5a5b5e233e86f2df4b94e024",
-      "size": 9724
+      "sha256": "58236ce0c74e00b76de68a77bdd520207bb26b592a5fc802775a2829227680fe",
+      "size": 10039
     },
     {
       "mode": "0644",
@@ -1026,6 +1040,36 @@
     },
     {
       "mode": "0644",
+      "path": "schemas/ppc-lab-replication-bundle-v1.schema.json",
+      "sha256": "d2066cc633610fb564c999e481e7f77d8a12a5f2dd67d4fc39e1174db3850d5f",
+      "size": 520
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/ppc-lab-replication-receipt-v1.schema.json",
+      "sha256": "8378b872e36adeaad3072f8456e91d6e15c1a037fcf32fdde73ba3c50f8e9184",
+      "size": 441
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/ppc-lab-replication-status-v1.schema.json",
+      "sha256": "27833531f9ef0f6eaa843c6abcdb798d05a961141fdcbd3129f0724cebbf7de3",
+      "size": 449
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/ppc-lab-replication-store-v1.schema.json",
+      "sha256": "722926e79fa8f169b7a980ed32cb22cf93c1ef83b7be9e5e2aec15590e2fcbc7",
+      "size": 376
+    },
+    {
+      "mode": "0644",
+      "path": "schemas/ppc-lab-replication-verify-v1.schema.json",
+      "sha256": "d07975ec7b4e77a97e5bc27b83577ff961ff6a73ff12d33ba8735bda97e8d0ba",
+      "size": 321
+    },
+    {
+      "mode": "0644",
       "path": "schemas/ppc-lab-scheduler-state-v1.schema.json",
       "sha256": "75e746edeb355324e78ed59006c3c1024699f2a7499120473be0ca054225570f",
       "size": 431
@@ -1117,8 +1161,8 @@
     {
       "mode": "0755",
       "path": "scripts/check_repository_invariants.py",
-      "sha256": "15123f7d636ff5ff5a640896da2954e68536e955a08350ed76a3cc7f94ee4bc2",
-      "size": 6813
+      "sha256": "e7534de6ce370940986dcf23342ea5bf4924e875d851b209308e416b5a732806",
+      "size": 7149
     },
     {
       "mode": "0755",
@@ -1165,8 +1209,8 @@
     {
       "mode": "0755",
       "path": "scripts/ppc_lab_compat.py",
-      "sha256": "9ed2900e2d246a372aafcd8fda017a0fdb386ae5510d80009368d28f9d8be08a",
-      "size": 6120
+      "sha256": "9aa079d1831f436f8c99d2be0c1c9aee5e71bb1223796a9b60cf0dd568696563",
+      "size": 6189
     },
     {
       "mode": "0755",
@@ -1231,7 +1275,7 @@
     {
       "mode": "0755",
       "path": "scripts/ppc_lab_platform.py",
-      "sha256": "c61ba2f335435bcac1836d324405df64d54f14d545e75b0f660ee95e409e1754",
+      "sha256": "c751ca775dd03a8d1fbec9bd17bb148efa258c66c4cb470051a6925d2d7cbf01",
       "size": 19231
     },
     {
@@ -1245,6 +1289,12 @@
       "path": "scripts/ppc_lab_release.py",
       "sha256": "269f55d72265da92f071458796730e5da6533cdb6ed0dd260bd073c7b71ed446",
       "size": 6989
+    },
+    {
+      "mode": "0755",
+      "path": "scripts/ppc_lab_replicate.py",
+      "sha256": "1a8ee33d989e554c3eb9c2a334331748b57787b6fa75fb621ba268753e73c9b1",
+      "size": 22757
     },
     {
       "mode": "0755",
@@ -1429,7 +1479,7 @@
     {
       "mode": "0755",
       "path": "tests/test_backup_restore.py",
-      "sha256": "46b6935da6ece001a5dacaff34bcca4e0fb397c87e194ea504c2c1914e4dd4a1",
+      "sha256": "bd3e88233055b1b5115b6b7e582fe63504a7b9d654d66b1e96a0be4f64784a0c",
       "size": 5420
     },
     {
@@ -1471,19 +1521,19 @@
     {
       "mode": "0755",
       "path": "tests/test_cli_elf.py",
-      "sha256": "1bd37f80ed6548fdfdbe447822f6d2f1c71bb06d0e7d792e271b8805f0a60fb4",
+      "sha256": "56c67ab1a614f12fbfa23776742796df30f9360b05622eb018b6c7f78c6b18cf",
       "size": 4098
     },
     {
       "mode": "0755",
       "path": "tests/test_compatibility_assurance.py",
-      "sha256": "549f7965018b57377bbac13f96279880c6fe8549b17a7420594b33f322bc2f42",
-      "size": 2113
+      "sha256": "2a289e631514c13125d2af7b03c9906d91b41bc56b9b75b4d6dac4a7309d4a13",
+      "size": 2259
     },
     {
       "mode": "0755",
       "path": "tests/test_deployment.py",
-      "sha256": "fc929a842ffd271b8d521b1eb0b445b59678b83b4dc72d1cc46ec7b4b8c76991",
+      "sha256": "9fc8ff40195868d276623358075dae3eb8c1ea437c3ca3298dff0785b06bfeed",
       "size": 2948
     },
     {
@@ -1531,7 +1581,7 @@
     {
       "mode": "0755",
       "path": "tests/test_http_api.py",
-      "sha256": "5c163ee3a19b8d859d09066f2ab92f88951b086d5fa5fd7dac8906f5d633a232",
+      "sha256": "e2851180642cd040984491d7f7df14ad285daf9aecab216d9edf71ace8383afa",
       "size": 6164
     },
     {
@@ -1549,8 +1599,8 @@
     {
       "mode": "0755",
       "path": "tests/test_install_contract.py",
-      "sha256": "5a2f32cf977c8259bf237127f2e864d480794c3202706506d4b31fb049518f97",
-      "size": 17323
+      "sha256": "eeebf6b3a92fd3998fe29fe6582f1783d945593393b9935e92f64fc9075064ff",
+      "size": 18117
     },
     {
       "mode": "0644",
@@ -1603,7 +1653,7 @@
     {
       "mode": "0755",
       "path": "tests/test_platform_consolidation.py",
-      "sha256": "830e67a53ed0f24e45f7e14649fbd5625ef43913cf742f0216adbb2982b9ddbe",
+      "sha256": "634428eab5c654f0844681c5085bc3f54ab079511133812466989332e6eb8572",
       "size": 2789
     },
     {
@@ -1615,8 +1665,14 @@
     {
       "mode": "0755",
       "path": "tests/test_release_engineering.py",
-      "sha256": "7e470f2460359e04525fd2e2e6ae666e96d01bd8300c593f7fbd492a740ee2ef",
+      "sha256": "bb1bc423632f9ec9d9d92e3002c0b11d836de7634415ba1325f1a135ced46840",
       "size": 2117
+    },
+    {
+      "mode": "0755",
+      "path": "tests/test_replication.py",
+      "sha256": "ecc306ec6ef0541d9b6b45010c054d62228b2812d60ab69d8129a13d9637167f",
+      "size": 7045
     },
     {
       "mode": "0755",
@@ -1633,7 +1689,7 @@
     {
       "mode": "0755",
       "path": "tests/test_security_access.py",
-      "sha256": "ca6a17590aafc7f57c0a723ad861076b540f073404c2a84e7bd9c53c9305740a",
+      "sha256": "cb84a3608605f0913a954cb8f03d007ab85b3b4eb1771858e74e6b828f5d1d14",
       "size": 5192
     },
     {
@@ -1657,7 +1713,7 @@
     {
       "mode": "0644",
       "path": "tests/test_upgrade_rollback.py",
-      "sha256": "de4b5fcfc47e99560516e695a00740ad14d3a719655a3eabc179c0f599b10a4c",
+      "sha256": "98838909d7f827767ca45719b0753f622c79dae81df360ed79a297d9f5d98cd9",
       "size": 2907
     },
     {
@@ -1669,13 +1725,13 @@
     {
       "mode": "0644",
       "path": "tools/ppc_lab.cpp",
-      "sha256": "2211c69a7f411bb8d8499dfc6e8e65436039138910dc31f5b8ccfc55d9426e83",
-      "size": 45397
+      "sha256": "060194c2efdd15b014c0b794108faf941260eb16ddfcbf56ae57b66b16d7e610",
+      "size": 46146
     }
   ],
   "license": "GPL-3.0-only",
   "release_api": 1,
   "schema": "ppc-lab-release-manifest-v1",
   "target_profile_api": 1,
-  "version": "3.8.0"
+  "version": "3.9.0"
 }

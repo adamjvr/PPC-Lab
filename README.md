@@ -12,6 +12,16 @@ and get back to the actual reverse-engineering project.
 **License:** GNU General Public License version 3 only (`GPL-3.0-only`). See
 [`LICENSE`](LICENSE).
 
+## v3.9.0 — LTS Replication & Multi-Site Resilience
+
+PPC Lab 3.9 adds dependency-free, offline-safe replication for accumulated evidence and knowledge across independent research servers. `ppc-lab-replicate` exports content-addressed JSON bundles, imports them idempotently, tracks immutable site/generation receipts, detects divergent generation conflicts, and copies only redacted terminal control history. Private PPC target binaries and live queue/process state are never replicated. See [`docs/REPLICATION.md`](docs/REPLICATION.md).
+
+```bash
+ppc-lab-replicate init /var/lib/ppc-lab/replication --site cortana
+ppc-lab-replicate export /var/lib/ppc-lab/replication --evidence /var/lib/ppc-lab/evidence --knowledge /var/lib/ppc-lab/knowledge --out cortana-1.zip
+ppc-lab-replicate verify cortana-1.zip
+```
+
 ## v3.8.0 — LTS Security, Access Control & Auditability
 
 PPC Lab 3.8 adds optional scoped bearer tokens and tamper-evident API audit logging for long-lived research servers. `ppc-lab-security` manages least-privilege viewer/runner/researcher/admin credentials without storing bearer secrets, while the HTTP API can enforce per-endpoint scopes through `--auth-store`. Legacy single-token mode remains available for compatibility. See [`docs/SECURITY.md`](docs/SECURITY.md).

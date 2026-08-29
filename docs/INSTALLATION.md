@@ -88,3 +88,7 @@ A normal v2.5 install adds `ppc-lab-hypothesize` plus the hypothesis report/expe
 ## v3.7 observability companion
 
 The installed command set includes `ppc-lab-observe`. It is a standard-library operational companion and requires no metrics daemon, Prometheus client, or database package. Point it at the persistent `ppc-lab-control` root and a writable observability store. See [`OBSERVABILITY.md`](OBSERVABILITY.md).
+## v3.9 replication companion
+
+`cmake --install` installs `ppc-lab-replicate` and the five `ppc-lab-replication-*-v1` schemas. The command uses only Python's standard library and the installed evidence/knowledge helpers; it requires no database server or network service. See `REPLICATION.md`.
+

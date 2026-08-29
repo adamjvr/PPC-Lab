@@ -424,3 +424,17 @@ ppc-lab-security audit-verify AUDIT.jsonl [--json]
 ```
 
 See [`SECURITY.md`](SECURITY.md) for scope and deployment semantics.
+## `ppc-lab-replicate`
+
+Long-lived v3 LTS installations can synchronize durable research metadata without copying target binaries:
+
+```bash
+ppc-lab-replicate init STORE --site SITE
+ppc-lab-replicate export STORE --out BUNDLE.zip [--evidence PATH] [--knowledge PATH] [--control PATH]
+ppc-lab-replicate verify BUNDLE.zip [--json]
+ppc-lab-replicate import STORE BUNDLE.zip [--evidence PATH] [--knowledge PATH]
+ppc-lab-replicate status STORE [--json]
+```
+
+See `REPLICATION.md` for the site-generation, conflict, privacy, and merge contracts.
+

@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"PPC Lab replication verify v1","type":"object","required":["schema","ok","errors"],"properties":{"schema":{"const":"ppc-lab-replication-verify-v1"},"ok":{"type":"boolean"},"errors":{"type":"array","items":{"type":"string"}}},"additionalProperties":true}

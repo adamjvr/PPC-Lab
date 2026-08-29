@@ -1,3 +1,13 @@
+## 3.9.0 — 2026-08-28 — LTS Replication & Multi-Site Resilience
+
+- Add installed `ppc-lab-replicate init/export/verify/import/status` for dependency-free, transport-neutral multi-site synchronization.
+- Replicate evidence and knowledge as canonical content-addressed JSON and rebuild local indexes through the existing evidence/knowledge ingestion contracts rather than copying mutable SQLite files.
+- Add monotonic per-site generations, immutable import receipts, idempotent re-import, and hard conflict detection when different bundles claim the same site/generation.
+- Replicate only redacted terminal control history; live queue/process state, PID/lock files, manifests/run paths, credentials, logs, caches, and arbitrary files remain local.
+- Enforce bundle SHA-256 inventories, semantic object hashes, path/symlink/member-size checks, and an explicit no-target-binary policy.
+- Add Replication API v1, five stable replication schemas, install/capability/LTS invariant coverage, documentation, and end-to-end cross-site regression tests.
+- Preserve the post-v3 feature freeze: this release adds multi-site durability only; no PPC execution/runtime subsystem changes.
+
 ## 3.8.0 — 2026-08-28 — LTS Security, Access Control & Auditability
 
 - Add installed `ppc-lab-security` for scoped bearer-token lifecycle management: init, issue, list, verify, revoke, rotate, and audit-chain verification.

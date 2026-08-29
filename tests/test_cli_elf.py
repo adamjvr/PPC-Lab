@@ -118,7 +118,7 @@ def main() -> int:
 
         version = run(exe, "--version")
         assert version.returncode == 0
-        assert version.stdout.strip() == "PPC Lab 3.8.0"
+        assert version.stdout.strip() == "PPC Lab 3.9.0"
 
     print("PASS: ELF32 CLI inspect/disasm/call")
     return 0

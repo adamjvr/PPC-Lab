@@ -43,7 +43,7 @@ def main() -> int:
         version_header = prefix / "include" / "ppclab" / "Version.hpp"
         assert version_header.is_file(), version_header
         version_text = version_header.read_text(encoding="utf-8")
-        assert '#define PPCLAB_VERSION_STRING "3.8.0"' in version_text
+        assert '#define PPCLAB_VERSION_STRING "3.9.0"' in version_text
         assert '#define PPCLAB_CPP_API_VERSION 1' in version_text
         assert '#define PPCLAB_CPP_ABI_VERSION 1' in version_text
         worker = prefix / "bin" / "ppc-lab-worker"
@@ -90,7 +90,9 @@ def main() -> int:
         assert backup_tool.is_file(), backup_tool
         observe_tool = prefix / "bin" / "ppc-lab-observe"
         security_tool = prefix / "bin" / "ppc-lab-security"
+        replicate_tool = prefix / "bin" / "ppc-lab-replicate"
         assert security_tool.is_file()
+        assert replicate_tool.is_file()
         assert observe_tool.is_file(), observe_tool
         assert '#define PPCLAB_OBSERVABILITY_API_VERSION 1' in version_text
         for name in ["ppc-lab-trace-capture","ppc-lab-trace-analyze","ppc-lab-trace-diff","ppc_trace_intelligence.py"]:
@@ -165,13 +167,18 @@ def main() -> int:
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-capacity-report-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-auth-store-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-audit-record-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-replication-store-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-replication-bundle-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-replication-receipt-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-replication-status-v1.schema.json"))
+        assert list(prefix.glob("share/ppc-lab/schemas/ppc-lab-replication-verify-v1.schema.json"))
         assert list(prefix.glob("share/ppc-lab/channels/release-channels.json"))
         assert list(prefix.glob("share/ppc-lab/compat/baselines/v3.1.0.json"))
         config_candidates = list(prefix.glob("lib*/cmake/PPCLab/PPCLabConfig.cmake"))
         assert config_candidates, "PPCLabConfig.cmake was not installed"
 
         version = run(str(exe), "--version")
-        assert version.stdout.strip() == "PPC Lab 3.8.0"
+        assert version.stdout.strip() == "PPC Lab 3.9.0"
         caps = run(str(exe), "capabilities", "--json")
         assert '"schema": "ppc-lab-capabilities-v1"' in caps.stdout
         assert '"orchestration": "ppc-lab-orchestration-v1"' in caps.stdout
@@ -205,7 +212,7 @@ def main() -> int:
         assert '"target_profile": "ppc-lab-target-profile-v1"' in caps.stdout
         assert '"target_profile_package": "ppc-lab-target-profile-package-v1"' in caps.stdout
         assert '"release_manifest": "ppc-lab-release-manifest-v1"' in caps.stdout
-        assert '"api": {"cpp": 1, "abi": 1, "target_profile": 1, "release": 1, "compatibility": 1, "observability": 1, "security": 1}' in caps.stdout
+        assert '"api": {"cpp": 1, "abi": 1, "target_profile": 1, "release": 1, "compatibility": 1, "observability": 1, "security": 1, "replication": 1}' in caps.stdout
         assert '"compatibility_snapshot": "ppc-lab-compatibility-snapshot-v1"' in caps.stdout
         assert '"support_report": "ppc-lab-support-report-v1"' in caps.stdout
         assert '"support_bundle": "ppc-lab-support-bundle-v1"' in caps.stdout
@@ -221,6 +228,8 @@ def main() -> int:
         assert '"capacity_report": "ppc-lab-capacity-report-v1"' in caps.stdout
         assert '"auth_store": "ppc-lab-auth-store-v1"' in caps.stdout
         assert '"audit_record": "ppc-lab-audit-record-v1"' in caps.stdout
+        assert '"replication_bundle": "ppc-lab-replication-bundle-v1"' in caps.stdout
+        assert '"replication_receipt": "ppc-lab-replication-receipt-v1"' in caps.stdout
 
         consumer = root / "consumer"
         consumer.mkdir()
